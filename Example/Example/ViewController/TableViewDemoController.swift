@@ -152,9 +152,9 @@ private extension TableViewDemoController {
     ///   - tableView: UITableView
     ///   - indexPath: IndexPath
     func selectCell(with tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        guard let peripheral = peripherals[safe: indexPath.row] else { fatalError() }
-        WWBluetoothManager.shared.connect(peripheral: peripheral)
         
+        guard let peripheral = peripherals[safe: indexPath.row] else { fatalError() }
+                
         if (!isConnent) {
             WWBluetoothManager.shared.connect(peripheral: peripheral)
         } else {
