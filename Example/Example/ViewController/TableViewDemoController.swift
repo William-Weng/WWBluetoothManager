@@ -13,7 +13,8 @@ final class TableViewDemoController: UIViewController {
 
     @IBOutlet weak var myTableView: UITableView!
     
-    private let myPeripheral = "AirPods"
+    private let myPeripheral = "iOS的MacBook Pro"
+    private var isConnent = false
     
     private var peripherals: [CBPeripheral] = [] {
         didSet { myTableView.reloadData() }
@@ -22,6 +23,10 @@ final class TableViewDemoController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         initSetting()
+    }
+    
+    @IBAction func restartScan(_ sender: UIBarButtonItem) {
+        WWBluetoothManager.shared.restartScan(delegate: self)
     }
 }
 
@@ -74,17 +79,33 @@ extension TableViewDemoController: WWBluetoothManagerDelegate {
         }
     }
     
-    func didUpdatePeripheral(manager: WWBluetoothManager, result: Result<WWBluetoothManager.UpdateType, WWBluetoothManager.PeripheralError>) {
-        
+    func didUpdatePeripheral(manager: WWBluetoothManager, result: Result<WWBluetoothManager.PeripheralValueInformation, WWBluetoothManager.PeripheralError>) {
+       
         switch result {
         case .failure(let error): wwPrint(error)
-        case .success(let updateType):
+        case .success(let info):
             
-            switch updateType {
-            case .value(let info): updatePeripheralValue(with: manager, info: info)
-            case .notificationState(let info): updatePeripheralNotificationState(with: manager, info: info)
+            guard let data = info.characteristicValue,
+                  !data.isEmpty
+            else {
+                return
             }
+            
+            if let number = data._hexString()._UInt64() { title = "\(number)°C"; return }
+            if let string = data._string() { title = "\(string)"; return }
         }
+    }
+    
+    func didModifyServices(manager: WWBluetoothManager, information: WWBluetoothManager.ModifyServicesInformation) {
+        
+        guard let peripheral = manager.peripheral(UUID: information.UUID),
+              let index = peripherals.firstIndex(of: peripheral)
+        else {
+            return
+        }
+        
+        peripherals.remove(at: index)
+        myTableView.reloadData()
     }
 }
 
@@ -109,8 +130,19 @@ private extension TableViewDemoController {
         guard let peripheral = peripherals[safe: indexPath.row] else { fatalError() }
         
         let cell = tableView.dequeueReusableCell(withIdentifier: "MyTableViewCell", for: indexPath)
+        let backgroundColor: UIColor
+        
+        switch peripheral.state {
+        case .connecting: backgroundColor = .yellow
+        case .connected: backgroundColor = .green
+        case .disconnecting: backgroundColor = .lightGray
+        case .disconnected: backgroundColor = .white
+        default: backgroundColor = .white
+        }
+        
         cell.textLabel?.text = "\(peripheral.name ?? "<NONE>")"
         cell.detailTextLabel?.text = "\(peripheral.identifier)"
+        cell.backgroundColor = backgroundColor
         
         return cell
     }
@@ -122,6 +154,14 @@ private extension TableViewDemoController {
     func selectCell(with tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         guard let peripheral = peripherals[safe: indexPath.row] else { fatalError() }
         WWBluetoothManager.shared.connect(peripheral: peripheral)
+        
+        if (!isConnent) {
+            WWBluetoothManager.shared.connect(peripheral: peripheral)
+        } else {
+            WWBluetoothManager.shared.disconnect(peripheral: peripheral)
+        }
+        
+        isConnent.toggle()
     }
 }
 
@@ -168,14 +208,13 @@ private extension TableViewDemoController {
     func discoverPeripheralServices(with manager: WWBluetoothManager, info: WWBluetoothManager.DiscoverServicesInformation) {
         
         guard let peripheral = manager.peripheral(UUID: info.UUID),
-              let services = info.services
+              let services = info.peripheral.services
         else {
             return
         }
         
         services.forEach({ service in
             peripheral.discoverCharacteristics(nil, for: service)
-            wwPrint(service)
         })
     }
     
@@ -186,18 +225,25 @@ private extension TableViewDemoController {
     func discoverPeripheralCharacteristics(with manager: WWBluetoothManager, info: WWBluetoothManager.DiscoverCharacteristics) {
         
         guard let peripheral = manager.peripheral(UUID: info.UUID),
-              let characteristics = info.characteristics
+              let service = Optional.some(info.service),
+              let characteristics = service.characteristics
         else {
             return
         }
         
-        characteristics.forEach({ characteristic in
-            
-            let isContains = characteristic.properties.contains([.notify, .read])
-            if isContains { peripheral.setNotifyValue(isContains, for: characteristic) }
-            
-            wwPrint(characteristic.properties._parse())
-        })
+        if (service.uuid === .deviceInformation) {
+            characteristics.forEach { characteristic in
+                if (peripheral._readValue(pairUUIDType: .manufacturerNameString, characteristic: characteristic)) { return }
+                if (peripheral._readValue(pairUUIDType: .modelNumberString, characteristic: characteristic)) { return }
+            }
+        }
+        
+        if (service.uuid === "0x1809") {
+            characteristics.forEach { characteristic in
+                if (peripheral._notifyValue(pairUUIDString: "0x2A1E", characteristic: characteristic)) { return }
+                if (peripheral._indicateValue(pairUUIDString: "0x2A1C", characteristic: characteristic)) { return }
+            }
+        }
     }
     
     /// 處理有關搜尋到Descriptors的事務
@@ -209,25 +255,4 @@ private extension TableViewDemoController {
     }
 }
 
-// MARK: - Update Peripheral Action
-private extension TableViewDemoController {
-    
-    /// 處理設備數值事件
-    /// - Parameters:
-    ///   - manager: WWBluetoothManager
-    ///   - info: WWBluetoothManager.UpdateValueInformation
-    func updatePeripheralValue(with manager: WWBluetoothManager, info: WWBluetoothManager.UpdateValueInformation) {
-        wwPrint(info)
-    }
-    
-    /// 處理設備通知事件
-    /// - Parameters:
-    ///   - manager: WWBluetoothManager
-    ///   - info: WWBluetoothManager.UpdateNotificationStateInformation
-    func updatePeripheralNotificationState(with manager: WWBluetoothManager, info: WWBluetoothManager.UpdateNotificationStateInformation) {
-        
-        let value = info.data?.withUnsafeBytes { $0.load(as: UTF8.self) }
-        wwPrint(value)
-    }
-}
 

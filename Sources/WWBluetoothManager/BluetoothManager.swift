@@ -2,97 +2,18 @@
 //  BluetoothManager.swift
 //  WWBluetoothManager
 //
-//  Created by William.Weng on 2023/9/11.
+//  Created by William.Weng on 2023/11/29.
 //  ~/Library/Caches/org.swift.swiftpm/
 
 import UIKit
 import CoreBluetooth
-
-/// 藍牙管理的Delegate
-public protocol WWBluetoothManagerDelegate {
-    
-    /// 手機藍牙的更新狀態
-    /// - Parameters:
-    ///   - manager: WWBluetoothManager
-    ///   - state: CBManagerState
-    func updateState(manager: WWBluetoothManager, state: CBManagerState)
-    
-    /// 搜尋到的週邊設備 (不重複)
-    /// - Parameters:
-    ///   - manager: WWBluetoothManager
-    ///   - peripherals: Set<CBPeripheral>
-    ///   - newPeripheralInformation: WWBluetoothManager.PeripheralInformation
-    func discoveredPeripherals(manager: WWBluetoothManager, peripherals: Set<CBPeripheral>, newPeripheralInformation: WWBluetoothManager.PeripheralInformation)
-    
-    /// 取得剛連上設備的資訊
-    /// - Parameters:
-    ///   - manager: WWBluetoothManager
-    ///   - result: Result<UUID, WWBluetoothManager.PeripheralError>
-    func didConnectPeripheral(manager: WWBluetoothManager, result: Result<UUID, WWBluetoothManager.PeripheralError>)
-    
-    /// 處理已經連上設備的Services / Characteristics / Descriptors
-    /// - Parameters:
-    ///   - manager: WWBluetoothManager
-    ///   - result: Result<WWBluetoothManager.DiscoverValueType, WWBluetoothManager.PeripheralError>
-    func didDiscoverPeripheral(manager: WWBluetoothManager, result: Result<WWBluetoothManager.DiscoverValueType, WWBluetoothManager.PeripheralError>)
-    
-    /// 週邊設備數值相關的功能
-    /// - Parameters:
-    ///   - manager: WWBluetoothManager
-    ///   - result: Result<WWBluetoothManager.UpdateType, WWBluetoothManager.PeripheralError>
-    func didUpdatePeripheral(manager: WWBluetoothManager, result: Result<WWBluetoothManager.UpdateType, WWBluetoothManager.PeripheralError>)
-}
+import WWPrint
 
 // MARK: - WWBluetoothManager
 open class WWBluetoothManager: NSObject {
-    
-    public typealias PeripheralInformation = (UUID: UUID, name: String?, advertisementData: [String : Any], RSSI: NSNumber)
-    public typealias DiscoverServicesInformation = (UUID: UUID, name: String?, services: [CBService]?)
-    public typealias DiscoverCharacteristics = (UUID: UUID, name: String?, characteristics: [CBCharacteristic]?)
-    public typealias DiscoverDescriptors = (UUID: UUID, name: String?, descriptors: [CBDescriptor]?)
-    public typealias UpdateValueInformation = (UUID: UUID, name: String?, data: Data?)
-    public typealias UpdateNotificationStateInformation = (UUID: UUID, name: String?, data: Data?)
-    
-    /// 搜尋數值的類型
-    public enum DiscoverValueType {
-        case services(_ info: DiscoverServicesInformation)
-        case characteristics(_ info: DiscoverCharacteristics)
-        case descriptors(_ info: DiscoverDescriptors)
-    }
-    
-    /// 更新數值的類型
-    public enum UpdateType {
-        case value(_ info: UpdateValueInformation)
-        case notificationState(_ info: UpdateNotificationStateInformation)
-    }
-
-    /// 相關錯誤
-    public enum PeripheralError: Error {
-        case connect(_ UUID: UUID, name: String?, error: ConnectError)
-        case discover(_ UUID: UUID, name: String?, error: DiscoverError)
-        case update(_ UUID: UUID, name: String?, error: UpdateError)
-    }
-    
-    /// 連接管理中心錯誤
-    public enum ConnectError {
-        case centralManager(_ error: Error)
-    }
-    
-    /// 設備搜尋錯誤
-    public enum DiscoverError {
-        case services(_ error: Error)
-        case characteristics(_ error: Error)
-        case descriptors(_ error: Error)
-    }
-    
-    /// 設備傳值錯誤
-    public enum UpdateError {
-        case value(_ error: Error)
-        case notificationState(_ error: Error)
-    }
 
     public static let shared = WWBluetoothManager()
-
+    
     private var peripherals: Set<CBPeripheral> = []
     private var centralManager: CBCentralManager!
     private var delegate: WWBluetoothManagerDelegate?
@@ -100,15 +21,15 @@ open class WWBluetoothManager: NSObject {
     private override init() {}
 }
 
-/// MARK: - 公開函式 (0)
+/// MARK: - 公開函式 (1)
 public extension WWBluetoothManager {
     
-    /// 建立新BluetoothManager
+    /// [建立新BluetoothManager](https://www.cnblogs.com/iini/p/12334646.html)
     /// - Returns: WWBluetoothManager
     static func build() -> WWBluetoothManager { return WWBluetoothManager() }
 }
 
-/// MARK: - 公開函式 (1)
+/// MARK: - 公開函式 (2)
 public extension WWBluetoothManager {
     
     /// [開始掃瞄](http://wisdomskyduan.blogspot.com/2013/06/ios-cb-class-note.html)
@@ -119,6 +40,20 @@ public extension WWBluetoothManager {
         self.delegate = delegate
         self.peripherals.removeAll()
         centralManager = CBCentralManager(delegate: self, queue: queue)
+    }
+    
+    /// [停止掃瞄](https://bbs.huaweicloud.com/blogs/354107)
+    func stopScan() {
+        centralManager.stopScan()
+    }
+    
+    /// [重新開始掃瞄](https://punchthrough.com/lightblue-features/)
+    /// - Parameters:
+    ///   - queue: DispatchQueue?
+    ///   - delegate: WWBluetoothManagerDelegate?
+    func restartScan(queue: DispatchQueue? = nil, delegate: WWBluetoothManagerDelegate?) {
+        stopScan()
+        startScan(queue: queue, delegate: delegate)
     }
     
     /// [連接藍牙設備](https://www.wpgdadatong.com/blog/detail/40547)
@@ -142,14 +77,9 @@ public extension WWBluetoothManager {
         let peripheral = peripherals.first { $0.identifier == UUID }
         return peripheral
     }
-    
-    /// [停止掃瞄](https://bbs.huaweicloud.com/blogs/354107)
-    func stopScan() {
-        centralManager.stopScan()
-    }
 }
 
-/// MARK: - 公開函式 (2)
+/// MARK: - 公開函式 (3)
 public extension WWBluetoothManager {
     
     /// [搜尋設備](https://github.com/Eronwu/Getting-Started-with-Bluetooth-Low-Energy-in-Chinese)
@@ -186,7 +116,7 @@ public extension WWBluetoothManager {
         return peripheral.identifier
     }
     
-    /// 藍牙設備斷開連接
+    /// [藍牙設備斷開連接](http://www.wowotech.net/bluetooth/ble_stack_overview.html)
     /// - Parameter UUID: UUID
     /// - Returns: CBPeripheral?
     func disconnect(UUID: UUID) -> UUID? {
@@ -197,7 +127,7 @@ public extension WWBluetoothManager {
         return peripheral.identifier
     }
     
-    /// 藍牙設備斷開連接
+    /// [藍牙設備斷開連接](http://www.sunyouqun.com/2017/04/understand-ble-5-stack-generic-attribute-profile-layer/)
     /// - Parameter UUID: UUID
     /// - Returns: CBPeripheral?
     func disconnect(UUIDString: String) -> UUID? {
@@ -207,14 +137,32 @@ public extension WWBluetoothManager {
         centralManager.cancelPeripheralConnection(peripheral)
         return peripheral.identifier
     }
+    
+    /// 解析特徵值設定 => ["broadcast", "read"]
+    /// - Parameter properties: CBCharacteristicProperties
+    /// - Returns: [String]
+    func parseProperties(_ properties: CBCharacteristicProperties) -> [String] {
+        return properties._parse()
+    }
+    
+    /// 某特徵值的文字訊息
+    /// - Parameter properties: CBCharacteristicProperties
+    /// - Returns: String?
+    func propertiesMessage(_ properties: CBCharacteristicProperties) -> String? {
+        return properties._message()
+    }
+    
+    /// [取得特徵值的全部設定值 => [1: "broadcast"]](https://blog.csdn.net/RazilFelix/article/details/68776794)
+    /// - Returns: [UInt: CBCharacteristicProperties]
+    func properties() -> [UInt: CBCharacteristicProperties] {
+        return CBCharacteristicProperties._dictionary()
+    }
 }
 
 // MARK: - CBCentralManagerDelegate
 extension WWBluetoothManager: CBCentralManagerDelegate {
     
     public func centralManagerDidUpdateState(_ central: CBCentralManager) {
-        
-        delegate?.updateState(manager: self, state: central.state)
         
         switch central.state {
         case .poweredOn: centralManager?.scanForPeripherals(withServices: nil, options: nil)
@@ -225,12 +173,13 @@ extension WWBluetoothManager: CBCentralManagerDelegate {
         case .unknown: break
         @unknown default: break
         }
+        
+        delegate?.updateState(manager: self, state: central.state)
     }
     
     public func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String: Any], rssi RSSI: NSNumber) {
         
         let newPeripheralInfo: PeripheralInformation = (UUID: peripheral.identifier, name: peripheral.name, advertisementData: advertisementData, RSSI: RSSI)
-        
         peripherals.insert(peripheral)
         delegate?.discoveredPeripherals(manager: self, peripherals: peripherals, newPeripheralInformation: newPeripheralInfo)
     }
@@ -267,7 +216,7 @@ extension WWBluetoothManager: CBPeripheralDelegate {
         
         if let error = error { delegate?.didDiscoverPeripheral(manager: self, result: .failure(.discover(peripheral.identifier, name: peripheral.name, error: .services(error)))); return }
         
-        let info: DiscoverServicesInformation = (UUID: peripheral.identifier, name: peripheral.name, services: peripheral.services)
+        let info: DiscoverServicesInformation = (UUID: peripheral.identifier, name: peripheral.name, peripheral: peripheral)
         delegate?.didDiscoverPeripheral(manager: self, result: .success(.services(info)))
     }
 
@@ -275,7 +224,7 @@ extension WWBluetoothManager: CBPeripheralDelegate {
         
         if let error = error { delegate?.didDiscoverPeripheral(manager: self, result: .failure(.discover(peripheral.identifier, name: peripheral.name, error: .characteristics(error)))); return }
         
-        let info: DiscoverCharacteristics = (UUID: peripheral.identifier, name: peripheral.name, characteristics: service.characteristics)
+        let info: DiscoverCharacteristics = (UUID: peripheral.identifier, name: peripheral.name, service: service)
         delegate?.didDiscoverPeripheral(manager: self, result: .success(.characteristics(info)))
     }
     
@@ -283,27 +232,85 @@ extension WWBluetoothManager: CBPeripheralDelegate {
         
         if let error = error { delegate?.didDiscoverPeripheral(manager: self, result: .failure(.discover(peripheral.identifier, name: peripheral.name, error: .descriptors(error)))); return }
         
-        let info: DiscoverDescriptors = (UUID: peripheral.identifier, name: peripheral.name, descriptors: characteristic.descriptors)
+        let info: DiscoverDescriptors = (UUID: peripheral.identifier, name: peripheral.name, characteristic: characteristic)
         delegate?.didDiscoverPeripheral(manager: self, result: .success(.descriptors(info)))
     }
 }
 
 // MARK: - CBPeripheralDelegate
 extension WWBluetoothManager {
-    
+        
     public func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
         
         if let error = error { delegate?.didUpdatePeripheral(manager: self, result: .failure(.discover(peripheral.identifier, name: peripheral.name, error: .characteristics(error)))); return }
         
-        let info: UpdateValueInformation = (UUID: peripheral.identifier, name: peripheral.name, data: characteristic.value)
-        delegate?.didUpdatePeripheral(manager: self, result: .success(.value(info)))
+        let _info: UpdateValueInformation = (UUID: peripheral.identifier, characteristic: characteristic)
+        let info = updatePeripheral(with: .value(_info))
+        
+        delegate?.didUpdatePeripheral(manager: self, result: .success(info))
     }
     
     public func peripheral(_ peripheral: CBPeripheral, didUpdateNotificationStateFor characteristic: CBCharacteristic, error: Error?) {
       
         if let error = error { delegate?.didUpdatePeripheral(manager: self, result: .failure(.discover(peripheral.identifier, name: peripheral.name, error: .characteristics(error)))); return }
         
-        let info: UpdateNotificationStateInformation = (UUID: peripheral.identifier, name: peripheral.name, data: characteristic.value)
-        delegate?.didUpdatePeripheral(manager: self, result: .success(.notificationState(info)))
+        let _info: UpdateValueInformation = (UUID: peripheral.identifier, characteristic: characteristic)
+        let info = updatePeripheral(with: .notificationState(_info))
+
+        delegate?.didUpdatePeripheral(manager: self, result: .success(info))
     }
 }
+
+// MARK: - CBPeripheralDelegate
+extension WWBluetoothManager {
+    
+    public func peripheral(_ peripheral: CBPeripheral, didModifyServices invalidatedServices: [CBService]) {
+        
+        let info: ModifyServicesInformation = (UUID: peripheral.identifier, invalidatedServices: invalidatedServices)
+        delegate?.didModifyServices(manager: self, information: info)
+    }
+}
+
+// MARK: - 小工具
+private extension WWBluetoothManager {
+        
+    /// 跟據類型取得設定回傳的資料
+    /// - Parameters:
+    ///   - updateType: WWBluetoothManager.UpdateType
+    /// - Returns: WWBluetoothManager.PeripheralValueInformation
+    func updatePeripheral(with updateType: (UpdateType)) -> PeripheralValueInformation {
+        
+        let valueInfo: WWBluetoothManager.PeripheralValueInformation
+        
+        switch updateType {
+        case .notificationState(let info): valueInfo = updatePeripheralNotificationState(info)
+        case .value(let info): valueInfo = updatePeripheralValue(info)
+        }
+        
+        return valueInfo
+    }
+    
+    /// 處理設備數值事件 (.read)
+    /// - Parameters:
+    ///   - info: WWBluetoothManager.UpdateValueInformation
+    func updatePeripheralValue(_ info: UpdateValueInformation) -> PeripheralValueInformation {
+        
+        let characteristic = info.characteristic
+        let info: PeripheralValueInformation = (peripheralId: info.UUID, characteristicId: characteristic.uuid, characteristicValue: characteristic.value)
+        
+        return info
+    }
+    
+    /// 處理設備通知事件 (.notify)
+    /// - Parameters:
+    ///   - info: WWBluetoothManager.UpdateNotificationStateInformation
+    func updatePeripheralNotificationState(_ info: UpdateNotificationStateInformation) -> PeripheralValueInformation {
+        
+        let characteristic = info.characteristic
+        let info: PeripheralValueInformation = (peripheralId: info.UUID, characteristicId: characteristic.uuid, characteristicValue: characteristic.value)
+        
+        return info
+    }
+}
+
+

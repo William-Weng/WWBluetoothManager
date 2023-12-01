@@ -28,6 +28,7 @@
 		3DBCD88126F198F300522E3B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8130038F27D5D18100436128 /* Constant.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constant.swift; sourceTree = "<group>"; };
 		8130039127D5D19000436128 /* Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extension.swift; sourceTree = "<group>"; };
+		81AEF0DA2B171B7300752AC3 /* WWBluetoothManager */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = WWBluetoothManager; path = ../WWBluetoothManager; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -46,6 +47,7 @@
 		3DBCD86726F198EF00522E3B = {
 			isa = PBXGroup;
 			children = (
+				81AEF0D92B171B7300752AC3 /* Packages */,
 				3DBCD87226F198EF00522E3B /* Example */,
 				3DBCD87126F198EF00522E3B /* Products */,
 				81AEF0D12B170AF500752AC3 /* Frameworks */,
@@ -122,6 +124,14 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		81AEF0D92B171B7300752AC3 /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				81AEF0DA2B171B7300752AC3 /* WWBluetoothManager */,
+			);
+			name = Packages;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -171,7 +181,6 @@
 			);
 			mainGroup = 3DBCD86726F198EF00522E3B;
 			packageReferences = (
-				81AEF0D52B17110B00752AC3 /* XCRemoteSwiftPackageReference "WWBluetoothManager" */,
 				81AEF0D62B17115400752AC3 /* XCRemoteSwiftPackageReference "WWPrint" */,
 			);
 			productRefGroup = 3DBCD87126F198EF00522E3B /* Products */;
@@ -416,14 +425,6 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		81AEF0D52B17110B00752AC3 /* XCRemoteSwiftPackageReference "WWBluetoothManager" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/William-Weng/WWBluetoothManager.git";
-			requirement = {
-				branch = main;
-				kind = branch;
-			};
-		};
 		81AEF0D62B17115400752AC3 /* XCRemoteSwiftPackageReference "WWPrint" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/William-Weng/WWPrint.git";

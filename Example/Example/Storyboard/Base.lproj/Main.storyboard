@@ -12,7 +12,7 @@
         <!--Bluetooth-->
         <scene sceneID="7Qi-w5-Q9v">
             <objects>
-                <viewController id="A7J-st-6xk" customClass="TableViewDemoController" customModule="BlueToothDemo" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="A7J-st-6xk" customClass="TableViewDemoController" customModule="Example" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="xcx-3u-yRo">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -57,7 +57,14 @@
                             <constraint firstItem="gyt-VC-3Cr" firstAttribute="leading" secondItem="Vhp-DO-1v2" secondAttribute="leading" id="dQl-V7-Bgt"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" title="Bluetooth" id="tGb-Vt-lYn"/>
+                    <navigationItem key="navigationItem" title="Bluetooth" id="tGb-Vt-lYn">
+                        <barButtonItem key="rightBarButtonItem" style="plain" systemItem="refresh" id="8JG-hL-tPA">
+                            <color key="tintColor" systemColor="systemMintColor"/>
+                            <connections>
+                                <action selector="restartScan:" destination="A7J-st-6xk" id="9GH-s0-yqx"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
                     <connections>
                         <outlet property="myTableView" destination="gyt-VC-3Cr" id="PiI-kf-4oz"/>
                     </connections>
@@ -88,6 +95,9 @@
     <resources>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+        <systemColor name="systemMintColor">
+            <color red="0.0" green="0.7803921568627451" blue="0.74509803921568629" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>
