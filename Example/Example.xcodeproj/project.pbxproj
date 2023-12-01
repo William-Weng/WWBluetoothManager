@@ -16,6 +16,7 @@
 		8130039227D5D19000436128 /* Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8130039127D5D19000436128 /* Extension.swift */; };
 		81AEF0D32B170AF500752AC3 /* WWBluetoothManager in Frameworks */ = {isa = PBXBuildFile; productRef = 81AEF0D22B170AF500752AC3 /* WWBluetoothManager */; };
 		81AEF0D82B17115400752AC3 /* WWPrint in Frameworks */ = {isa = PBXBuildFile; productRef = 81AEF0D72B17115400752AC3 /* WWPrint */; };
+		81CEB1192B19D52000FAD264 /* WWBluetoothManager in Frameworks */ = {isa = PBXBuildFile; productRef = 81CEB1182B19D52000FAD264 /* WWBluetoothManager */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,7 +29,6 @@
 		3DBCD88126F198F300522E3B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8130038F27D5D18100436128 /* Constant.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constant.swift; sourceTree = "<group>"; };
 		8130039127D5D19000436128 /* Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extension.swift; sourceTree = "<group>"; };
-		81AEF0DA2B171B7300752AC3 /* WWBluetoothManager */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = WWBluetoothManager; path = ../WWBluetoothManager; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -38,6 +38,7 @@
 			files = (
 				81AEF0D82B17115400752AC3 /* WWPrint in Frameworks */,
 				81AEF0D32B170AF500752AC3 /* WWBluetoothManager in Frameworks */,
+				81CEB1192B19D52000FAD264 /* WWBluetoothManager in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -47,7 +48,6 @@
 		3DBCD86726F198EF00522E3B = {
 			isa = PBXGroup;
 			children = (
-				81AEF0D92B171B7300752AC3 /* Packages */,
 				3DBCD87226F198EF00522E3B /* Example */,
 				3DBCD87126F198EF00522E3B /* Products */,
 				81AEF0D12B170AF500752AC3 /* Frameworks */,
@@ -124,14 +124,6 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		81AEF0D92B171B7300752AC3 /* Packages */ = {
-			isa = PBXGroup;
-			children = (
-				81AEF0DA2B171B7300752AC3 /* WWBluetoothManager */,
-			);
-			name = Packages;
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -151,6 +143,7 @@
 			packageProductDependencies = (
 				81AEF0D22B170AF500752AC3 /* WWBluetoothManager */,
 				81AEF0D72B17115400752AC3 /* WWPrint */,
+				81CEB1182B19D52000FAD264 /* WWBluetoothManager */,
 			);
 			productName = Example;
 			productReference = 3DBCD87026F198EF00522E3B /* Example.app */;
@@ -182,6 +175,7 @@
 			mainGroup = 3DBCD86726F198EF00522E3B;
 			packageReferences = (
 				81AEF0D62B17115400752AC3 /* XCRemoteSwiftPackageReference "WWPrint" */,
+				81CEB1172B19D52000FAD264 /* XCRemoteSwiftPackageReference "WWBluetoothManager" */,
 			);
 			productRefGroup = 3DBCD87126F198EF00522E3B /* Products */;
 			projectDirPath = "";
@@ -433,6 +427,14 @@
 				minimumVersion = 1.2.0;
 			};
 		};
+		81CEB1172B19D52000FAD264 /* XCRemoteSwiftPackageReference "WWBluetoothManager" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/William-Weng/WWBluetoothManager";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.6.1;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -444,6 +446,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 81AEF0D62B17115400752AC3 /* XCRemoteSwiftPackageReference "WWPrint" */;
 			productName = WWPrint;
+		};
+		81CEB1182B19D52000FAD264 /* WWBluetoothManager */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 81CEB1172B19D52000FAD264 /* XCRemoteSwiftPackageReference "WWBluetoothManager" */;
+			productName = WWBluetoothManager;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

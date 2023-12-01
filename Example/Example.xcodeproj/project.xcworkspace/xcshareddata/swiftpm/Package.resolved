@@ -1,6 +1,15 @@
 {
   "pins" : [
     {
+      "identity" : "wwbluetoothmanager",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/William-Weng/WWBluetoothManager",
+      "state" : {
+        "revision" : "51dbc838788f4630da2883d57ed91e380939fa9e",
+        "version" : "0.6.1"
+      }
+    },
+    {
       "identity" : "wwprint",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/William-Weng/WWPrint.git",
