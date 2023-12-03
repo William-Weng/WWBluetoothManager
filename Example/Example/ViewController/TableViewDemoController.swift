@@ -8,12 +8,13 @@ import CoreBluetooth
 import UIKit
 import WWPrint
 import WWBluetoothManager
+import WWHUD
 
 final class TableViewDemoController: UIViewController {
 
     @IBOutlet weak var myTableView: UITableView!
     
-    private let myPeripheral = "iOS的MacBook Pro"
+    private let myPeripheral = "GZUT-MIDI"
     private var isConnent = false
     
     private var peripherals: [CBPeripheral] = [] {
@@ -44,6 +45,15 @@ extension TableViewDemoController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         selectCell(with: tableView, didSelectRowAt: indexPath)
     }
+    
+    func tableView(_ tableView: UITableView, accessoryButtonTappedForRowWith indexPath: IndexPath) {
+        
+        guard let peripheral = self.peripherals[safe: indexPath.row] else { return }
+        
+        loading()
+        WWBluetoothManager.shared.disconnect(peripheral: peripheral)
+        isConnent = false
+    }
 }
 
 // MARK: - WWBluetoothManagerDelegate
@@ -57,11 +67,20 @@ extension TableViewDemoController: WWBluetoothManagerDelegate {
         discoveredPeripherals(with: manager, peripherals: peripherals, newPeripheralInformation: newPeripheralInformation)
     }
     
-    func didConnectPeripheral(manager: WWBluetoothManager, result: Result<UUID, WWBluetoothManager.PeripheralError>) {
+    func didConnectPeripheral(manager: WWBluetoothManager, result: Result<WWBluetoothManager.PeripheralConnectType, WWBluetoothManager.PeripheralError>) {
+        
+        unloading()
         
         switch result {
         case .failure(let error): wwPrint(error)
-        case .success(let uuid): wwPrint(uuid)
+        case .success(let connentType):
+            
+            switch connentType {
+            case .didConnect(let UUID): wwPrint("didConnect => \(UUID)")
+            case .didDisconnect(let UUID): wwPrint("didDisconnect => \(UUID)")
+            }
+            
+            myTableView.reloadData()
         }
     }
     
@@ -86,13 +105,16 @@ extension TableViewDemoController: WWBluetoothManagerDelegate {
         case .success(let info):
             
             guard let data = info.characteristicValue,
-                  !data.isEmpty
+                  !data.isEmpty,
+                  let hexString = Optional.some(data._hexString()),
+                  let number = hexString._UInt64()
             else {
                 return
             }
             
-            if let number = data._hexString()._UInt64() { title = "\(number)°C"; return }
-            if let string = data._string() { title = "\(string)"; return }
+            let note = ((number >> 8) - 215590) % 1000
+            title = "0x\(hexString)"
+            noteReading(note: note)
         }
     }
     
@@ -130,19 +152,10 @@ private extension TableViewDemoController {
         guard let peripheral = peripherals[safe: indexPath.row] else { fatalError() }
         
         let cell = tableView.dequeueReusableCell(withIdentifier: "MyTableViewCell", for: indexPath)
-        let backgroundColor: UIColor
-        
-        switch peripheral.state {
-        case .connecting: backgroundColor = .yellow
-        case .connected: backgroundColor = .green
-        case .disconnecting: backgroundColor = .lightGray
-        case .disconnected: backgroundColor = .white
-        default: backgroundColor = .white
-        }
         
         cell.textLabel?.text = "\(peripheral.name ?? "<NONE>")"
         cell.detailTextLabel?.text = "\(peripheral.identifier)"
-        cell.backgroundColor = backgroundColor
+        cell.backgroundColor = (peripheral.state == .connected) ? .green : .white
         
         return cell
     }
@@ -154,14 +167,12 @@ private extension TableViewDemoController {
     func selectCell(with tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
         guard let peripheral = peripherals[safe: indexPath.row] else { fatalError() }
-                
-        if (!isConnent) {
-            WWBluetoothManager.shared.connect(peripheral: peripheral)
-        } else {
-            WWBluetoothManager.shared.disconnect(peripheral: peripheral)
-        }
         
-        isConnent.toggle()
+        if (!isConnent) {
+            isConnent = true
+            loading()
+            WWBluetoothManager.shared.connect(peripheral: peripheral)
+        }
     }
 }
 
@@ -190,11 +201,49 @@ private extension TableViewDemoController {
     func discoveredPeripherals(with manager: WWBluetoothManager, peripherals: Set<CBPeripheral>, newPeripheralInformation: WWBluetoothManager.PeripheralInformation) {
         
         let peripherals = peripherals.compactMap { peripheral -> CBPeripheral? in
-            guard peripheral.name == myPeripheral else { return nil }
+            guard peripheral.name != nil else { return nil }
             return peripheral
         }
         
         self.peripherals = peripherals
+    }
+    
+    /// 讀取動畫
+    func loading() {
+        guard let gifUrl = Bundle.main.url(forResource: "Loading", withExtension: ".gif") else { return }
+        WWHUD.shared.display(effect: .gif(url: gifUrl, options: nil), height: 512.0, backgroundColor: .black.withAlphaComponent(0.3))
+    }
+    
+    /// 結束讀取動畫
+    func unloading() {
+        WWHUD.shared.dismiss() {_ in }
+    }
+    
+    /// 讀取音符
+    func noteReading(note: UInt64) {
+        
+        guard let gifUrl = Bundle.main.url(forResource: "Note", withExtension: ".gif"),
+              note > 589
+        else {
+            return
+        }
+        
+        var noteString = "DO"
+        
+        switch note {
+        case 590: noteString = "DO"
+        case 592: noteString = "RE"
+        case 594: noteString = "MI"
+        case 595: noteString = "FA"
+        case 597: noteString = "SO"
+        case 599: noteString = "LA"
+        case 601: noteString = "SI"
+        case 602: noteString = "DO"
+        default: break
+        }
+        
+        WWHUD.shared.updateProgess(text: noteString)
+        WWHUD.shared.flash(effect: .gif(url: gifUrl, options: nil), height: 512.0, backgroundColor: .black.withAlphaComponent(0.3)) {_ in }
     }
 }
 
@@ -231,17 +280,11 @@ private extension TableViewDemoController {
             return
         }
         
-        if (service.uuid === .deviceInformation) {
+        if (service.uuid === .bluMidi) {
             characteristics.forEach { characteristic in
-                if (peripheral._readValue(pairUUIDType: .manufacturerNameString, characteristic: characteristic)) { return }
-                if (peripheral._readValue(pairUUIDType: .modelNumberString, characteristic: characteristic)) { return }
-            }
-        }
-        
-        if (service.uuid === "0x1809") {
-            characteristics.forEach { characteristic in
-                if (peripheral._notifyValue(pairUUIDString: "0x2A1E", characteristic: characteristic)) { return }
-                if (peripheral._indicateValue(pairUUIDString: "0x2A1C", characteristic: characteristic)) { return }
+                let pairUUID = characteristic.uuid
+                if (peripheral._notifyValue(pairUUIDString: "\(pairUUID.uuidString)", characteristic: characteristic)) {}
+                wwPrint("pairUUID => \(pairUUID) , properties => \(characteristic.properties._parse())")
             }
         }
     }
@@ -251,7 +294,7 @@ private extension TableViewDemoController {
     ///   - manager: WWBluetoothManager
     ///   - info: WWBluetoothManager.DiscoverDescriptors
     func discoverPeripheralDescriptors(with manager: WWBluetoothManager, info: WWBluetoothManager.DiscoverDescriptors) {
-        wwPrint(info)
+        wwPrint(info.characteristic.properties._parse())
     }
 }
 

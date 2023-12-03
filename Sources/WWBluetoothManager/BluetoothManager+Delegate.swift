@@ -22,12 +22,12 @@ public protocol WWBluetoothManagerDelegate {
     ///   - peripherals: Set<CBPeripheral>
     ///   - newPeripheralInformation: WWBluetoothManager.PeripheralInformation
     func discoveredPeripherals(manager: WWBluetoothManager, peripherals: Set<CBPeripheral>, newPeripheralInformation: WWBluetoothManager.PeripheralInformation)
-    
+        
     /// 取得剛連上設備的資訊
     /// - Parameters:
     ///   - manager: WWBluetoothManager
-    ///   - result: Result<UUID, WWBluetoothManager.PeripheralError>
-    func didConnectPeripheral(manager: WWBluetoothManager, result: Result<UUID, WWBluetoothManager.PeripheralError>)
+    ///   - result: Result<WWBluetoothManager.ConnectType, WWBluetoothManager.PeripheralError>
+    func didConnectPeripheral(manager: WWBluetoothManager, result: Result<WWBluetoothManager.PeripheralConnectType, WWBluetoothManager.PeripheralError>)
     
     /// 處理已經連上設備的Services / Characteristics / Descriptors
     /// - Parameters:

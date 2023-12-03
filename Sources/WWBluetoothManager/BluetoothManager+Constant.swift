@@ -29,6 +29,7 @@ public extension WWBluetoothManager {
         case modelNumberString = "0x2A24"
         case manufacturerNameString = "0x2A29"
         case continuity = "D0611E78-BBB4-4591-A5F8-487910AE4366"
+        case bluMidi = "03B80E5A-EDE8-4B33-A751-6CE34EC4C700"
         
         /// UUID數值
         /// - Returns: CBUUID
@@ -53,6 +54,12 @@ public extension WWBluetoothManager {
         case connect(_ UUID: UUID, name: String?, error: ConnectError)
         case discover(_ UUID: UUID, name: String?, error: DiscoverError)
         case update(_ UUID: UUID, name: String?, error: UpdateError)
+    }
+    
+    /// 設備連線狀態
+    enum PeripheralConnectType {
+        case didConnect(_ UUID: UUID)
+        case didDisconnect(_ UUID: UUID)
     }
     
     /// 連接管理中心錯誤

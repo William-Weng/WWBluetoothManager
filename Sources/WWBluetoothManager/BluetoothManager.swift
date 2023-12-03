@@ -7,7 +7,6 @@
 
 import UIKit
 import CoreBluetooth
-import WWPrint
 
 // MARK: - WWBluetoothManager
 open class WWBluetoothManager: NSObject {
@@ -137,26 +136,6 @@ public extension WWBluetoothManager {
         centralManager.cancelPeripheralConnection(peripheral)
         return peripheral.identifier
     }
-    
-    /// 解析特徵值設定 => ["broadcast", "read"]
-    /// - Parameter properties: CBCharacteristicProperties
-    /// - Returns: [String]
-    func parseProperties(_ properties: CBCharacteristicProperties) -> [String] {
-        return properties._parse()
-    }
-    
-    /// 某特徵值的文字訊息
-    /// - Parameter properties: CBCharacteristicProperties
-    /// - Returns: String?
-    func propertiesMessage(_ properties: CBCharacteristicProperties) -> String? {
-        return properties._message()
-    }
-    
-    /// [取得特徵值的全部設定值 => [1: "broadcast"]](https://blog.csdn.net/RazilFelix/article/details/68776794)
-    /// - Returns: [UInt: CBCharacteristicProperties]
-    func properties() -> [UInt: CBCharacteristicProperties] {
-        return CBCharacteristicProperties._dictionary()
-    }
 }
 
 // MARK: - CBCentralManagerDelegate
@@ -189,7 +168,7 @@ extension WWBluetoothManager: CBCentralManagerDelegate {
 extension WWBluetoothManager {
     
     public func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
-        delegate?.didConnectPeripheral(manager: self, result: .success(peripheral.identifier))
+        delegate?.didConnectPeripheral(manager: self, result: .success(.didConnect(peripheral.identifier)))
         peripheral.delegate = self
         peripheral.discoverServices(nil)
     }
@@ -206,6 +185,8 @@ extension WWBluetoothManager {
         if let error = error {
             delegate?.didConnectPeripheral(manager: self, result: .failure(PeripheralError.connect(peripheral.identifier, name: peripheral.name, error: .centralManager(error))))
         }
+        
+        delegate?.didConnectPeripheral(manager: self, result: .success(.didDisconnect(peripheral.identifier)))
     }
 }
 
