@@ -14,7 +14,6 @@ final class TableViewDemoController: UIViewController {
 
     @IBOutlet weak var myTableView: UITableView!
     
-    private let myPeripheral = "GZUT-MIDI"
     private var isConnent = false
     
     private var peripherals: [CBPeripheral] = [] {

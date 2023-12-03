@@ -1,6 +1,15 @@
 {
   "pins" : [
     {
+      "identity" : "wwbluetoothmanager",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/William-Weng/WWBluetoothManager",
+      "state" : {
+        "revision" : "0addc2c268ead9d22c92bccd244a2ac2b1bb7e6e",
+        "version" : "0.7.0"
+      }
+    },
+    {
       "identity" : "wwhud",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/William-Weng/WWHUD.git",
