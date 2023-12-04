@@ -22,10 +22,13 @@ import UIKit
 import WWPrint
 import WWBluetoothManager
 import WWHUD
+import WWProgressMaskView
 
 final class TableViewDemoController: UIViewController {
 
+    @IBOutlet weak var myLabel: UILabel!
     @IBOutlet weak var myTableView: UITableView!
+    @IBOutlet weak var myProgressMaskView: WWProgressMaskView!
     
     private var isConnent = false
     
@@ -112,38 +115,15 @@ extension TableViewDemoController: WWBluetoothManagerDelegate {
     }
     
     func didUpdatePeripheral(manager: WWBluetoothManager, result: Result<WWBluetoothManager.PeripheralValueInformation, WWBluetoothManager.PeripheralError>) {
-       
+        
         switch result {
         case .failure(let error): wwPrint(error)
-        case .success(let info):
-            
-            guard let data = info.characteristicValue,
-                  !data.isEmpty,
-                  let hexString = Optional.some(data._hexString()),
-                  let number = hexString._UInt64()
-            else {
-                return
-            }
-            
-            let volume = number & 0xFF
-            let note = (number >> 8) & 0xFF
-            let press = (number >> 16) & 0xFF
-            
-            title = "0x\(hexString)"
-            noteReading(press: press, note: note, volume: volume)
+        case .success(let info): updatePeripheralAction(info: info)
         }
     }
     
     func didModifyServices(manager: WWBluetoothManager, information: WWBluetoothManager.ModifyServicesInformation) {
-        
-        guard let peripheral = manager.peripheral(UUID: information.UUID),
-              let index = peripherals.firstIndex(of: peripheral)
-        else {
-            return
-        }
-        
-        peripherals.remove(at: index)
-        myTableView.reloadData()
+        wwPrint(information)
     }
 }
 
@@ -153,8 +133,12 @@ private extension TableViewDemoController {
     /// 初始化設定
     /// >> info.plist => NSBluetoothAlwaysUsageDescription / NSBluetoothPeripheralUsageDescription
     func initSetting() {
+        
+        myLabel.text = "----"
         myTableView.delegate = self
         myTableView.dataSource = self
+        
+        myProgressMaskView.setting(originalAngle: 0, lineWidth: 20, clockwise: false, lineCap: .round, innerImage: nil, outerImage: nil)
         WWBluetoothManager.shared.startScan(delegate: self)
     }
     
@@ -189,6 +173,26 @@ private extension TableViewDemoController {
             loading()
             WWBluetoothManager.shared.connect(peripheral: peripheral)
         }
+    }
+    
+    /// 處理藍牙傳來的數值
+    /// - Parameter info:  WWBluetoothManager.PeripheralValueInformation
+    func updatePeripheralAction(info: WWBluetoothManager.PeripheralValueInformation) {
+        
+        guard let data = info.characteristicValue,
+              !data.isEmpty,
+              let hexString = Optional.some(data._hexString()),
+              let number = hexString._UInt64()
+        else {
+            return
+        }
+        
+        let volume = number & 0xFF
+        let note = (number >> 8) & 0xFF
+        let press = (number >> 16) & 0xFF
+        
+        title = "0x\(hexString)"
+        noteReading(press: press, note: note, volume: volume)
     }
 }
 
@@ -246,18 +250,23 @@ private extension TableViewDemoController {
     ///   - note: 音符的數值 (0x15 ~ 0x6C)
     ///   - volume: 音量大小 (0x00 ~ 0x7F)
     func noteReading(press: UInt64, note: UInt64, volume: UInt64) {
-                
-        guard let gifUrl = Bundle.main.url(forResource: "Note", withExtension: ".gif"),
-              press == 0x90,
+        
+        var noteString = "----"
+        var percent = 0.0
+        
+        defer {
+            myLabel.text = noteString
+            myProgressMaskView.progressCircle(progressUnit: .percent(Int(percent * 100)))
+        }
+        
+        guard press == 0x90,
               note > 0x14
         else {
             return
         }
         
-        let noteString = equalTemperament(note: note)
-
-        WWHUD.shared.updateProgess(text: noteString)
-        WWHUD.shared.flash(effect: .gif(url: gifUrl, options: nil), height: 512.0, backgroundColor: .black.withAlphaComponent(0.3)) {_ in }
+        noteString = equalTemperament(note: note)
+        percent = Double(volume) / Double(0x7F)
     }
     
     /// [十二平均律 - 唱名](https://zh.wikipedia.org/zh-tw/十二平均律)

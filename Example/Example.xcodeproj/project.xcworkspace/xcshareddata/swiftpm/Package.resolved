@@ -26,6 +26,15 @@
         "revision" : "edb791ed5e59c0f4044810d21a89102a440e2fbd",
         "version" : "1.2.1"
       }
+    },
+    {
+      "identity" : "wwprogressmaskview",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/William-Weng/WWProgressMaskView.git",
+      "state" : {
+        "revision" : "64573c4ca7690a7f170a2c5410002c2c60641d9b",
+        "version" : "1.1.1"
+      }
     }
   ],
   "version" : 2
