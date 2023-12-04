@@ -39,6 +39,7 @@ final class TableViewDemoController: UIViewController {
     }
     
     @IBAction func restartScan(_ sender: UIBarButtonItem) {
+        isConnent = false
         WWBluetoothManager.shared.restartScan(delegate: self)
     }
 }
@@ -124,9 +125,12 @@ extension TableViewDemoController: WWBluetoothManagerDelegate {
                 return
             }
             
-            let note = ((number >> 8) - 215590) % 1000
+            let volume = number & 0xFF
+            let note = (number >> 8) & 0xFF
+            let press = (number >> 16) & 0xFF
+            
             title = "0x\(hexString)"
-            noteReading(note: note)
+            noteReading(press: press, note: note, volume: volume)
         }
     }
     
@@ -222,40 +226,63 @@ private extension TableViewDemoController {
     
     /// 讀取動畫
     func loading() {
+        
         guard let gifUrl = Bundle.main.url(forResource: "Loading", withExtension: ".gif") else { return }
+        
+        WWHUD.shared.updateProgess(text: "")
         WWHUD.shared.display(effect: .gif(url: gifUrl, options: nil), height: 512.0, backgroundColor: .black.withAlphaComponent(0.3))
     }
     
     /// 結束讀取動畫
     func unloading() {
-        WWHUD.shared.dismiss() {_ in }
+        
+        WWHUD.shared.updateProgess(text: "")
+        WWHUD.shared.dismiss() { _ in }
     }
     
-    /// 讀取音符
-    func noteReading(note: UInt64) {
-        
+    /// 讀取音符 (for 電鋼琴88鍵 => 0x8080_80_3C_65)
+    /// - Parameters:
+    ///   - press: 是否按下的數值 (0x80 - false / 0x90 - true)
+    ///   - note: 音符的數值 (0x15 ~ 0x6C)
+    ///   - volume: 音量大小 (0x00 ~ 0x7F)
+    func noteReading(press: UInt64, note: UInt64, volume: UInt64) {
+                
         guard let gifUrl = Bundle.main.url(forResource: "Note", withExtension: ".gif"),
-              note > 589
+              press == 0x90,
+              note > 0x14
         else {
             return
         }
         
-        var noteString = "DO"
+        let noteString = equalTemperament(note: note)
+
+        WWHUD.shared.updateProgess(text: noteString)
+        WWHUD.shared.flash(effect: .gif(url: gifUrl, options: nil), height: 512.0, backgroundColor: .black.withAlphaComponent(0.3)) {_ in }
+    }
+    
+    /// [十二平均律 - 唱名](https://zh.wikipedia.org/zh-tw/十二平均律)
+    func equalTemperament(note: UInt64) -> String {
         
-        switch note {
-        case 590: noteString = "DO"
-        case 592: noteString = "RE"
-        case 594: noteString = "MI"
-        case 595: noteString = "FA"
-        case 597: noteString = "SO"
-        case 599: noteString = "LA"
-        case 601: noteString = "SI"
-        case 602: noteString = "DO"
+        let singingName = note % 12
+        var noteString = "Do"
+        
+        switch singingName {
+        case 0: noteString = "Do"
+        case 1: noteString = "Do#"
+        case 2: noteString = "Re"
+        case 3: noteString = "Re#"
+        case 4: noteString = "Mi"
+        case 5: noteString = "Fa"
+        case 6: noteString = "Fa#"
+        case 7: noteString = "So"
+        case 8: noteString = "So#"
+        case 9: noteString = "La"
+        case 10: noteString = "La#"
+        case 11: noteString = "Si"
         default: break
         }
         
-        WWHUD.shared.updateProgess(text: noteString)
-        WWHUD.shared.flash(effect: .gif(url: gifUrl, options: nil), height: 512.0, backgroundColor: .black.withAlphaComponent(0.3)) {_ in }
+        return noteString
     }
 }
 
@@ -293,10 +320,15 @@ private extension TableViewDemoController {
         }
         
         if (service.uuid === .bluMidi) {
+            
             characteristics.forEach { characteristic in
+                
                 let pairUUID = characteristic.uuid
+                
+                if (peripheral._readValue(pairUUIDString: "\(pairUUID.uuidString)", characteristic: characteristic)) {}
                 if (peripheral._notifyValue(pairUUIDString: "\(pairUUID.uuidString)", characteristic: characteristic)) {}
-                wwPrint("pairUUID => \(pairUUID) , properties => \(characteristic.properties._parse())")
+                
+                wwPrint("pairUUID => \(pairUUID), properties => \(characteristic.properties._parse())")
             }
         }
     }
