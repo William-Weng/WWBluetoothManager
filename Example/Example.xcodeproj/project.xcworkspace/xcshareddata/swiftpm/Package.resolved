@@ -1,30 +1,21 @@
 {
   "pins" : [
     {
-      "identity" : "wwbluetoothmanager",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/William-Weng/WWBluetoothManager",
-      "state" : {
-        "revision" : "4b21457ae8f6a4e271bf1890754adf524bb100cb",
-        "version" : "0.7.2"
-      }
-    },
-    {
       "identity" : "wwhud",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/William-Weng/WWHUD.git",
       "state" : {
-        "revision" : "861ce060cfbfaf4be75e40b0779465c21f455bf5",
-        "version" : "1.1.3"
+        "revision" : "7579ebf2b1fee3d81bdd35a829f05ed1e1cbed3c",
+        "version" : "1.1.4"
       }
     },
     {
       "identity" : "wwprint",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/William-Weng/WWPrint.git",
+      "location" : "https://github.com/William-Weng/WWPrint",
       "state" : {
-        "revision" : "edb791ed5e59c0f4044810d21a89102a440e2fbd",
-        "version" : "1.2.1"
+        "revision" : "0acf1057863faea81c3ded2057c21b09c3435435",
+        "version" : "1.3.0"
       }
     },
     {

@@ -2,7 +2,7 @@
 //  BluetoothManager+Extension.swift
 //  WWBluetoothManager
 //
-//  Created by iOS on 2023/12/1.
+//  Created by William.Weng on 2023/12/1.
 //
 
 import UIKit
@@ -109,24 +109,33 @@ public extension CBCharacteristicProperties {
         
         return dictionary.sorted()
     }
+}
+
+// MARK: - CBCharacteristicProperties (function)
+private extension CBCharacteristicProperties {
     
-    /// 某特徵值的文字訊息
-    /// - Returns: String?
-    func _message() -> String? {
-        
-        if (self == .broadcast) { return "broadcast（廣播）" }
-        if (self == .read) { return "read（讀取）" }
-        if (self == .write) { return "write（寫入）" }
-        if (self == .writeWithoutResponse) { return "writeWithoutResponse（無響應寫入）" }
-        if (self == .notify) { return "notify（通知）" }
-        if (self == .indicate) { return "indicate（指示）" }
-        if (self == .notifyEncryptionRequired) { return "notifyEncryptionRequired（通知加密要求）" }
-        if (self == .indicateEncryptionRequired) { return "indicateEncryptionRequired（指示加密要求）" }
-        if (self == .authenticatedSignedWrites) { return "authenticatedSignedWrites（身份驗證簽名寫入）" }
-        if (self == .extendedProperties) { return "extendedProperties（擴展屬性）" }
-        
-        return nil
-    }
+     /// 某特徵值的文字訊息
+     /// - Returns: String?
+     func _message() -> String? {
+         
+         var message: String?
+         
+         switch self {
+         case .broadcast: message = "broadcast（廣播）"
+         case .read: message = "read（讀取）"
+         case .write: message = "write（寫入）"
+         case .writeWithoutResponse: message = "writeWithoutResponse（無響應寫入）"
+         case .notify: message = "notify（通知）"
+         case .indicate: message = "indicate（指示）"
+         case .notifyEncryptionRequired: message = "notifyEncryptionRequired（通知加密要求）"
+         case .indicateEncryptionRequired: message = "indicateEncryptionRequired（指示加密要求）"
+         case .authenticatedSignedWrites: message = "authenticatedSignedWrites（身份驗證簽名寫入）"
+         case .extendedProperties: message = "extendedProperties（擴展屬性）"
+         default: break
+         }
+         
+         return message
+     }
 }
 
 // MARK: - CBPeripheral (function)

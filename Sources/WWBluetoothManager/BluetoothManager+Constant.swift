@@ -30,6 +30,7 @@ public extension WWBluetoothManager {
         case manufacturerNameString = "0x2A29"
         case continuity = "D0611E78-BBB4-4591-A5F8-487910AE4366"
         case bluMidi = "03B80E5A-EDE8-4B33-A751-6CE34EC4C700"
+        case read = "0000FF10-0000-1000-8000-00805F9B34FB"
         
         /// UUID數值
         /// - Returns: CBUUID
