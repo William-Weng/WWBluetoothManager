@@ -14,8 +14,7 @@ let package = Package(
     dependencies: [
     ],
     targets: [
-        .target(name: "WWBluetoothManager", dependencies: []),
-        .testTarget(name: "WWBluetoothManagerTests", dependencies: ["WWBluetoothManager"]),
+        .target(name: "WWBluetoothManager", resources: [.copy("Privacy")])
     ],
     swiftLanguageVersions: [
         .v5
