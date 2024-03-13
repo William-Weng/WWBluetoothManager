@@ -2,18 +2,44 @@
 
 [![Swift-5.6](https://img.shields.io/badge/Swift-5.6-orange.svg?style=flat)](https://developer.apple.com/swift/) [![iOS-14.0](https://img.shields.io/badge/iOS-14.0-pink.svg?style=flat)](https://developer.apple.com/swift/) ![TAG](https://img.shields.io/github/v/tag/William-Weng/WWBluetoothManager) [![Swift Package Manager-SUCCESS](https://img.shields.io/badge/Swift_Package_Manager-SUCCESS-blue.svg?style=flat)](https://developer.apple.com/swift/) [![LICENSE](https://img.shields.io/badge/LICENSE-MIT-yellow.svg?style=flat)](https://developer.apple.com/swift/)
 
-Simple integration of official CoreBluetooth suite functions allows developers to develop Bluetooth devices more easily.
-
-簡單整合官方的CoreBluetooth套件功能，讓開發者能更簡單的開發藍牙設備。
+### [Introduction - 簡介](https://swiftpackageindex.com/William-Weng)
+- Simple integration of official CoreBluetooth suite functions allows developers to develop Bluetooth devices more easily.
+- 簡單整合官方的CoreBluetooth套件功能，讓開發者能更簡單的開發藍牙設備。
 
 ![WWBluetoothManager](./Example.gif)
 
 ### [Installation with Swift Package Manager](https://medium.com/彼得潘的-swift-ios-app-開發問題解答集/使用-spm-安裝第三方套件-xcode-11-新功能-2c4ffcf85b4b)
-```
+```bash
 dependencies: [
-    .package(url: "https://github.com/William-Weng/WWBluetoothManager.git", .upToNextMajor(from: "1.0.0"))
+    .package(url: "https://github.com/William-Weng/WWBluetoothManager.git", .upToNextMajor(from: "0.7.5"))
 ]
 ```
+
+### Function - 可用函式
+|函式|功能|
+|-|-|
+|build()|建立新BluetoothManager|
+|startScan(queue:delegate:)|開始掃瞄|
+|stopScan()|停止掃瞄|
+|restartScan(queue:delegate:)|重新開始掃瞄|
+|connect(peripheral:options:)|連接藍牙設備|
+|disconnect(peripheral:)|藍牙設備斷開連接|
+|peripheral(UUID:)|搜尋設備|
+|peripheral(UUIDString:)|搜尋設備|
+|connect(UUID:options:)|連接藍牙設備|
+|connect(UUIDString:options:)|連接藍牙設備|
+|disconnect(UUID:)|藍牙設備斷開連接|
+|disconnect(UUIDString:)|藍牙設備斷開連接|
+
+### WWBluetoothManagerDelegate
+|函式|功能|
+|-|-|
+|updateState(manager:state:)|手機藍牙的更新狀態|
+|discoveredPeripherals(manager:peripherals:newPeripheralInformation:)|搜尋到的週邊設備 (不重複)|
+|didConnectPeripheral(manager:result:)|取得剛連上設備的資訊|
+|didDiscoverPeripheral(manager:result:)|處理已經連上設備的Services / Characteristics / Descriptors|
+|didUpdatePeripheral(manager:result:)|週邊設備數值相關的功能|
+|didModifyServices(manager:information:)|週邊設備服務更動的功能|
 
 ### Example
 ```swift
