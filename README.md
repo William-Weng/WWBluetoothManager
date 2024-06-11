@@ -11,7 +11,7 @@
 ### [Installation with Swift Package Manager](https://medium.com/彼得潘的-swift-ios-app-開發問題解答集/使用-spm-安裝第三方套件-xcode-11-新功能-2c4ffcf85b4b)
 ```bash
 dependencies: [
-    .package(url: "https://github.com/William-Weng/WWBluetoothManager.git", .upToNextMajor(from: "0.7.5"))
+    .package(url: "https://github.com/William-Weng/WWBluetoothManager.git", .upToNextMajor(from: "0.7.10"))
 ]
 ```
 
@@ -24,12 +24,9 @@ dependencies: [
 |restartScan(queue:delegate:)|重新開始掃瞄|
 |connect(peripheral:options:)|連接藍牙設備|
 |disconnect(peripheral:)|藍牙設備斷開連接|
-|peripheral(UUID:)|搜尋設備|
-|peripheral(UUIDString:)|搜尋設備|
-|connect(UUID:options:)|連接藍牙設備|
-|connect(UUIDString:options:)|連接藍牙設備|
-|disconnect(UUID:)|藍牙設備斷開連接|
-|disconnect(UUIDString:)|藍牙設備斷開連接|
+|peripheral(_:)|搜尋設備|
+|connect(_:options:)|連接藍牙設備|
+|disconnect(_:)|藍牙設備斷開連接|
 
 ### WWBluetoothManagerDelegate
 |函式|功能|
@@ -73,7 +70,6 @@ final class TableViewDemoController: UIViewController {
     }
 }
 
-// MARK: - UITableViewDelegate, UITableViewDataSource
 extension TableViewDemoController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -98,7 +94,6 @@ extension TableViewDemoController: UITableViewDelegate, UITableViewDataSource {
     }
 }
 
-// MARK: - WWBluetoothManagerDelegate
 extension TableViewDemoController: WWBluetoothManagerDelegate {
         
     func updateState(manager: WWBluetoothManager, state: CBManagerState) {
@@ -156,8 +151,6 @@ extension TableViewDemoController: WWBluetoothManagerDelegate {
 // MARK: - 小工具
 private extension TableViewDemoController {
     
-    /// 初始化設定
-    /// >> info.plist => NSBluetoothAlwaysUsageDescription / NSBluetoothPeripheralUsageDescription
     func initSetting() {
         
         myLabel.text = "----"
@@ -168,11 +161,6 @@ private extension TableViewDemoController {
         WWBluetoothManager.shared.startScan(delegate: self)
     }
     
-    /// 產生UITableViewCell
-    /// - Parameters:
-    ///   - tableView: UITableView
-    ///   - indexPath: IndexPath
-    /// - Returns: UITableViewCell
     func cellMaker(with tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         guard let peripheral = peripherals[safe: indexPath.row] else { fatalError() }
@@ -186,10 +174,6 @@ private extension TableViewDemoController {
         return cell
     }
     
-    /// Cell被按到的處理
-    /// - Parameters:
-    ///   - tableView: UITableView
-    ///   - indexPath: IndexPath
     func selectCell(with tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
         guard let peripheral = peripherals[safe: indexPath.row] else { fatalError() }
@@ -201,8 +185,6 @@ private extension TableViewDemoController {
         }
     }
     
-    /// 處理藍牙傳來的數值
-    /// - Parameter info:  WWBluetoothManager.PeripheralValueInformation
     func updatePeripheralAction(info: WWBluetoothManager.PeripheralValueInformation) {
         
         guard let data = info.characteristicValue,
@@ -225,10 +207,6 @@ private extension TableViewDemoController {
 // MARK: - Connect Action
 private extension TableViewDemoController {
     
-    /// 處理藍牙連線狀態
-    /// - Parameters:
-    ///   - manager: WWBluetoothManager
-    ///   - state: CBManagerState
     func updateState(with manager: WWBluetoothManager, state: CBManagerState) {
         
         switch state {
@@ -239,11 +217,6 @@ private extension TableViewDemoController {
         }
     }
     
-    /// 處理藍牙搜尋到的設備
-    /// - Parameters:
-    ///   - manager: WWBluetoothManager
-    ///   - peripherals: Set<CBPeripheral>
-    ///   - newPeripheralInformation: WWBluetoothManager.PeripheralInformation
     func discoveredPeripherals(with manager: WWBluetoothManager, peripherals: Set<CBPeripheral>, newPeripheralInformation: WWBluetoothManager.PeripheralInformation) {
         
         let peripherals = peripherals.compactMap { peripheral -> CBPeripheral? in
@@ -254,7 +227,6 @@ private extension TableViewDemoController {
         self.peripherals = peripherals
     }
     
-    /// 讀取動畫
     func loading() {
         
         guard let gifUrl = Bundle.main.url(forResource: "Loading", withExtension: ".gif") else { return }
@@ -263,18 +235,12 @@ private extension TableViewDemoController {
         WWHUD.shared.display(effect: .gif(url: gifUrl, options: nil), height: 512.0, backgroundColor: .black.withAlphaComponent(0.3))
     }
     
-    /// 結束讀取動畫
     func unloading() {
         
         WWHUD.shared.updateProgess(text: "")
         WWHUD.shared.dismiss() { _ in }
     }
     
-    /// 讀取音符 (for 電鋼琴88鍵 => 0x8080_80_3C_65)
-    /// - Parameters:
-    ///   - press: 是否按下的數值 (0x80 - false / 0x90 - true)
-    ///   - note: 音符的數值 (0x15 ~ 0x6C)
-    ///   - volume: 音量大小 (0x00 ~ 0x7F)
     func noteReading(press: UInt64, note: UInt64, volume: UInt64) {
         
         var noteString = "----"
@@ -295,7 +261,6 @@ private extension TableViewDemoController {
         percent = Double(volume) / Double(0x7F)
     }
     
-    /// [十二平均律 - 唱名](https://zh.wikipedia.org/zh-tw/十二平均律)
     func equalTemperament(note: UInt64) -> String {
         
         let singingName = note % 12
@@ -321,16 +286,11 @@ private extension TableViewDemoController {
     }
 }
 
-// MARK: - Discover Peripheral Action
 private extension TableViewDemoController {
     
-    /// 處理有關搜尋到Services的事務
-    /// - Parameters:
-    ///   - manager: WWBluetoothManager
-    ///   - info: WWBluetoothManager.DiscoverServicesInformation
     func discoverPeripheralServices(with manager: WWBluetoothManager, info: WWBluetoothManager.DiscoverServicesInformation) {
         
-        guard let peripheral = manager.peripheral(UUID: info.UUID),
+        guard let peripheral = manager.peripheral(.UUID(info.UUID)),
               let services = info.peripheral.services
         else {
             return
@@ -341,13 +301,9 @@ private extension TableViewDemoController {
         })
     }
     
-    /// 處理有關搜尋到Characteristics的事務
-    /// - Parameters:
-    ///   - manager: WWBluetoothManager
-    ///   - info: WWBluetoothManager.DiscoverCharacteristics
     func discoverPeripheralCharacteristics(with manager: WWBluetoothManager, info: WWBluetoothManager.DiscoverCharacteristics) {
         
-        guard let peripheral = manager.peripheral(UUID: info.UUID),
+        guard let peripheral = manager.peripheral(.UUID(info.UUID)),
               let service = Optional.some(info.service),
               let characteristics = service.characteristics
         else {
@@ -367,11 +323,7 @@ private extension TableViewDemoController {
             }
         }
     }
-    
-    /// 處理有關搜尋到Descriptors的事務
-    /// - Parameters:
-    ///   - manager: WWBluetoothManager
-    ///   - info: WWBluetoothManager.DiscoverDescriptors
+
     func discoverPeripheralDescriptors(with manager: WWBluetoothManager, info: WWBluetoothManager.DiscoverDescriptors) {
         wwPrint(info.characteristic.properties._parse())
     }

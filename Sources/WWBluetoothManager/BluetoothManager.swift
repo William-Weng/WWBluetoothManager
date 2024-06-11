@@ -13,6 +13,11 @@ open class WWBluetoothManager: NSObject {
 
     public static let shared = build()
     
+    public enum PeripheralIdType {
+        case UUID(_ UUID: UUID)
+        case UUIDString(_ UUIDString: String)
+    }
+    
     private var peripherals: Set<CBPeripheral> = []
     private var centralManager: CBCentralManager!
     private var delegate: WWBluetoothManagerDelegate?
@@ -75,71 +80,38 @@ public extension WWBluetoothManager {
     }
     
     /// [搜尋設備](https://developer.apple.com/library/archive/documentation/NetworkingInternetWeb/Conceptual/CoreBluetooth_concepts/PerformingCommonCentralRoleTasks/PerformingCommonCentralRoleTasks.html#//apple_ref/doc/uid/TP40013257-CH3-SW7)
-    /// - Parameter UUID: UUID
+    /// - Parameter type: [PeripheralIdType](https://github.com/Eronwu/Getting-Started-with-Bluetooth-Low-Energy-in-Chinese)
     /// - Returns: CBPeripheral?
-    func peripheral(UUID: UUID) -> CBPeripheral? {
-        let peripheral = peripherals.first { $0.identifier == UUID }
-        return peripheral
-    }
-}
-
-/// MARK: - 公開函式 (3)
-public extension WWBluetoothManager {
-    
-    /// [搜尋設備](https://github.com/Eronwu/Getting-Started-with-Bluetooth-Low-Energy-in-Chinese)
-    /// - Parameter UUIDString: String
-    /// - Returns: CBPeripheral?
-    func peripheral(UUIDString: String) -> CBPeripheral? {
-        guard let UUID = UUID(uuidString: UUIDString) else { return nil }
-        return peripheral(UUID: UUID)
+    func peripheral(_ type: PeripheralIdType) -> CBPeripheral? {
+        
+        switch type {
+        case .UUID(let UUID): return peripheral(UUID: UUID)
+        case .UUIDString(let UUIDString): return peripheral(UUIDString: UUIDString)
+        }
     }
     
     /// [連接藍牙設備](https://blog.csdn.net/lang523493505/article/details/103474961)
     /// - Parameters:
-    ///   - UUID: UUID
+    ///   - type: [PeripheralIdType](https://medium.com/@nalydadad/概述-gatt-藍芽傳輸-9fa218ce6022)
     ///   - options: [String : Any]?
-    /// - Returns: Bool
-    func connect(UUID: UUID, options: [String : Any]? = nil) -> UUID? {
+    /// - Returns: UUID?
+    func connect(_ type: PeripheralIdType, options: [String : Any]? = nil) -> UUID? {
         
-        guard let peripheral = peripheral(UUID: UUID) else { return nil }
-        
-        connect(peripheral: peripheral, options: options)
-        return peripheral.identifier
-    }
-    
-    /// [連接藍牙設備](https://medium.com/@nalydadad/概述-gatt-藍芽傳輸-9fa218ce6022)
-    /// - Parameters:
-    ///   - UUIDString: String
-    ///   - options: [String : Any]?
-    /// - Returns: Bool
-    func connect(UUIDString: String, options: [String : Any]? = nil) -> UUID? {
-        
-        guard let peripheral = peripheral(UUIDString: UUIDString) else { return nil }
-        
-        connect(peripheral: peripheral, options: options)
-        return peripheral.identifier
+        switch type {
+        case .UUID(let UUID): return connect(UUID: UUID, options: options)
+        case .UUIDString(let UUIDString): return connect(UUIDString: UUIDString, options: options)
+        }
     }
     
     /// [藍牙設備斷開連接](http://www.wowotech.net/bluetooth/ble_stack_overview.html)
-    /// - Parameter UUID: UUID
-    /// - Returns: CBPeripheral?
-    func disconnect(UUID: UUID) -> UUID? {
+    /// - Parameter type: PeripheralIdType
+    /// - Returns: UUID?
+    func disconnect(_ type: PeripheralIdType) -> UUID? {
         
-        guard let peripheral = peripheral(UUID: UUID) else { return nil }
-        
-        centralManager.cancelPeripheralConnection(peripheral)
-        return peripheral.identifier
-    }
-    
-    /// [藍牙設備斷開連接](http://www.sunyouqun.com/2017/04/understand-ble-5-stack-generic-attribute-profile-layer/)
-    /// - Parameter UUID: UUID
-    /// - Returns: CBPeripheral?
-    func disconnect(UUIDString: String) -> UUID? {
-        
-        guard let peripheral = peripheral(UUIDString: UUIDString) else { return nil }
-        
-        centralManager.cancelPeripheralConnection(peripheral)
-        return peripheral.identifier
+        switch type {
+        case .UUID(let UUID): return disconnect(UUID: UUID)
+        case .UUIDString(let UUIDString): return disconnect(UUIDString: UUIDString)
+        }
     }
 }
 
@@ -216,6 +188,74 @@ public extension WWBluetoothManager {
 // MARK: - 小工具
 private extension WWBluetoothManager {
     
+    /// 搜尋設備
+    /// - Parameter UUID: UUID
+    /// - Returns: CBPeripheral?
+    func peripheral(UUID: UUID) -> CBPeripheral? {
+        let peripheral = peripherals.first { $0.identifier == UUID }
+        return peripheral
+    }
+    
+    /// 搜尋設備
+    /// - Parameter UUIDString: String
+    /// - Returns: CBPeripheral?
+    func peripheral(UUIDString: String) -> CBPeripheral? {
+        guard let UUID = UUID(uuidString: UUIDString) else { return nil }
+        return peripheral(UUID: UUID)
+    }
+    
+    /// 連接藍牙設備
+    /// - Parameters:
+    ///   - UUID: UUID
+    ///   - options: [String : Any]?
+    /// - Returns: Bool
+    func connect(UUID: UUID, options: [String : Any]? = nil) -> UUID? {
+        
+        guard let peripheral = peripheral(UUID: UUID) else { return nil }
+        
+        connect(peripheral: peripheral, options: options)
+        return peripheral.identifier
+    }
+    
+    /// 連接藍牙設備
+    /// - Parameters:
+    ///   - UUIDString: String
+    ///   - options: [String : Any]?
+    /// - Returns: Bool
+    func connect(UUIDString: String, options: [String : Any]? = nil) -> UUID? {
+        
+        guard let peripheral = peripheral(UUIDString: UUIDString) else { return nil }
+        
+        connect(peripheral: peripheral, options: options)
+        return peripheral.identifier
+    }
+        
+    /// [藍牙設備斷開連接](http://www.wowotech.net/bluetooth/ble_stack_overview.html)
+    /// - Parameter UUID: UUID
+    /// - Returns: CBPeripheral?
+    func disconnect(UUID: UUID) -> UUID? {
+        
+        guard let peripheral = peripheral(UUID: UUID) else { return nil }
+        
+        centralManager.cancelPeripheralConnection(peripheral)
+        return peripheral.identifier
+    }
+    
+    /// [藍牙設備斷開連接](http://www.sunyouqun.com/2017/04/understand-ble-5-stack-generic-attribute-profile-layer/)
+    /// - Parameter UUID: UUID
+    /// - Returns: CBPeripheral?
+    func disconnect(UUIDString: String) -> UUID? {
+        
+        guard let peripheral = peripheral(UUIDString: UUIDString) else { return nil }
+        
+        centralManager.cancelPeripheralConnection(peripheral)
+        return peripheral.identifier
+    }
+}
+
+// MARK: - 小工具
+private extension WWBluetoothManager {
+    
     /// 處理藍牙中心的更新狀態 (開 / 開 / 重開 / …)
     /// - Parameter central: CBCentralManager
     func centralManagerDidUpdateStateAction(with central: CBCentralManager) {
@@ -283,7 +323,6 @@ private extension WWBluetoothManager {
         
         delegate?.didConnectPeripheral(manager: self, result: .success(.didDisconnect(peripheral.identifier)))
     }
-    
     
     /// 發現服務時的處理
     /// - Parameters:

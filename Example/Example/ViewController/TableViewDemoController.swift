@@ -206,7 +206,7 @@ private extension TableViewDemoController {
     ///   - peripherals: Set<CBPeripheral>
     ///   - newPeripheralInformation: WWBluetoothManager.PeripheralInformation
     func discoveredPeripherals(with manager: WWBluetoothManager, peripherals: Set<CBPeripheral>, newPeripheralInformation: WWBluetoothManager.PeripheralInformation) {
-                
+        
         let peripherals = peripherals.compactMap { peripheral -> CBPeripheral? in
             guard peripheral.name != nil else { return nil }
             return peripheral
@@ -291,7 +291,7 @@ private extension TableViewDemoController {
     ///   - info: WWBluetoothManager.DiscoverServicesInformation
     func discoverPeripheralServices(with manager: WWBluetoothManager, info: WWBluetoothManager.DiscoverServicesInformation) {
         
-        guard let peripheral = manager.peripheral(UUID: info.UUID),
+        guard let peripheral = manager.peripheral(.UUID(info.UUID)),
               let services = info.peripheral.services
         else {
             return
@@ -308,7 +308,7 @@ private extension TableViewDemoController {
     ///   - info: WWBluetoothManager.DiscoverCharacteristics
     func discoverPeripheralCharacteristics(with manager: WWBluetoothManager, info: WWBluetoothManager.DiscoverCharacteristics) {
         
-        guard let peripheral = manager.peripheral(UUID: info.UUID),
+        guard let peripheral = manager.peripheral(.UUID(info.UUID)),
               let service = Optional.some(info.service),
               let characteristics = service.characteristics
         else {
