@@ -139,9 +139,81 @@ public extension WWBluetoothManager {
 }
 
 // MARK: - CBCentralManagerDelegate
-extension WWBluetoothManager: CBCentralManagerDelegate {
+extension WWBluetoothManager: CBCentralManagerDelegate {}
+
+// MARK: - CBCentralManagerDelegate
+public extension WWBluetoothManager {
     
-    public func centralManagerDidUpdateState(_ central: CBCentralManager) {
+    func centralManagerDidUpdateState(_ central: CBCentralManager) {
+        centralManagerDidUpdateStateAction(with: central)
+    }
+    
+    func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String: Any], rssi RSSI: NSNumber) {
+        centralManagerAction(with: central, didDiscover: peripheral, advertisementData: advertisementData, rssi: RSSI)
+    }
+}
+
+// MARK: - CBCentralManagerDelegate
+public extension WWBluetoothManager {
+    
+    func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
+        centralManagerAction(with: central, didConnect: peripheral)
+    }
+    
+    func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {
+        centralManagerAction(with: central, didFailToConnect: peripheral, error: error)
+    }
+    
+    func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
+        centralManagerAction(with: central, didDisconnectPeripheral: peripheral, error: error)
+    }
+}
+
+// MARK: - CBPeripheralDelegate
+extension WWBluetoothManager: CBPeripheralDelegate {}
+
+// MARK: - CBPeripheralDelegate
+public extension WWBluetoothManager {
+    
+    func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
+        peripheralAction(with: peripheral, didDiscoverServices: error)
+    }
+
+    func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
+        peripheralAction(with: peripheral, didDiscoverCharacteristicsFor: service, error: error)
+    }
+    
+    func peripheral(_ peripheral: CBPeripheral, didDiscoverDescriptorsFor characteristic: CBCharacteristic, error: Error?) {
+        peripheralAction(with: peripheral, didDiscoverDescriptorsFor: characteristic, error: error)
+    }
+}
+
+// MARK: - CBPeripheralDelegate
+public extension WWBluetoothManager {
+    
+    func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
+        peripheralAction(with: peripheral, didUpdateValueFor: characteristic, error: error)
+    }
+    
+    func peripheral(_ peripheral: CBPeripheral, didUpdateNotificationStateFor characteristic: CBCharacteristic, error: Error?) {
+        peripheralAction(with: peripheral, didUpdateNotificationStateFor: characteristic, error: error)
+    }
+}
+
+// MARK: - CBPeripheralDelegate
+public extension WWBluetoothManager {
+    
+    func peripheral(_ peripheral: CBPeripheral, didModifyServices invalidatedServices: [CBService]) {
+        peripheralAction(with: peripheral, didModifyServices: invalidatedServices)
+    }
+}
+
+// MARK: - 小工具
+private extension WWBluetoothManager {
+    
+    /// 處理藍牙中心的更新狀態 (開 / 開 / 重開 / …)
+    /// - Parameter central: CBCentralManager
+    func centralManagerDidUpdateStateAction(with central: CBCentralManager) {
         
         switch central.state {
         case .poweredOn: centralManager?.scanForPeripherals(withServices: nil, options: nil)
@@ -156,31 +228,49 @@ extension WWBluetoothManager: CBCentralManagerDelegate {
         delegate?.updateState(manager: self, state: central.state)
     }
     
-    public func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String: Any], rssi RSSI: NSNumber) {
+    /// 發現新設備的處理
+    /// - Parameters:
+    ///   - central: CBCentralManager
+    ///   - peripheral: CBPeripheral
+    ///   - advertisementData: [String: Any]
+    ///   - RSSI: NSNumber
+    func centralManagerAction(with central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String: Any], rssi RSSI: NSNumber) {
         
         let newPeripheralInfo: PeripheralInformation = (UUID: peripheral.identifier, name: peripheral.name, advertisementData: advertisementData, RSSI: RSSI)
+        
         peripherals.insert(peripheral)
         delegate?.discoveredPeripherals(manager: self, peripherals: peripherals, newPeripheralInformation: newPeripheralInfo)
     }
-}
-
-// MARK: - CBCentralManagerDelegate
-extension WWBluetoothManager {
     
-    public func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
+    /// 已經連上的設備處理
+    /// - Parameters:
+    ///   - central: CBCentralManager
+    ///   - peripheral: CBPeripheral
+    func centralManagerAction(with central: CBCentralManager, didConnect peripheral: CBPeripheral) {
+        
         delegate?.didConnectPeripheral(manager: self, result: .success(.didConnect(peripheral.identifier)))
         peripheral.delegate = self
         peripheral.discoverServices(nil)
     }
     
-    public func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {
+    /// 連線錯誤的處理
+    /// - Parameters:
+    ///   - central: CBCentralManager
+    ///   - peripheral: CBPeripheral
+    ///   - error: Error?
+    func centralManagerAction(with central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {
         
         if let error = error {
             delegate?.didConnectPeripheral(manager: self, result: .failure(PeripheralError.connect(peripheral.identifier, name: peripheral.name, error: .centralManager(error))))
         }
     }
     
-    public func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
+    /// 斷開連線的處理
+    /// - Parameters:
+    ///   - central: CBCentralManager
+    ///   - peripheral: CBPeripheral
+    ///   - error: Error?
+    func centralManagerAction(with central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
         
         if let error = error {
             delegate?.didConnectPeripheral(manager: self, result: .failure(PeripheralError.connect(peripheral.identifier, name: peripheral.name, error: .centralManager(error))))
@@ -188,20 +278,26 @@ extension WWBluetoothManager {
         
         delegate?.didConnectPeripheral(manager: self, result: .success(.didDisconnect(peripheral.identifier)))
     }
-}
-
-// MARK: - CBPeripheralDelegate
-extension WWBluetoothManager: CBPeripheralDelegate {
     
-    public func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
+    
+    /// 發現服務時的處理
+    /// - Parameters:
+    ///   - peripheral: CBPeripheral
+    ///   - error: Error?
+    func peripheralAction(with peripheral: CBPeripheral, didDiscoverServices error: Error?) {
         
         if let error = error { delegate?.didDiscoverPeripheral(manager: self, result: .failure(.discover(peripheral.identifier, name: peripheral.name, error: .services(error)))); return }
         
         let info: DiscoverServicesInformation = (UUID: peripheral.identifier, name: peripheral.name, peripheral: peripheral)
         delegate?.didDiscoverPeripheral(manager: self, result: .success(.services(info)))
     }
-
-    public func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
+    
+    /// 發現特徵值的處理
+    /// - Parameters:
+    ///   - peripheral: CBPeripheral
+    ///   - service: CBService
+    ///   - error: Error?
+    func peripheralAction(with peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
         
         if let error = error { delegate?.didDiscoverPeripheral(manager: self, result: .failure(.discover(peripheral.identifier, name: peripheral.name, error: .characteristics(error)))); return }
         
@@ -209,19 +305,25 @@ extension WWBluetoothManager: CBPeripheralDelegate {
         delegate?.didDiscoverPeripheral(manager: self, result: .success(.characteristics(info)))
     }
     
-    public func peripheral(_ peripheral: CBPeripheral, didDiscoverDescriptorsFor characteristic: CBCharacteristic, error: Error?) {
+    /// 發現敘述的處理
+    /// - Parameters:
+    ///   - peripheral: CBPeripheral
+    ///   - characteristic: CBCharacteristic
+    ///   - error: Error?
+    func peripheralAction(with peripheral: CBPeripheral, didDiscoverDescriptorsFor characteristic: CBCharacteristic, error: Error?) {
         
         if let error = error { delegate?.didDiscoverPeripheral(manager: self, result: .failure(.discover(peripheral.identifier, name: peripheral.name, error: .descriptors(error)))); return }
         
         let info: DiscoverDescriptors = (UUID: peripheral.identifier, name: peripheral.name, characteristic: characteristic)
         delegate?.didDiscoverPeripheral(manager: self, result: .success(.descriptors(info)))
     }
-}
-
-// MARK: - CBPeripheralDelegate
-extension WWBluetoothManager {
-        
-    public func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
+    
+    /// 更新特徵值的處理
+    /// - Parameters:
+    ///   - peripheral: CBPeripheral
+    ///   - characteristic: CBCharacteristic
+    ///   - error: Error?
+    func peripheralAction(with peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
         
         if let error = error { delegate?.didUpdatePeripheral(manager: self, result: .failure(.discover(peripheral.identifier, name: peripheral.name, error: .characteristics(error)))); return }
         
@@ -231,8 +333,13 @@ extension WWBluetoothManager {
         delegate?.didUpdatePeripheral(manager: self, result: .success(info))
     }
     
-    public func peripheral(_ peripheral: CBPeripheral, didUpdateNotificationStateFor characteristic: CBCharacteristic, error: Error?) {
-      
+    /// 更新通知狀態的處理
+    /// - Parameters:
+    ///   - peripheral: CBPeripheral
+    ///   - characteristic: characteristic
+    ///   - error: Error?
+    func peripheralAction(with peripheral: CBPeripheral, didUpdateNotificationStateFor characteristic: CBCharacteristic, error: Error?) {
+        
         if let error = error { delegate?.didUpdatePeripheral(manager: self, result: .failure(.discover(peripheral.identifier, name: peripheral.name, error: .characteristics(error)))); return }
         
         let _info: UpdateValueInformation = (UUID: peripheral.identifier, characteristic: characteristic)
@@ -240,12 +347,12 @@ extension WWBluetoothManager {
 
         delegate?.didUpdatePeripheral(manager: self, result: .success(info))
     }
-}
-
-// MARK: - CBPeripheralDelegate
-extension WWBluetoothManager {
     
-    public func peripheral(_ peripheral: CBPeripheral, didModifyServices invalidatedServices: [CBService]) {
+    /// 更動服務的處理
+    /// - Parameters:
+    ///   - peripheral: CBPeripheral
+    ///   - invalidatedServices: [CBService]
+    public func peripheralAction(with peripheral: CBPeripheral, didModifyServices invalidatedServices: [CBService]) {
         
         let info: ModifyServicesInformation = (UUID: peripheral.identifier, invalidatedServices: invalidatedServices)
         delegate?.didModifyServices(manager: self, information: info)
@@ -254,7 +361,7 @@ extension WWBluetoothManager {
 
 // MARK: - 小工具
 private extension WWBluetoothManager {
-        
+    
     /// 跟據類型取得設定回傳的資料
     /// - Parameters:
     ///   - updateType: WWBluetoothManager.UpdateType

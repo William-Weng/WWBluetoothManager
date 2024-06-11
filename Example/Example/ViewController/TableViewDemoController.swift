@@ -206,7 +206,7 @@ private extension TableViewDemoController {
     ///   - peripherals: Set<CBPeripheral>
     ///   - newPeripheralInformation: WWBluetoothManager.PeripheralInformation
     func discoveredPeripherals(with manager: WWBluetoothManager, peripherals: Set<CBPeripheral>, newPeripheralInformation: WWBluetoothManager.PeripheralInformation) {
-        
+                
         let peripherals = peripherals.compactMap { peripheral -> CBPeripheral? in
             guard peripheral.name != nil else { return nil }
             return peripheral
