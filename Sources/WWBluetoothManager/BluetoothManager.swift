@@ -11,13 +11,18 @@ import CoreBluetooth
 // MARK: - WWBluetoothManager
 open class WWBluetoothManager: NSObject {
 
-    public static let shared = WWBluetoothManager()
+    public static let shared = build()
     
     private var peripherals: Set<CBPeripheral> = []
     private var centralManager: CBCentralManager!
     private var delegate: WWBluetoothManagerDelegate?
     
     private override init() {}
+    
+    deinit {
+        peripherals = []
+        delegate = nil
+    }
 }
 
 /// MARK: - 公開函式 (1)
