@@ -67,7 +67,7 @@ public extension WWBluetoothManager {
     
     /// [連接藍牙設備](https://www.wpgdadatong.com/blog/detail/40547)
     /// - Parameters:
-    ///   - peripheral: CBPeripheral
+    ///   - peripheral: [CBPeripheral](https://vocus.cc/article/654aafe5fd897800015ff128)
     ///   - options: [String : Any]?
     func connect(peripheral: CBPeripheral, options: [String : Any]? = nil) {
         centralManager.connect(peripheral, options: options)
@@ -115,8 +115,8 @@ public extension WWBluetoothManager {
     }
 }
 
-// MARK: - CBCentralManagerDelegate
-extension WWBluetoothManager: CBCentralManagerDelegate {}
+// MARK: - CBCentralManagerDelegate / CBPeripheralDelegate
+extension WWBluetoothManager: CBCentralManagerDelegate, CBPeripheralDelegate {}
 
 // MARK: - CBCentralManagerDelegate
 public extension WWBluetoothManager {
@@ -145,9 +145,6 @@ public extension WWBluetoothManager {
         centralManagerAction(with: central, didDisconnectPeripheral: peripheral, error: error)
     }
 }
-
-// MARK: - CBPeripheralDelegate
-extension WWBluetoothManager: CBPeripheralDelegate {}
 
 // MARK: - CBPeripheralDelegate
 public extension WWBluetoothManager {
@@ -294,6 +291,7 @@ private extension WWBluetoothManager {
     func centralManagerAction(with central: CBCentralManager, didConnect peripheral: CBPeripheral) {
         
         delegate?.didConnectPeripheral(manager: self, result: .success(.didConnect(peripheral.identifier)))
+        
         peripheral.delegate = self
         peripheral.discoverServices(nil)
     }

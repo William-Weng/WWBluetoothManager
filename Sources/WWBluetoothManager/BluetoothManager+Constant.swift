@@ -24,13 +24,13 @@ public extension WWBluetoothManager {
     enum PeripheralUUIDType: String {
         
         case healthThermometer = "0x1809"
-        case battery = "0x180F"
-        case deviceInformation = "0x180A"
-        case modelNumberString = "0x2A24"
-        case manufacturerNameString = "0x2A29"
-        case continuity = "D0611E78-BBB4-4591-A5F8-487910AE4366"
-        case bluMidi = "03B80E5A-EDE8-4B33-A751-6CE34EC4C700"
-        case read = "0000FF10-0000-1000-8000-00805F9B34FB"
+        case battery = "0x180F"                                     // 電量
+        case deviceInformation = "0x180A"                           // 設備資訊
+        case manufacturerNameString = "0x2A29"                      // 製造商編號 (Apple Inc.)
+        case modelNumberString = "0x2A24"                           // 設備編號 (iPhone14,5)
+        case continuity = "D0611E78-BBB4-4591-A5F8-487910AE4366"    // 接續互通
+        case bluMidi = "03B80E5A-EDE8-4B33-A751-6CE34EC4C700"       // 藍芽Midi
+        case read = "0000FF10-0000-1000-8000-00805F9B34FB"          // 讀取
         
         /// UUID數值
         /// - Returns: CBUUID
