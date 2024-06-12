@@ -17,6 +17,16 @@ public extension String {
     func _UInt64(radix: Int = 16) -> UInt64? {
         return UInt64(self, radix: radix)
     }
+    
+    /// String => Data
+    /// - Parameters:
+    ///   - encoding: 字元編碼
+    ///   - isLossyConversion: 失真轉換
+    /// - Returns: Data?
+    func _data(using encoding: String.Encoding = .utf8, isLossyConversion: Bool = false) -> Data? {
+        let data = self.data(using: encoding, allowLossyConversion: isLossyConversion)
+        return data
+    }
 }
 
 // MARK: - Data (function)

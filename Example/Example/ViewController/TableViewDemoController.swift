@@ -9,16 +9,16 @@ import UIKit
 import WWPrint
 import WWBluetoothManager
 import WWHUD
-import WWProgressMaskView
 
+// MARK: - TableViewDemoController
 final class TableViewDemoController: UIViewController {
 
     @IBOutlet weak var myLabel: UILabel!
     @IBOutlet weak var myTableView: UITableView!
-    @IBOutlet weak var myProgressMaskView: WWProgressMaskView!
     
-    private var isConnent = false
-    
+    private var isConnented = false
+    private var bluetoothPeripheralManager: WWBluetoothPeripheralManager?
+
     private var peripherals: [CBPeripheral] = [] {
         didSet { myTableView.reloadData() }
     }
@@ -29,8 +29,12 @@ final class TableViewDemoController: UIViewController {
     }
     
     @IBAction func restartScan(_ sender: UIBarButtonItem) {
-        isConnent = false
+        isConnented = false
         WWBluetoothManager.shared.restartScan(delegate: self)
+    }
+    
+    @IBAction func sendText(_ sender: UIBarButtonItem) {
+        _ = bluetoothPeripheralManager?.sendText("HelloWorld!!!")
     }
 }
 
@@ -55,7 +59,7 @@ extension TableViewDemoController: UITableViewDelegate, UITableViewDataSource {
         
         loading()
         WWBluetoothManager.shared.disconnect(peripheral: peripheral)
-        isConnent = false
+        isConnented = false
     }
 }
 
@@ -79,8 +83,8 @@ extension TableViewDemoController: WWBluetoothManagerDelegate {
         case .success(let connentType):
             
             switch connentType {
-            case .didConnect(let UUID): wwPrint("didConnect => \(UUID)")
-            case .didDisconnect(let UUID): wwPrint("didDisconnect => \(UUID)")
+            case .didConnect(_):  isConnented = true
+            case .didDisconnect(_): isConnented = false
             }
             
             myTableView.reloadData()
@@ -125,7 +129,7 @@ private extension TableViewDemoController {
         myTableView.delegate = self
         myTableView.dataSource = self
         
-        myProgressMaskView.setting(originalAngle: 0, lineWidth: 20, clockwise: false, lineCap: .round, innerImage: nil, outerImage: nil)
+        bluetoothPeripheralManager = WWBluetoothPeripheralManager.build()
         WWBluetoothManager.shared.startScan(delegate: self)
     }
     
@@ -155,31 +159,24 @@ private extension TableViewDemoController {
         
         guard let peripheral = peripherals[safe: indexPath.row] else { fatalError() }
         
-        if (!isConnent) {
-            isConnent = true
+        if (!isConnented) {
+            isConnented = true
             loading()
             WWBluetoothManager.shared.connect(peripheral: peripheral)
         }
     }
     
     /// 處理藍牙傳來的數值
-    /// - Parameter info:  WWBluetoothManager.PeripheralValueInformation
+    /// - Parameter info: WWBluetoothManager.PeripheralValueInformation
     func updatePeripheralAction(info: WWBluetoothManager.PeripheralValueInformation) {
         
         guard let data = info.characteristicValue,
-              !data.isEmpty,
-              let hexString = Optional.some(data._hexString()),
-              let number = hexString._UInt64()
+              let string = data._string()
         else {
             return
         }
         
-        let volume = number & 0xFF
-        let note = (number >> 8) & 0xFF
-        let press = (number >> 16) & 0xFF
-        
-        title = "0x\(hexString)"
-        noteReading(press: press, note: note, volume: volume)
+        myLabel.text = string
     }
 }
 
@@ -211,7 +208,7 @@ private extension TableViewDemoController {
             guard peripheral.name != nil else { return nil }
             return peripheral
         }
-        
+                
         self.peripherals = peripherals
     }
     
@@ -230,56 +227,6 @@ private extension TableViewDemoController {
         WWHUD.shared.updateProgess(text: "")
         WWHUD.shared.dismiss() { _ in }
     }
-    
-    /// 讀取音符 (for 電鋼琴88鍵 => 0x8080_80_3C_65)
-    /// - Parameters:
-    ///   - press: 是否按下的數值 (0x80 - false / 0x90 - true)
-    ///   - note: 音符的數值 (0x15 ~ 0x6C)
-    ///   - volume: 音量大小 (0x00 ~ 0x7F)
-    func noteReading(press: UInt64, note: UInt64, volume: UInt64) {
-        
-        var noteString = "----"
-        var percent = 0.0
-        
-        defer {
-            myLabel.text = noteString
-            myProgressMaskView.progressCircle(progressUnit: .percent(Int(percent * 100)))
-        }
-        
-        guard press == 0x90,
-              note > 0x14
-        else {
-            return
-        }
-        
-        noteString = equalTemperament(note: note)
-        percent = Double(volume) / Double(0x7F)
-    }
-    
-    /// [十二平均律 - 唱名](https://zh.wikipedia.org/zh-tw/十二平均律)
-    func equalTemperament(note: UInt64) -> String {
-        
-        let singingName = note % 12
-        var noteString = "Do"
-        
-        switch singingName {
-        case 0: noteString = "Do"
-        case 1: noteString = "Do#"
-        case 2: noteString = "Re"
-        case 3: noteString = "Re#"
-        case 4: noteString = "Mi"
-        case 5: noteString = "Fa"
-        case 6: noteString = "Fa#"
-        case 7: noteString = "So"
-        case 8: noteString = "So#"
-        case 9: noteString = "La"
-        case 10: noteString = "La#"
-        case 11: noteString = "Si"
-        default: break
-        }
-        
-        return noteString
-    }
 }
 
 // MARK: - Discover Peripheral Action
@@ -297,9 +244,7 @@ private extension TableViewDemoController {
             return
         }
         
-        services.forEach({ service in
-            peripheral.discoverCharacteristics(nil, for: service)
-        })
+        services.forEach({ peripheral.discoverCharacteristics(nil, for: $0) })
     }
     
     /// 處理有關搜尋到Characteristics的事務
@@ -315,16 +260,14 @@ private extension TableViewDemoController {
             return
         }
         
-        if (service.uuid === .bluMidi) {
+        if (service.uuid !== .read) {
             
             characteristics.forEach { characteristic in
                 
                 let pairUUID = characteristic.uuid
                 
-                if (peripheral._readValue(pairUUIDString: "\(pairUUID.uuidString)", characteristic: characteristic)) {}
                 if (peripheral._notifyValue(pairUUIDString: "\(pairUUID.uuidString)", characteristic: characteristic)) {}
-                
-                wwPrint("pairUUID => \(pairUUID), properties => \(characteristic.properties._parse())")
+                if (peripheral._readValue(pairUUIDString: "\(pairUUID.uuidString)", characteristic: characteristic)) {}
             }
         }
     }

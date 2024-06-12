@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="22155" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="IYf-a2-HX1">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="22505" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="IYf-a2-HX1">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22131"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22504"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -54,35 +54,18 @@
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="0wN-Qf-V9I">
                                         <rect key="frame" x="0.0" y="448" width="414" height="356"/>
                                         <subviews>
-                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Do" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="VpV-B2-nxG">
-                                                <rect key="frame" x="184" y="157" width="46.5" height="42"/>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="----" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="VpV-B2-nxG">
+                                                <rect key="frame" x="16" y="157" width="382" height="42"/>
                                                 <fontDescription key="fontDescription" name="HelveticaNeue" family="Helvetica Neue" pointSize="36"/>
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
-                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="utu-ni-tUG" customClass="WWProgressMaskView" customModule="WWProgressMaskView">
-                                                <rect key="frame" x="65" y="36" width="284" height="284"/>
-                                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                                <constraints>
-                                                    <constraint firstAttribute="width" secondItem="utu-ni-tUG" secondAttribute="height" id="kcP-qp-YxX"/>
-                                                </constraints>
-                                                <userDefinedRuntimeAttributes>
-                                                    <userDefinedRuntimeAttribute type="number" keyPath="lineWidth">
-                                                        <integer key="value" value="20"/>
-                                                    </userDefinedRuntimeAttribute>
-                                                    <userDefinedRuntimeAttribute type="number" keyPath="originalAngle">
-                                                        <integer key="value" value="0"/>
-                                                    </userDefinedRuntimeAttribute>
-                                                </userDefinedRuntimeAttributes>
-                                            </view>
                                         </subviews>
                                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                         <constraints>
-                                            <constraint firstItem="utu-ni-tUG" firstAttribute="centerX" secondItem="0wN-Qf-V9I" secondAttribute="centerX" id="9H3-sh-dL2"/>
                                             <constraint firstItem="VpV-B2-nxG" firstAttribute="centerY" secondItem="0wN-Qf-V9I" secondAttribute="centerY" id="Qbe-aN-C0V"/>
-                                            <constraint firstAttribute="bottom" secondItem="utu-ni-tUG" secondAttribute="bottom" constant="36" id="U9N-QI-8TJ"/>
                                             <constraint firstItem="VpV-B2-nxG" firstAttribute="centerX" secondItem="0wN-Qf-V9I" secondAttribute="centerX" id="Ztz-06-gya"/>
-                                            <constraint firstItem="utu-ni-tUG" firstAttribute="centerY" secondItem="0wN-Qf-V9I" secondAttribute="centerY" id="lGq-6J-vQ6"/>
+                                            <constraint firstAttribute="trailing" secondItem="VpV-B2-nxG" secondAttribute="trailing" constant="16" id="feF-hS-Oxc"/>
                                         </constraints>
                                     </view>
                                 </subviews>
@@ -98,6 +81,12 @@
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="Bluetooth" id="tGb-Vt-lYn">
+                        <barButtonItem key="leftBarButtonItem" systemItem="action" id="VcA-5p-jhN">
+                            <color key="tintColor" red="1" green="0.14913141730000001" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                            <connections>
+                                <action selector="sendText:" destination="A7J-st-6xk" id="snE-7J-Ipl"/>
+                            </connections>
+                        </barButtonItem>
                         <barButtonItem key="rightBarButtonItem" style="plain" systemItem="refresh" id="8JG-hL-tPA">
                             <color key="tintColor" systemColor="systemRedColor"/>
                             <connections>
@@ -107,7 +96,6 @@
                     </navigationItem>
                     <connections>
                         <outlet property="myLabel" destination="VpV-B2-nxG" id="gff-lf-Vmv"/>
-                        <outlet property="myProgressMaskView" destination="utu-ni-tUG" id="z5K-Gh-AlJ"/>
                         <outlet property="myTableView" destination="gyt-VC-3Cr" id="PiI-kf-4oz"/>
                     </connections>
                 </viewController>

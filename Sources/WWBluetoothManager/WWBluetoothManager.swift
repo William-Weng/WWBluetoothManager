@@ -30,7 +30,7 @@ open class WWBluetoothManager: NSObject {
     }
 }
 
-/// MARK: - 公開函式 (1)
+// MARK: - 公開函式 (static)
 public extension WWBluetoothManager {
     
     /// [建立新BluetoothManager](https://www.cnblogs.com/iini/p/12334646.html)
@@ -38,7 +38,7 @@ public extension WWBluetoothManager {
     static func build() -> WWBluetoothManager { return WWBluetoothManager() }
 }
 
-/// MARK: - 公開函式 (2)
+// MARK: - 公開函式 (class)
 public extension WWBluetoothManager {
     
     /// [開始掃瞄](http://wisdomskyduan.blogspot.com/2013/06/ios-cb-class-note.html)
@@ -442,5 +442,3 @@ private extension WWBluetoothManager {
         return info
     }
 }
-
-

@@ -16,12 +16,13 @@
 		645482F12B1C7C7900465836 /* WWBluetoothManager in Frameworks */ = {isa = PBXBuildFile; productRef = 645482F02B1C7C7900465836 /* WWBluetoothManager */; };
 		645482F72B1CA6B100465836 /* Loading.gif in Resources */ = {isa = PBXBuildFile; fileRef = 645482F62B1CA6B100465836 /* Loading.gif */; };
 		648161612B6F9966001D5B6E /* WWBluetoothManager in Frameworks */ = {isa = PBXBuildFile; productRef = 648161602B6F9966001D5B6E /* WWBluetoothManager */; };
+		810B0DC52C198EBB0047A5CB /* WWBluetoothManager in Frameworks */ = {isa = PBXBuildFile; productRef = 810B0DC42C198EBB0047A5CB /* WWBluetoothManager */; };
+		810B0DC82C19905A0047A5CB /* WWBluetoothManager in Frameworks */ = {isa = PBXBuildFile; productRef = 810B0DC72C19905A0047A5CB /* WWBluetoothManager */; };
 		8130039027D5D18100436128 /* Constant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8130038F27D5D18100436128 /* Constant.swift */; };
 		8130039227D5D19000436128 /* Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8130039127D5D19000436128 /* Extension.swift */; };
+		8148196C2C1931B900E41AD7 /* WWBluetoothManager in Frameworks */ = {isa = PBXBuildFile; productRef = 8148196B2C1931B900E41AD7 /* WWBluetoothManager */; };
 		815787E62C184709009169C8 /* WWBluetoothManager in Frameworks */ = {isa = PBXBuildFile; productRef = 815787E52C184709009169C8 /* WWBluetoothManager */; };
-		815787E92C185208009169C8 /* WWBluetoothManager in Frameworks */ = {isa = PBXBuildFile; productRef = 815787E82C185208009169C8 /* WWBluetoothManager */; };
 		81AEF0D32B170AF500752AC3 /* WWBluetoothManager in Frameworks */ = {isa = PBXBuildFile; productRef = 81AEF0D22B170AF500752AC3 /* WWBluetoothManager */; };
-		81DA53392C18341800F55273 /* WWProgressMaskView in Frameworks */ = {isa = PBXBuildFile; productRef = 81DA53382C18341800F55273 /* WWProgressMaskView */; };
 		81DA533F2C18343B00F55273 /* WWPrint in Frameworks */ = {isa = PBXBuildFile; productRef = 81DA533E2C18343B00F55273 /* WWPrint */; };
 		81DA53412C18346700F55273 /* WWHUD in Frameworks */ = {isa = PBXBuildFile; productRef = 81DA53402C18346700F55273 /* WWHUD */; };
 /* End PBXBuildFile section */
@@ -48,11 +49,12 @@
 				815787E62C184709009169C8 /* WWBluetoothManager in Frameworks */,
 				648161612B6F9966001D5B6E /* WWBluetoothManager in Frameworks */,
 				81DA533F2C18343B00F55273 /* WWPrint in Frameworks */,
-				81DA53392C18341800F55273 /* WWProgressMaskView in Frameworks */,
 				81DA53412C18346700F55273 /* WWHUD in Frameworks */,
+				810B0DC82C19905A0047A5CB /* WWBluetoothManager in Frameworks */,
 				81AEF0D32B170AF500752AC3 /* WWBluetoothManager in Frameworks */,
 				645482F12B1C7C7900465836 /* WWBluetoothManager in Frameworks */,
-				815787E92C185208009169C8 /* WWBluetoothManager in Frameworks */,
+				8148196C2C1931B900E41AD7 /* WWBluetoothManager in Frameworks */,
+				810B0DC52C198EBB0047A5CB /* WWBluetoothManager in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -168,11 +170,12 @@
 				645482F02B1C7C7900465836 /* WWBluetoothManager */,
 				642A81892B1DD91C0007E569 /* WWBluetoothManager */,
 				648161602B6F9966001D5B6E /* WWBluetoothManager */,
-				81DA53382C18341800F55273 /* WWProgressMaskView */,
 				81DA533E2C18343B00F55273 /* WWPrint */,
 				81DA53402C18346700F55273 /* WWHUD */,
 				815787E52C184709009169C8 /* WWBluetoothManager */,
-				815787E82C185208009169C8 /* WWBluetoothManager */,
+				8148196B2C1931B900E41AD7 /* WWBluetoothManager */,
+				810B0DC42C198EBB0047A5CB /* WWBluetoothManager */,
+				810B0DC72C19905A0047A5CB /* WWBluetoothManager */,
 			);
 			productName = Example;
 			productReference = 3DBCD87026F198EF00522E3B /* Example.app */;
@@ -204,9 +207,8 @@
 			mainGroup = 3DBCD86726F198EF00522E3B;
 			packageReferences = (
 				81DA53362C1833EE00F55273 /* XCRemoteSwiftPackageReference "WWHUD" */,
-				81DA53372C18341800F55273 /* XCRemoteSwiftPackageReference "WWProgressMaskView" */,
 				81DA533D2C18343B00F55273 /* XCRemoteSwiftPackageReference "WWPrint" */,
-				815787E72C185208009169C8 /* XCRemoteSwiftPackageReference "WWBluetoothManager" */,
+				810B0DC62C19905A0047A5CB /* XCRemoteSwiftPackageReference "WWBluetoothManager" */,
 			);
 			productRefGroup = 3DBCD87126F198EF00522E3B /* Products */;
 			projectDirPath = "";
@@ -455,12 +457,12 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		815787E72C185208009169C8 /* XCRemoteSwiftPackageReference "WWBluetoothManager" */ = {
+		810B0DC62C19905A0047A5CB /* XCRemoteSwiftPackageReference "WWBluetoothManager" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/William-Weng/WWBluetoothManager.git";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 0.7.9;
+				minimumVersion = 0.7.10;
 			};
 		};
 		81DA53362C1833EE00F55273 /* XCRemoteSwiftPackageReference "WWHUD" */ = {
@@ -469,14 +471,6 @@
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 1.2.1;
-			};
-		};
-		81DA53372C18341800F55273 /* XCRemoteSwiftPackageReference "WWProgressMaskView" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/William-Weng/WWProgressMaskView";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.1.2;
 			};
 		};
 		81DA533D2C18343B00F55273 /* XCRemoteSwiftPackageReference "WWPrint" */ = {
@@ -502,23 +496,26 @@
 			isa = XCSwiftPackageProductDependency;
 			productName = WWBluetoothManager;
 		};
-		815787E52C184709009169C8 /* WWBluetoothManager */ = {
+		810B0DC42C198EBB0047A5CB /* WWBluetoothManager */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = WWBluetoothManager;
 		};
-		815787E82C185208009169C8 /* WWBluetoothManager */ = {
+		810B0DC72C19905A0047A5CB /* WWBluetoothManager */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 815787E72C185208009169C8 /* XCRemoteSwiftPackageReference "WWBluetoothManager" */;
+			package = 810B0DC62C19905A0047A5CB /* XCRemoteSwiftPackageReference "WWBluetoothManager" */;
+			productName = WWBluetoothManager;
+		};
+		8148196B2C1931B900E41AD7 /* WWBluetoothManager */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = WWBluetoothManager;
+		};
+		815787E52C184709009169C8 /* WWBluetoothManager */ = {
+			isa = XCSwiftPackageProductDependency;
 			productName = WWBluetoothManager;
 		};
 		81AEF0D22B170AF500752AC3 /* WWBluetoothManager */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = WWBluetoothManager;
-		};
-		81DA53382C18341800F55273 /* WWProgressMaskView */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 81DA53372C18341800F55273 /* XCRemoteSwiftPackageReference "WWProgressMaskView" */;
-			productName = WWProgressMaskView;
 		};
 		81DA533E2C18343B00F55273 /* WWPrint */ = {
 			isa = XCSwiftPackageProductDependency;

@@ -7,7 +7,7 @@
 
 import CoreBluetooth
 
-/// 藍牙管理的Delegate
+// 藍牙管理的Delegate
 public protocol WWBluetoothManagerDelegate {
     
     /// 手機藍牙的更新狀態
