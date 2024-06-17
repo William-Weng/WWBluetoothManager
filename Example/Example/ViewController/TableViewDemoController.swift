@@ -12,13 +12,19 @@ import WWHUD
 
 // MARK: - TableViewDemoController
 final class TableViewDemoController: UIViewController {
-
+    
     @IBOutlet weak var myLabel: UILabel!
+    @IBOutlet weak var myImageView: UIImageView!
     @IBOutlet weak var myTableView: UITableView!
     
+    private let BOM = "<BOM>"
+    private let EOM = "<EOM>"
+    
+    private var isSwitch = false
     private var isConnented = false
     private var bluetoothPeripheralManager: WWBluetoothPeripheralManager?
-
+    private var receiveData = Data()
+    
     private var peripherals: [CBPeripheral] = [] {
         didSet { myTableView.reloadData() }
     }
@@ -33,8 +39,23 @@ final class TableViewDemoController: UIViewController {
         WWBluetoothManager.shared.restartScan(delegate: self)
     }
     
-    @IBAction func sendText(_ sender: UIBarButtonItem) {
-        _ = bluetoothPeripheralManager?.sendText("HelloWorld!!!")
+    @IBAction func sendData(_ sender: UIBarButtonItem) {
+        
+        let imageName = !isSwitch ? "Red.jpg" : "Green.png"
+        let imageUrl = Bundle.main.url(forResource: imageName, withExtension: nil)
+        let result = FileManager.default._readData(from: imageUrl)
+
+        isSwitch.toggle()
+        
+        switch result {
+        case .failure(let error): wwPrint(error)
+        case .success(let data):
+             
+            if let data = data {
+                wwPrint(data.count)
+                _ = bluetoothPeripheralManager?.sendData(data, BOM: BOM, EOM: EOM)
+            }
+        }
     }
 }
 
@@ -83,7 +104,7 @@ extension TableViewDemoController: WWBluetoothManagerDelegate {
         case .success(let connentType):
             
             switch connentType {
-            case .didConnect(_):  isConnented = true
+            case .didConnect(_): isConnented = true
             case .didDisconnect(_): isConnented = false
             }
             
@@ -118,18 +139,34 @@ extension TableViewDemoController: WWBluetoothManagerDelegate {
     }
 }
 
+// MARK: - WWBluetoothPeripheralManagerDelegate
+extension TableViewDemoController: WWBluetoothPeripheralManagerDelegate {
+    
+    func managerIsReady(manager: WWBluetoothPeripheralManager, MTU: Int) {
+        wwPrint("MTU => \(MTU)")
+    }
+    
+    func receiveValue(manager: WWBluetoothPeripheralManager, value: Data) {
+        wwPrint("value => \(value._string()!)")
+    }
+    
+    func errorMessage(manager: WWBluetoothPeripheralManager, error: Error) {
+        wwPrint("error => \(error)")
+    }
+}
+
 // MARK: - 小工具
 private extension TableViewDemoController {
     
     /// 初始化設定
-    /// >> info.plist => NSBluetoothAlwaysUsageDescription / NSBluetoothPeripheralUsageDescription
+    /// info.plist => NSBluetoothAlwaysUsageDescription / NSBluetoothPeripheralUsageDescription
     func initSetting() {
         
         myLabel.text = "----"
         myTableView.delegate = self
         myTableView.dataSource = self
         
-        bluetoothPeripheralManager = WWBluetoothPeripheralManager.build()
+        bluetoothPeripheralManager = WWBluetoothPeripheralManager.build(managerDelegate: self)
         WWBluetoothManager.shared.startScan(delegate: self)
     }
     
@@ -169,14 +206,19 @@ private extension TableViewDemoController {
     /// 處理藍牙傳來的數值
     /// - Parameter info: WWBluetoothManager.PeripheralValueInformation
     func updatePeripheralAction(info: WWBluetoothManager.PeripheralValueInformation) {
-        
-        guard let data = info.characteristicValue,
-              let string = data._string()
-        else {
-            return
+                
+        guard let data = info.characteristicValue else { return }
+                
+        if let string = data._string() {
+                        
+            if (string == BOM) { receiveData = Data(); loading(); return }
+            if (string == EOM) { myImageView.image = UIImage(data: receiveData); unloading(); return }
+            
+            myLabel.text = string
+            
+        } else {
+            receiveData.append(data)
         }
-        
-        myLabel.text = string
     }
 }
 
@@ -205,7 +247,13 @@ private extension TableViewDemoController {
     func discoveredPeripherals(with manager: WWBluetoothManager, peripherals: Set<CBPeripheral>, newPeripheralInformation: WWBluetoothManager.PeripheralInformation) {
         
         let peripherals = peripherals.compactMap { peripheral -> CBPeripheral? in
-            guard peripheral.name != nil else { return nil }
+            
+            guard let name = peripheral.name,
+                  name.contains("William")
+            else {
+                return nil
+            }
+            
             return peripheral
         }
                 
@@ -280,5 +328,3 @@ private extension TableViewDemoController {
         wwPrint(info.characteristic.properties._parse())
     }
 }
-
-

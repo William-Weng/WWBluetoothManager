@@ -2,7 +2,6 @@
 <document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="22505" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="IYf-a2-HX1">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
-        <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22504"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -60,10 +59,17 @@
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
+                                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="ZzZ-js-7bv">
+                                                <rect key="frame" x="0.0" y="0.0" width="414" height="356"/>
+                                            </imageView>
                                         </subviews>
                                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                         <constraints>
+                                            <constraint firstItem="ZzZ-js-7bv" firstAttribute="height" secondItem="0wN-Qf-V9I" secondAttribute="height" id="1w3-CO-wDO"/>
+                                            <constraint firstItem="ZzZ-js-7bv" firstAttribute="centerX" secondItem="0wN-Qf-V9I" secondAttribute="centerX" id="64q-ia-nbX"/>
+                                            <constraint firstItem="ZzZ-js-7bv" firstAttribute="centerY" secondItem="0wN-Qf-V9I" secondAttribute="centerY" id="A0m-Xa-ctt"/>
                                             <constraint firstItem="VpV-B2-nxG" firstAttribute="centerY" secondItem="0wN-Qf-V9I" secondAttribute="centerY" id="Qbe-aN-C0V"/>
+                                            <constraint firstItem="ZzZ-js-7bv" firstAttribute="width" secondItem="0wN-Qf-V9I" secondAttribute="width" id="V86-O2-Q7e"/>
                                             <constraint firstItem="VpV-B2-nxG" firstAttribute="centerX" secondItem="0wN-Qf-V9I" secondAttribute="centerX" id="Ztz-06-gya"/>
                                             <constraint firstAttribute="trailing" secondItem="VpV-B2-nxG" secondAttribute="trailing" constant="16" id="feF-hS-Oxc"/>
                                         </constraints>
@@ -84,7 +90,7 @@
                         <barButtonItem key="leftBarButtonItem" systemItem="action" id="VcA-5p-jhN">
                             <color key="tintColor" red="1" green="0.14913141730000001" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             <connections>
-                                <action selector="sendText:" destination="A7J-st-6xk" id="snE-7J-Ipl"/>
+                                <action selector="sendData:" destination="A7J-st-6xk" id="snE-7J-Ipl"/>
                             </connections>
                         </barButtonItem>
                         <barButtonItem key="rightBarButtonItem" style="plain" systemItem="refresh" id="8JG-hL-tPA">
@@ -95,6 +101,7 @@
                         </barButtonItem>
                     </navigationItem>
                     <connections>
+                        <outlet property="myImageView" destination="ZzZ-js-7bv" id="jmE-HJ-Zt1"/>
                         <outlet property="myLabel" destination="VpV-B2-nxG" id="gff-lf-Vmv"/>
                         <outlet property="myTableView" destination="gyt-VC-3Cr" id="PiI-kf-4oz"/>
                     </connections>
@@ -127,10 +134,10 @@
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
         <systemColor name="systemPinkColor">
-            <color red="1" green="0.17647058823529413" blue="0.33333333333333331" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="1" green="0.1764705882" blue="0.33333333329999998" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="systemRedColor">
-            <color red="1" green="0.23137254901960785" blue="0.18823529411764706" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="1" green="0.23137254900000001" blue="0.18823529410000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>

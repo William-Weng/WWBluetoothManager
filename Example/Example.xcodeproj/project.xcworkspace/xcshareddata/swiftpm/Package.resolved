@@ -5,8 +5,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/William-Weng/WWBluetoothManager.git",
       "state" : {
-        "revision" : "712864054937004375eb6adbb94b282da654b28d",
-        "version" : "0.8.0"
+        "revision" : "28d2eae9ec7b97e28a8a80696797c863d22021f5",
+        "version" : "0.8.1"
       }
     },
     {
@@ -21,7 +21,7 @@
     {
       "identity" : "wwprint",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/William-Weng/WWPrint.git",
+      "location" : "https://github.com/William-Weng/WWPrint",
       "state" : {
         "revision" : "8f5928f5d36624d77f8fc563fd8e31a59cfac6b6",
         "version" : "1.3.1"

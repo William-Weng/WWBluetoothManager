@@ -39,3 +39,22 @@ extension DispatchQueue {
         asyncAfter(deadline: .now() + second, qos: qos, flags: flags) { block() }
     }
 }
+
+// MARK: - FileManager
+extension FileManager {
+    
+    /// 讀取檔案
+    /// - Parameter url: 要讀取的檔案位置
+    /// - Returns: Data?
+    func _readData(from url: URL?) -> Result<Data?, Error> {
+        
+        guard let url = url else { return .success(nil) }
+        
+        do {
+            let data = try Data(contentsOf: url)
+            return .success(data)
+        } catch {
+            return .failure(error)
+        }
+    }
+}
