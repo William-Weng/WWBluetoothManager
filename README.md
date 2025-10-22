@@ -11,7 +11,7 @@
 ### [Installation with Swift Package Manager](https://medium.com/彼得潘的-swift-ios-app-開發問題解答集/使用-spm-安裝第三方套件-xcode-11-新功能-2c4ffcf85b4b)
 ```bash
 dependencies: [
-    .package(url: "https://github.com/William-Weng/WWBluetoothManager.git", .upToNextMajor(from: "0.8.1"))
+    .package(url: "https://github.com/William-Weng/WWBluetoothManager.git", .upToNextMajor(from: "0.8.4"))
 ]
 ```
 
@@ -59,6 +59,7 @@ import UIKit
 import WWPrint
 import WWBluetoothManager
 import WWHUD
+import WWOrderedSet
 
 final class TableViewDemoController: UIViewController {
     
@@ -138,7 +139,7 @@ extension TableViewDemoController: WWBluetoothManager.Delegate {
         updateState(with: manager, state: state)
     }
     
-    func discoveredPeripherals(manager: WWBluetoothManager, peripherals: Set<CBPeripheral>, newPeripheralInformation: WWBluetoothManager.PeripheralInformation) {
+    func discoveredPeripherals(manager: WWBluetoothManager, peripherals: WWOrderedSet<CBPeripheral>, newPeripheralInformation: WWBluetoothManager.PeripheralInformation) {
         discoveredPeripherals(with: manager, peripherals: peripherals, newPeripheralInformation: newPeripheralInformation)
     }
     
@@ -266,7 +267,7 @@ private extension TableViewDemoController {
         }
     }
     
-    func discoveredPeripherals(with manager: WWBluetoothManager, peripherals: Set<CBPeripheral>, newPeripheralInformation: WWBluetoothManager.PeripheralInformation) {
+    func discoveredPeripherals(with manager: WWBluetoothManager, peripherals: WWOrderedSet<CBPeripheral>, newPeripheralInformation: WWBluetoothManager.PeripheralInformation) {
         
         let peripherals = peripherals.compactMap { peripheral -> CBPeripheral? in
             

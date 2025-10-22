@@ -9,6 +9,7 @@ import CoreBluetooth
 import WWPrint
 import WWBluetoothManager
 import WWHUD
+import WWOrderedSet
 
 // MARK: - TableViewDemoController
 final class TableViewDemoController: UIViewController {
@@ -91,7 +92,7 @@ extension TableViewDemoController: WWBluetoothManager.Delegate {
         updateState(with: manager, state: state)
     }
     
-    func discoveredPeripherals(manager: WWBluetoothManager, peripherals: Set<CBPeripheral>, newPeripheralInformation: WWBluetoothManager.PeripheralInformation) {
+    func discoveredPeripherals(manager: WWBluetoothManager, peripherals: WWOrderedSet<CBPeripheral>, newPeripheralInformation: WWBluetoothManager.PeripheralInformation) {
         discoveredPeripherals(with: manager, peripherals: peripherals, newPeripheralInformation: newPeripheralInformation)
     }
     
@@ -244,9 +245,9 @@ private extension TableViewDemoController {
     ///   - manager: WWBluetoothManager
     ///   - peripherals: Set<CBPeripheral>
     ///   - newPeripheralInformation: WWBluetoothManager.PeripheralInformation
-    func discoveredPeripherals(with manager: WWBluetoothManager, peripherals: Set<CBPeripheral>, newPeripheralInformation: WWBluetoothManager.PeripheralInformation) {
+    func discoveredPeripherals(with manager: WWBluetoothManager, peripherals: WWOrderedSet<CBPeripheral>, newPeripheralInformation: WWBluetoothManager.PeripheralInformation) {
         
-        let peripherals = peripherals.compactMap { peripheral -> CBPeripheral? in
+        let peripherals = peripherals.array.compactMap { peripheral -> CBPeripheral? in
             
             guard let name = peripheral.name,
                   name.contains("William")

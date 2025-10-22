@@ -12,9 +12,10 @@ let package = Package(
         .library(name: "WWBluetoothManager", targets: ["WWBluetoothManager"]),
     ],
     dependencies: [
+        .package(url: "https://github.com/William-Weng/WWOrderedSet", from: "1.0.0")
     ],
     targets: [
-        .target(name: "WWBluetoothManager", resources: [.copy("Privacy")])
+        .target(name: "WWBluetoothManager", dependencies: ["WWOrderedSet"], resources: [.copy("Privacy")])
     ],
     swiftLanguageVersions: [
         .v5

@@ -7,20 +7,21 @@
 
 import UIKit
 import CoreBluetooth
+import WWOrderedSet
 
 // MARK: - WWBluetoothManager
 open class WWBluetoothManager: NSObject {
 
     public static let shared = build()
     
-    private var peripherals: Set<CBPeripheral> = []
+    private var peripherals = WWOrderedSet<CBPeripheral>()
     private var centralManager: CBCentralManager!
     private var delegate: WWBluetoothManager.Delegate?
     
     private override init() {}
     
     deinit {
-        peripherals = []
+        peripherals.removeAll()
         delegate = nil
     }
 }
@@ -184,7 +185,7 @@ private extension WWBluetoothManager {
     /// - Parameter UUID: UUID
     /// - Returns: CBPeripheral?
     func peripheral(UUID: UUID) -> CBPeripheral? {
-        let peripheral = peripherals.first { $0.identifier == UUID }
+        let peripheral = peripherals.array.first { $0.identifier == UUID }
         return peripheral
     }
     
@@ -275,7 +276,7 @@ private extension WWBluetoothManager {
         
         let newPeripheralInfo: PeripheralInformation = (UUID: peripheral.identifier, name: peripheral.name, advertisementData: advertisementData, RSSI: RSSI)
         
-        peripherals.insert(peripheral)
+        peripherals.add(peripheral)
         delegate?.discoveredPeripherals(manager: self, peripherals: peripherals, newPeripheralInformation: newPeripheralInfo)
     }
     

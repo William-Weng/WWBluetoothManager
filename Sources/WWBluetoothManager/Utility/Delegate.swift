@@ -6,6 +6,7 @@
 //
 
 import CoreBluetooth
+import WWOrderedSet
 
 // MARK: - WWBluetoothManager.Delegate
 extension WWBluetoothManager {
@@ -24,7 +25,7 @@ extension WWBluetoothManager {
         ///   - manager: WWBluetoothManager
         ///   - peripherals: Set<CBPeripheral>
         ///   - newPeripheralInformation: WWBluetoothManager.PeripheralInformation
-        func discoveredPeripherals(manager: WWBluetoothManager, peripherals: Set<CBPeripheral>, newPeripheralInformation: WWBluetoothManager.PeripheralInformation)
+        func discoveredPeripherals(manager: WWBluetoothManager, peripherals: WWOrderedSet<CBPeripheral>, newPeripheralInformation: WWBluetoothManager.PeripheralInformation)
         
         /// 取得剛連上設備的資訊
         /// - Parameters:
