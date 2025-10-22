@@ -269,17 +269,11 @@ private extension TableViewDemoController {
     
     func discoveredPeripherals(with manager: WWBluetoothManager, peripherals: WWOrderedSet<CBPeripheral>, newPeripheralInformation: WWBluetoothManager.PeripheralInformation) {
         
-        let peripherals = peripherals.compactMap { peripheral -> CBPeripheral? in
-            
-            guard let name = peripheral.name,
-                  name.contains("William")
-            else {
-                return nil
-            }
-            
+        let peripherals = peripherals.array.compactMap { peripheral -> CBPeripheral? in
+            guard let name = peripheral.name else { return nil }
             return peripheral
         }
-                
+                        
         self.peripherals = peripherals
     }
     
