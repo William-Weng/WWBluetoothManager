@@ -6,7 +6,7 @@
 - Simple integration of official CoreBluetooth suite functions allows developers to develop Bluetooth devices more easily.
 - 簡單整合官方的CoreBluetooth套件功能，讓開發者能更簡單的開發藍牙設備。
 
-https://github.com/user-attachments/assets/84929ab7-263b-41a6-9cc8-105037cd8eb9
+https://github.com/user-attachments/assets/20f6da9f-28c5-4c38-8bbf-e4470157127b
 
 ### [Installation with Swift Package Manager](https://medium.com/彼得潘的-swift-ios-app-開發問題解答集/使用-spm-安裝第三方套件-xcode-11-新功能-2c4ffcf85b4b)
 ```bash
