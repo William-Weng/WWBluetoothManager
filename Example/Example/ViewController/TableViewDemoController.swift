@@ -4,8 +4,8 @@
 //
 //  Created by William.Weng on 2023/11/29.
 
-import CoreBluetooth
 import UIKit
+import CoreBluetooth
 import WWPrint
 import WWBluetoothManager
 import WWHUD
@@ -84,9 +84,9 @@ extension TableViewDemoController: UITableViewDelegate, UITableViewDataSource {
     }
 }
 
-// MARK: - WWBluetoothManagerDelegate
-extension TableViewDemoController: WWBluetoothManagerDelegate {
-        
+// MARK: - WWBluetoothManager.Delegate
+extension TableViewDemoController: WWBluetoothManager.Delegate {
+    
     func updateState(manager: WWBluetoothManager, state: CBManagerState) {
         updateState(with: manager, state: state)
     }
@@ -139,8 +139,8 @@ extension TableViewDemoController: WWBluetoothManagerDelegate {
     }
 }
 
-// MARK: - WWBluetoothPeripheralManagerDelegate
-extension TableViewDemoController: WWBluetoothPeripheralManagerDelegate {
+// MARK: - WWBluetoothPeripheralManager.Delegate
+extension TableViewDemoController: WWBluetoothPeripheralManager.Delegate {
     
     func managerIsReady(manager: WWBluetoothPeripheralManager, MTU: Int) {
         wwPrint("MTU => \(MTU)")
@@ -256,7 +256,7 @@ private extension TableViewDemoController {
             
             return peripheral
         }
-                
+        
         self.peripherals = peripherals
     }
     

@@ -7,7 +7,7 @@
 
 import CoreBluetooth
 
-/// MARK: - 公用常數 (1)
+// MARK: - Typealias
 public extension WWBluetoothManager {
     
     typealias PeripheralInformation = (UUID: UUID, name: String?, advertisementData: [String : Any], RSSI: NSNumber)
@@ -18,6 +18,16 @@ public extension WWBluetoothManager {
     typealias UpdateNotificationStateInformation = (UUID: UUID, characteristic: CBCharacteristic)
     typealias ModifyServicesInformation = (UUID: UUID, invalidatedServices: [CBService])
     typealias PeripheralValueInformation = (peripheralId: UUID, characteristicId: CBUUID, characteristicValue: Data?)
+}
+
+// MARK: - Enum
+public extension WWBluetoothManager {
+    
+    /// 設備ID類型
+    enum PeripheralIdType {
+        case UUID(_ UUID: UUID)
+        case UUIDString(_ UUIDString: String)
+    }
     
     /// [周邊設備的UUID代號類型](https://github.com/Eronwu/Getting-Started-with-Bluetooth-Low-Energy-in-Chinese/blob/master/chapter9.md)
     /// => CBUUID(string: "0x180f") -> Battery (電量)
@@ -82,3 +92,11 @@ public extension WWBluetoothManager {
     }
 }
 
+// MARK: - Enum
+public extension WWBluetoothPeripheralManager {
+    
+    enum DeviceError: Error {
+        case notPowerOn(state: CBManagerState)  // 藍牙未打開
+        case noValue                            // 沒有傳送有效數值
+    }
+}

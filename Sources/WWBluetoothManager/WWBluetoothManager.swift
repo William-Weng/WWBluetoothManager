@@ -13,14 +13,9 @@ open class WWBluetoothManager: NSObject {
 
     public static let shared = build()
     
-    public enum PeripheralIdType {
-        case UUID(_ UUID: UUID)
-        case UUIDString(_ UUIDString: String)
-    }
-    
     private var peripherals: Set<CBPeripheral> = []
     private var centralManager: CBCentralManager!
-    private var delegate: WWBluetoothManagerDelegate?
+    private var delegate: WWBluetoothManager.Delegate?
     
     private override init() {}
     
@@ -44,8 +39,8 @@ public extension WWBluetoothManager {
     /// [開始掃瞄](http://wisdomskyduan.blogspot.com/2013/06/ios-cb-class-note.html)
     /// - Parameters:
     ///   - queue: DispatchQueue?
-    ///   - delegate: WWBluetoothManagerDelegate?
-    func startScan(queue: DispatchQueue? = nil, delegate: WWBluetoothManagerDelegate?) {
+    ///   - delegate: WWBluetoothManager.Delegate?
+    func startScan(queue: DispatchQueue? = nil, delegate: WWBluetoothManager.Delegate?) {
         self.delegate = delegate
         self.peripherals.removeAll()
         centralManager = CBCentralManager(delegate: self, queue: queue)
@@ -59,8 +54,8 @@ public extension WWBluetoothManager {
     /// [重新開始掃瞄](https://punchthrough.com/lightblue-features/)
     /// - Parameters:
     ///   - queue: DispatchQueue?
-    ///   - delegate: WWBluetoothManagerDelegate?
-    func restartScan(queue: DispatchQueue? = nil, delegate: WWBluetoothManagerDelegate?) {
+    ///   - delegate: WWBluetoothManager.Delegate?
+    func restartScan(queue: DispatchQueue? = nil, delegate: WWBluetoothManager.Delegate?) {
         stopScan()
         startScan(queue: queue, delegate: delegate)
     }

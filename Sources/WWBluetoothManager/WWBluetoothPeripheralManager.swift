@@ -8,26 +8,13 @@
 import UIKit
 import CoreBluetooth
 
-// MARK: - WWBluetoothPeripheralManagerDelegate
-public protocol WWBluetoothPeripheralManagerDelegate: AnyObject {
-    
-    func managerIsReady(manager: WWBluetoothPeripheralManager, MTU: Int)    // 裝置準備完成
-    func receiveValue(manager: WWBluetoothPeripheralManager, value: Data)   // 接到的資訊
-    func errorMessage(manager: WWBluetoothPeripheralManager, error: Error)  // 錯誤訊息
-}
-
 // MARK: - WWBluetoothPeripheralManager
 open class WWBluetoothPeripheralManager: NSObject {
-    
-    public enum MyError: Error {
-        case notPowerOn(state: CBManagerState)  // 藍牙未打開
-        case noValue                            // 沒有傳送有效數值
-    }
     
     let serviceUUID = UUID().uuidString
     let characteristicUUID = UUID().uuidString
     
-    weak var managerDelegate: WWBluetoothPeripheralManagerDelegate?
+    weak var managerDelegate: WWBluetoothPeripheralManager.Delegate?
     
     private var sendDataIndex: Int = 0
     private var isSendingBOM: Bool = false
@@ -45,10 +32,10 @@ open class WWBluetoothPeripheralManager: NSObject {
     
     /// 自定義初始化
     /// - Parameters:
-    ///   - managerDelegate: WWBluetoothPeripheralManagerDelegate?
+    ///   - managerDelegate: WWBluetoothPeripheralManager.Delegate?
     ///   - peripheralName: String?
     ///   - queue: dispatch_queue_t?
-    private convenience init(managerDelegate: WWBluetoothPeripheralManagerDelegate?, peripheralName: String?, queue: dispatch_queue_t?) {
+    private convenience init(managerDelegate: WWBluetoothPeripheralManager.Delegate?, peripheralName: String?, queue: dispatch_queue_t?) {
         self.init()
         self.peripheralManager = CBPeripheralManager(delegate: self, queue: queue)
         self.peripheralName = peripheralName
@@ -88,11 +75,11 @@ public extension WWBluetoothPeripheralManager {
     
     /// [建立新WWBluetoothPeripheralManager](https://www.cnblogs.com/iini/p/12334646.html)
     /// - Parameters:
-    ///   - managerDelegate: WWBluetoothPeripheralManagerDelegate?
+    ///   - managerDelegate: WWBluetoothPeripheralManager.Delegate?
     ///   - peripheralName: String?
     ///   - queue: dispatch_queue_t?
     /// - Returns: WWBluetoothPeripheralManager
-    static func build(managerDelegate: WWBluetoothPeripheralManagerDelegate? = nil, peripheralName: String? = nil, queue: dispatch_queue_t? = nil) -> WWBluetoothPeripheralManager {
+    static func build(managerDelegate: WWBluetoothPeripheralManager.Delegate? = nil, peripheralName: String? = nil, queue: dispatch_queue_t? = nil) -> WWBluetoothPeripheralManager {
         return WWBluetoothPeripheralManager(managerDelegate: managerDelegate, peripheralName: peripheralName, queue: queue)
     }
 }
@@ -245,7 +232,7 @@ private extension WWBluetoothPeripheralManager {
     /// - Parameter peripheral: CBPeripheralManager
     func peripheralManagerDidUpdateStateAction(with peripheral: CBPeripheralManager) {
         
-        if (peripheral.state != .poweredOn) { managerDelegate?.errorMessage(manager: self, error: MyError.notPowerOn(state: peripheral.state)); return }
+        if (peripheral.state != .poweredOn) { managerDelegate?.errorMessage(manager: self, error: DeviceError.notPowerOn(state: peripheral.state)); return }
         startAdvertising()
     }
     
@@ -270,7 +257,7 @@ private extension WWBluetoothPeripheralManager {
             }
         }
         
-        if (!hasValue) { managerDelegate?.errorMessage(manager: self, error: MyError.noValue) }
+        if (!hasValue) { managerDelegate?.errorMessage(manager: self, error: DeviceError.noValue) }
     }
     
     /// 被訂閱的處理
