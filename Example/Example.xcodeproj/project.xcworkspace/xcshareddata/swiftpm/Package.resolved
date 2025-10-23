@@ -1,15 +1,6 @@
 {
-  "originHash" : "ee4bba48c3d6d07ceb51eae142a54af38190fd3f34154bf0057ff0befbee2f89",
+  "originHash" : "bb03df63020813acd8b0c49eb3b1b5d7d16628250096bbb9b6ccf14f785204cd",
   "pins" : [
-    {
-      "identity" : "wwbluetoothmanager",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/William-Weng/WWBluetoothManager",
-      "state" : {
-        "revision" : "ee5cb9eb5f71421801c1e2969a2d5c13d56627ed",
-        "version" : "0.8.4"
-      }
-    },
     {
       "identity" : "wwhud",
       "kind" : "remoteSourceControl",
@@ -24,8 +15,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/William-Weng/WWOrderedSet",
       "state" : {
-        "revision" : "8feff3c6fa4891faa462f4c573570e307a5f4b2d",
-        "version" : "1.0.0"
+        "revision" : "66bfe2ce0fcd2a7834d6ecdd3e54ccc9b574403e",
+        "version" : "1.0.1"
       }
     },
     {
