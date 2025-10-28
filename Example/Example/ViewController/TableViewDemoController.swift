@@ -138,6 +138,10 @@ extension TableViewDemoController: WWBluetoothManager.Delegate {
     func didModifyServices(manager: WWBluetoothManager, information: WWBluetoothManager.ModifyServicesInformation) {
         wwPrint(information)
     }
+    
+    func didReadRSSI(manager: WWBluetoothManager, RSSI: NSNumber, for peripheral: CBPeripheral) {
+        wwPrint("\(peripheral): RSSI(\(RSSI))")
+    }
 }
 
 // MARK: - WWBluetoothPeripheralManager.Delegate
@@ -185,6 +189,8 @@ private extension TableViewDemoController {
         cell.textLabel?.text = "\(peripheral.name ?? "<NONE>")"
         cell.detailTextLabel?.text = "\(peripheral.identifier)"
         cell.backgroundColor = (peripheral.state == .connected) ? .green : .white
+        
+        if (peripheral.state == .connected) { peripheral.readRSSI() }
         
         return cell
     }

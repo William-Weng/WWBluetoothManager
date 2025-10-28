@@ -176,6 +176,10 @@ public extension WWBluetoothManager {
     func peripheral(_ peripheral: CBPeripheral, didModifyServices invalidatedServices: [CBService]) {
         peripheralAction(with: peripheral, didModifyServices: invalidatedServices)
     }
+    
+    func peripheral(_ peripheral: CBPeripheral, didReadRSSI RSSI: NSNumber, error: Error?) {
+        peripheralAction(with: peripheral, didReadRSSI: RSSI, error: error)
+    }
 }
 
 // MARK: - 小工具
@@ -394,6 +398,15 @@ private extension WWBluetoothManager {
         
         let info: ModifyServicesInformation = (UUID: peripheral.identifier, invalidatedServices: invalidatedServices)
         delegate?.didModifyServices(manager: self, information: info)
+    }
+    
+    /// 讀取到RSSI的處理
+    /// - Parameters:
+    ///   - peripheral: CBPeripheral
+    ///   - RSSI: NSNumber
+    ///   - error: Error?
+    func peripheralAction(with peripheral: CBPeripheral, didReadRSSI RSSI: NSNumber, error: Error?) {
+        delegate?.didReadRSSI(manager: self, RSSI: RSSI, for: peripheral)
     }
 }
 

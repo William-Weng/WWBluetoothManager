@@ -50,6 +50,13 @@ extension WWBluetoothManager {
         ///   - manager: WWBluetoothManager
         ///   - information: WWBluetoothManager.ModifyServicesInformation
         func didModifyServices(manager: WWBluetoothManager, information: WWBluetoothManager.ModifyServicesInformation)
+        
+        /// 讀取到RSSI的值 (藍牙信號強度)
+        /// - Parameters:
+        ///   - manager: WWBluetoothManager
+        ///   - RSSI: NSNumber
+        ///   - peripheral: CBPeripheral
+        func didReadRSSI(manager: WWBluetoothManager, RSSI: NSNumber, for peripheral: CBPeripheral)
     }
 }
 
