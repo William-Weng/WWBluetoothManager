@@ -1,6 +1,15 @@
 {
-  "originHash" : "bb03df63020813acd8b0c49eb3b1b5d7d16628250096bbb9b6ccf14f785204cd",
+  "originHash" : "85f38aec36a45c623f5195154b7138e6b9b5e48f12790f7c9e598e4b3b78d2e1",
   "pins" : [
+    {
+      "identity" : "wwbluetoothmanager",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/William-Weng/WWBluetoothManager",
+      "state" : {
+        "revision" : "07924a707540f50bd5880cf41eded52370a5ecb9",
+        "version" : "0.8.5"
+      }
+    },
     {
       "identity" : "wwhud",
       "kind" : "remoteSourceControl",
