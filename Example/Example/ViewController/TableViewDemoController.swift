@@ -83,9 +83,9 @@ extension TableViewDemoController: WWBluetoothManager.Delegate {
     
     func peripheralEvent(manager: WWBluetoothManager, eventType: WWBluetoothManager.PeripheralEventType) {
         switch eventType {
-        case .didConnect(let _result): didConnectPeripheral(manager: manager, result: _result)
-        case .didDiscover(let _result): didDiscoverPeripheral(manager: manager, result: _result)
-        case .didUpdate(let _result): didUpdatePeripheral(manager: manager, result: _result)
+        case .didConnect(let result): didConnectPeripheral(manager: manager, result: result)
+        case .didDiscover(let result): didDiscoverPeripheral(manager: manager, result: result)
+        case .didUpdate(let result): didUpdatePeripheral(manager: manager, result: result)
         }
     }
     
