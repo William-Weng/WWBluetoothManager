@@ -17,6 +17,7 @@ public extension WWBluetoothManager {
     typealias UpdateValueInformation = (UUID: UUID, characteristic: CBCharacteristic)
     typealias UpdateNotificationStateInformation = (UUID: UUID, characteristic: CBCharacteristic)
     typealias ModifyServicesInformation = (UUID: UUID, invalidatedServices: [CBService])
+    typealias RSSIInformation = (UUID: UUID, RSSI: NSNumber)
     typealias PeripheralValueInformation = (peripheralId: UUID, characteristicId: CBUUID, characteristicValue: Data?)
 }
 
@@ -27,6 +28,19 @@ public extension WWBluetoothManager {
     enum PeripheralIdType {
         case UUID(_ UUID: UUID)
         case UUIDString(_ UUIDString: String)
+    }
+    
+    /// 設備動作事件
+    enum PeripheralEventType {
+        case didConnect(_ result: Result<WWBluetoothManager.PeripheralConnectType, WWBluetoothManager.PeripheralError>)         // 已連接 (取得剛連上設備的資訊)
+        case didDiscover(_ result: Result<WWBluetoothManager.DiscoverValueType, WWBluetoothManager.PeripheralError>)            // 已發現 (處理已經連上設資訊)
+        case didUpdate(_ result: Result<WWBluetoothManager.PeripheralValueInformation, WWBluetoothManager.PeripheralError>)     // 已更新 (週邊設備數值相關的功能)
+    }
+    
+    /// 設備資訊取得
+    enum PeripheralActionType {
+        case didModifyServices(_ information: WWBluetoothManager.ModifyServicesInformation)                                     // 週邊設備服務更動的功能
+        case didReadRSSI(_ information: WWBluetoothManager.RSSIInformation)                                                     // 讀取到RSSI的值 (藍牙信號強度)
     }
     
     /// [周邊設備的UUID代號類型](https://github.com/Eronwu/Getting-Started-with-Bluetooth-Low-Energy-in-Chinese/blob/master/chapter9.md)

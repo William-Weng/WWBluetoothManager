@@ -290,7 +290,7 @@ private extension WWBluetoothManager {
     ///   - peripheral: CBPeripheral
     func centralManagerAction(with central: CBCentralManager, didConnect peripheral: CBPeripheral) {
         
-        delegate?.didConnectPeripheral(manager: self, result: .success(.didConnect(peripheral.identifier)))
+        delegate?.peripheralEvent(manager: self, eventType: .didConnect(.success(.didConnect(peripheral.identifier))))
         
         peripheral.delegate = self
         peripheral.discoverServices(nil)
@@ -304,7 +304,8 @@ private extension WWBluetoothManager {
     func centralManagerAction(with central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {
         
         if let error = error {
-            delegate?.didConnectPeripheral(manager: self, result: .failure(PeripheralError.connect(peripheral.identifier, name: peripheral.name, error: .centralManager(error))))
+            let peripheralError = PeripheralError.connect(peripheral.identifier, name: peripheral.name, error: .centralManager(error))
+            delegate?.peripheralEvent(manager: self, eventType: .didConnect(.failure(peripheralError)))
         }
     }
     
@@ -316,10 +317,11 @@ private extension WWBluetoothManager {
     func centralManagerAction(with central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
         
         if let error = error {
-            delegate?.didConnectPeripheral(manager: self, result: .failure(PeripheralError.connect(peripheral.identifier, name: peripheral.name, error: .centralManager(error))))
+            let peripheralError = PeripheralError.connect(peripheral.identifier, name: peripheral.name, error: .centralManager(error))
+            delegate?.peripheralEvent(manager: self, eventType: .didConnect(.failure(peripheralError)))
         }
         
-        delegate?.didConnectPeripheral(manager: self, result: .success(.didDisconnect(peripheral.identifier)))
+        delegate?.peripheralEvent(manager: self, eventType: .didConnect(.success(.didDisconnect(peripheral.identifier))))
     }
     
     /// 發現服務時的處理
@@ -328,10 +330,13 @@ private extension WWBluetoothManager {
     ///   - error: Error?
     func peripheralAction(with peripheral: CBPeripheral, didDiscoverServices error: Error?) {
         
-        if let error = error { delegate?.didDiscoverPeripheral(manager: self, result: .failure(.discover(peripheral.identifier, name: peripheral.name, error: .services(error)))); return }
+        if let error = error {
+            let peripheralError = PeripheralError.discover(peripheral.identifier, name: peripheral.name, error: .services(error))
+            delegate?.peripheralEvent(manager: self, eventType: .didDiscover(.failure(peripheralError))); return
+        }
         
         let info: DiscoverServicesInformation = (UUID: peripheral.identifier, name: peripheral.name, peripheral: peripheral)
-        delegate?.didDiscoverPeripheral(manager: self, result: .success(.services(info)))
+        delegate?.peripheralEvent(manager: self, eventType: .didDiscover(.success(.services(info))))
     }
     
     /// 發現特徵值的處理
@@ -341,10 +346,13 @@ private extension WWBluetoothManager {
     ///   - error: Error?
     func peripheralAction(with peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
         
-        if let error = error { delegate?.didDiscoverPeripheral(manager: self, result: .failure(.discover(peripheral.identifier, name: peripheral.name, error: .characteristics(error)))); return }
+        if let error = error {
+            let peripheralError = PeripheralError.discover(peripheral.identifier, name: peripheral.name, error: .characteristics(error))
+            delegate?.peripheralEvent(manager: self, eventType: .didDiscover(.failure(peripheralError))); return
+        }
         
         let info: DiscoverCharacteristics = (UUID: peripheral.identifier, name: peripheral.name, service: service)
-        delegate?.didDiscoverPeripheral(manager: self, result: .success(.characteristics(info)))
+        delegate?.peripheralEvent(manager: self, eventType: .didDiscover(.success(.characteristics(info))))
     }
     
     /// 發現敘述的處理
@@ -354,10 +362,13 @@ private extension WWBluetoothManager {
     ///   - error: Error?
     func peripheralAction(with peripheral: CBPeripheral, didDiscoverDescriptorsFor characteristic: CBCharacteristic, error: Error?) {
         
-        if let error = error { delegate?.didDiscoverPeripheral(manager: self, result: .failure(.discover(peripheral.identifier, name: peripheral.name, error: .descriptors(error)))); return }
+        if let error = error {
+            let peripheralError = PeripheralError.discover(peripheral.identifier, name: peripheral.name, error: .descriptors(error))
+            delegate?.peripheralEvent(manager: self, eventType: .didDiscover(.failure(peripheralError))); return
+        }
         
         let info: DiscoverDescriptors = (UUID: peripheral.identifier, name: peripheral.name, characteristic: characteristic)
-        delegate?.didDiscoverPeripheral(manager: self, result: .success(.descriptors(info)))
+        delegate?.peripheralEvent(manager: self, eventType: .didDiscover(.success(.descriptors(info))))
     }
     
     /// 更新特徵值的處理
@@ -367,12 +378,15 @@ private extension WWBluetoothManager {
     ///   - error: Error?
     func peripheralAction(with peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
         
-        if let error = error { delegate?.didUpdatePeripheral(manager: self, result: .failure(.discover(peripheral.identifier, name: peripheral.name, error: .characteristics(error)))); return }
+        if let error = error {
+            let peripheralError = PeripheralError.discover(peripheral.identifier, name: peripheral.name, error: .characteristics(error))
+            delegate?.peripheralEvent(manager: self, eventType: .didUpdate(.failure(peripheralError))); return
+        }
         
         let _info: UpdateValueInformation = (UUID: peripheral.identifier, characteristic: characteristic)
         let info = updatePeripheral(with: .value(_info))
         
-        delegate?.didUpdatePeripheral(manager: self, result: .success(info))
+        delegate?.peripheralEvent(manager: self, eventType: .didUpdate(.success(info)))
     }
     
     /// 更新通知狀態的處理
@@ -382,12 +396,15 @@ private extension WWBluetoothManager {
     ///   - error: Error?
     func peripheralAction(with peripheral: CBPeripheral, didUpdateNotificationStateFor characteristic: CBCharacteristic, error: Error?) {
         
-        if let error = error { delegate?.didUpdatePeripheral(manager: self, result: .failure(.discover(peripheral.identifier, name: peripheral.name, error: .characteristics(error)))); return }
+        if let error = error {
+            let peripheralError = PeripheralError.discover(peripheral.identifier, name: peripheral.name, error: .characteristics(error))
+            delegate?.peripheralEvent(manager: self, eventType: .didUpdate(.failure(peripheralError))); return
+        }
         
         let _info: UpdateValueInformation = (UUID: peripheral.identifier, characteristic: characteristic)
         let info = updatePeripheral(with: .notificationState(_info))
 
-        delegate?.didUpdatePeripheral(manager: self, result: .success(info))
+        delegate?.peripheralEvent(manager: self, eventType: .didUpdate(.success(info)))
     }
     
     /// 更動服務的處理
@@ -397,7 +414,7 @@ private extension WWBluetoothManager {
     public func peripheralAction(with peripheral: CBPeripheral, didModifyServices invalidatedServices: [CBService]) {
         
         let info: ModifyServicesInformation = (UUID: peripheral.identifier, invalidatedServices: invalidatedServices)
-        delegate?.didModifyServices(manager: self, information: info)
+        delegate?.peripheralAction(manager: self, actionType: .didModifyServices(info))
     }
     
     /// 讀取到RSSI的處理
@@ -406,7 +423,8 @@ private extension WWBluetoothManager {
     ///   - RSSI: NSNumber
     ///   - error: Error?
     func peripheralAction(with peripheral: CBPeripheral, didReadRSSI RSSI: NSNumber, error: Error?) {
-        delegate?.didReadRSSI(manager: self, RSSI: RSSI, for: peripheral)
+        let info: RSSIInformation = (UUID: peripheral.identifier, RSSI: RSSI)
+        delegate?.peripheralAction(manager: self, actionType: .didReadRSSI(info))
     }
 }
 

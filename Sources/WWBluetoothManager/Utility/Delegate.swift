@@ -27,36 +27,17 @@ extension WWBluetoothManager {
         ///   - newPeripheralInformation: WWBluetoothManager.PeripheralInformation
         func discoveredPeripherals(manager: WWBluetoothManager, peripherals: WWOrderedSet<CBPeripheral>, newPeripheralInformation: WWBluetoothManager.PeripheralInformation)
         
-        /// 取得剛連上設備的資訊
+        /// 處理設備的事件資訊 (整合)
         /// - Parameters:
         ///   - manager: WWBluetoothManager
-        ///   - result: Result<WWBluetoothManager.ConnectType, WWBluetoothManager.PeripheralError>
-        func didConnectPeripheral(manager: WWBluetoothManager, result: Result<WWBluetoothManager.PeripheralConnectType, WWBluetoothManager.PeripheralError>)
+        ///   - eventType: PeripheralEventType
+        func peripheralEvent(manager: WWBluetoothManager, eventType: PeripheralEventType)
         
-        /// 處理已經連上設備的Services / Characteristics / Descriptors
+        /// 處理設備的資訊取得 (整合)
         /// - Parameters:
         ///   - manager: WWBluetoothManager
-        ///   - result: Result<WWBluetoothManager.DiscoverValueType, WWBluetoothManager.PeripheralError>
-        func didDiscoverPeripheral(manager: WWBluetoothManager, result: Result<WWBluetoothManager.DiscoverValueType, WWBluetoothManager.PeripheralError>)
-        
-        /// 週邊設備數值相關的功能
-        /// - Parameters:
-        ///   - manager: WWBluetoothManager
-        ///   - result: Result<WWBluetoothManager.PeripheralValueInformation, WWBluetoothManager.PeripheralError>
-        func didUpdatePeripheral(manager: WWBluetoothManager, result: Result<WWBluetoothManager.PeripheralValueInformation, WWBluetoothManager.PeripheralError>)
-        
-        /// 週邊設備服務更動的功能
-        /// - Parameters:
-        ///   - manager: WWBluetoothManager
-        ///   - information: WWBluetoothManager.ModifyServicesInformation
-        func didModifyServices(manager: WWBluetoothManager, information: WWBluetoothManager.ModifyServicesInformation)
-        
-        /// 讀取到RSSI的值 (藍牙信號強度)
-        /// - Parameters:
-        ///   - manager: WWBluetoothManager
-        ///   - RSSI: NSNumber
-        ///   - peripheral: CBPeripheral
-        func didReadRSSI(manager: WWBluetoothManager, RSSI: NSNumber, for peripheral: CBPeripheral)
+        ///   - actionType: PeripheralActionType
+        func peripheralAction(manager: WWBluetoothManager, actionType: PeripheralActionType)
     }
 }
 

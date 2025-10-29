@@ -11,7 +11,7 @@ https://github.com/user-attachments/assets/20f6da9f-28c5-4c38-8bbf-e4470157127b
 ### [Installation with Swift Package Manager](https://medium.com/彼得潘的-swift-ios-app-開發問題解答集/使用-spm-安裝第三方套件-xcode-11-新功能-2c4ffcf85b4b)
 ```bash
 dependencies: [
-    .package(url: "https://github.com/William-Weng/WWBluetoothManager.git", .upToNextMajor(from: "0.9.0"))
+    .package(url: "https://github.com/William-Weng/WWBluetoothManager.git", .upToNextMajor(from: "0.10.0"))
 ]
 ```
 
@@ -40,11 +40,8 @@ dependencies: [
 |-|-|
 |updateState(manager:state:)|手機藍牙的更新狀態|
 |discoveredPeripherals(manager:peripherals:newPeripheralInformation:)|搜尋到的週邊設備 (不重複)|
-|didConnectPeripheral(manager:result:)|取得剛連上設備的資訊|
-|didDiscoverPeripheral(manager:result:)|處理已經連上設備的Services / Characteristics / Descriptors|
-|didUpdatePeripheral(manager:result:)|週邊設備數值相關的功能|
-|didModifyServices(manager:information:)|週邊設備服務更動的功能|
-|didReadRSSI(manager:RSSI:for:)|讀取到RSSI的值 (藍牙信號強度)|
+|peripheralEvent(manager:eventType:)|處理設備的動作資訊 (整合)|
+|peripheralAction(manager:actionType:)|處理設備的資訊取得 (整合)|
 
 ### WWBluetoothPeripheralManagerDelegate
 |函式|功能|
@@ -55,8 +52,8 @@ dependencies: [
 
 ### Example
 ```swift
-import CoreBluetooth
 import UIKit
+import CoreBluetooth
 import WWPrint
 import WWBluetoothManager
 import WWHUD
@@ -89,24 +86,9 @@ final class TableViewDemoController: UIViewController {
         isConnented = false
         WWBluetoothManager.shared.restartScan(delegate: self)
     }
-    
-    @IBAction func sendData(_ sender: UIBarButtonItem) {
-                
-        let imageName = !isSwitch ? "Red.jpg" : "Green.png"
-        let imageUrl = Bundle.main.url(forResource: imageName, withExtension: nil)
-        let result = FileManager.default._readData(from: imageUrl)
-
-        isSwitch.toggle()
         
-        switch result {
-        case .failure(let error): wwPrint(error)
-        case .success(let data):
-             
-            if let data = data {
-                wwPrint(data.count)
-                _ = bluetoothPeripheralManager?.sendData(data, BOM: BOM, EOM: EOM)
-            }
-        }
+    @IBAction func sendData(_ sender: UIBarButtonItem) {
+        sendDataAction()
     }
 }
 
@@ -135,7 +117,7 @@ extension TableViewDemoController: UITableViewDelegate, UITableViewDataSource {
 }
 
 extension TableViewDemoController: WWBluetoothManager.Delegate {
-        
+    
     func updateState(manager: WWBluetoothManager, state: CBManagerState) {
         updateState(with: manager, state: state)
     }
@@ -144,51 +126,19 @@ extension TableViewDemoController: WWBluetoothManager.Delegate {
         discoveredPeripherals(with: manager, peripherals: peripherals, newPeripheralInformation: newPeripheralInformation)
     }
     
-    func didConnectPeripheral(manager: WWBluetoothManager, result: Result<WWBluetoothManager.PeripheralConnectType, WWBluetoothManager.PeripheralError>) {
-        
-        unloading()
-        
-        switch result {
-        case .failure(let error): wwPrint(error)
-        case .success(let connentType):
-            
-            switch connentType {
-            case .didConnect(_): isConnented = true
-            case .didDisconnect(_): isConnented = false
-            }
-            
-            myTableView.reloadData()
+    func peripheralEvent(manager: WWBluetoothManager, eventType: WWBluetoothManager.PeripheralEventType) {
+        switch eventType {
+        case .didConnect(let _result): didConnectPeripheral(manager: manager, result: _result)
+        case .didDiscover(let _result): didDiscoverPeripheral(manager: manager, result: _result)
+        case .didUpdate(let _result): didUpdatePeripheral(manager: manager, result: _result)
         }
     }
     
-    func didDiscoverPeripheral(manager: WWBluetoothManager, result: Result<WWBluetoothManager.DiscoverValueType, WWBluetoothManager.PeripheralError>) {
-        
-        switch result {
-        case .failure(let error): wwPrint(error)
-        case .success(let discoverValueType):
-            
-            switch discoverValueType {
-            case .services(let info): discoverPeripheralServices(with: manager, info: info)
-            case .characteristics(let info): discoverPeripheralCharacteristics(with: manager, info: info)
-            case .descriptors(let info): discoverPeripheralDescriptors(with: manager, info: info)
-            }
+    func peripheralAction(manager: WWBluetoothManager, actionType: WWBluetoothManager.PeripheralActionType) {
+        switch actionType {
+        case .didModifyServices(let info): didModifyServices(manager: manager, information: info)
+        case .didReadRSSI(let info): didReadRSSI(manager: manager, information: info)
         }
-    }
-    
-    func didUpdatePeripheral(manager: WWBluetoothManager, result: Result<WWBluetoothManager.PeripheralValueInformation, WWBluetoothManager.PeripheralError>) {
-        
-        switch result {
-        case .failure(let error): wwPrint(error)
-        case .success(let info): updatePeripheralAction(info: info)
-        }
-    }
-    
-    func didModifyServices(manager: WWBluetoothManager, information: WWBluetoothManager.ModifyServicesInformation) {
-        wwPrint(information)
-    }
-    
-    func didReadRSSI(manager: WWBluetoothManager, RSSI: NSNumber, for peripheral: CBPeripheral) {
-        wwPrint("\(peripheral): RSSI(\(RSSI))")
     }
 }
 
@@ -248,7 +198,7 @@ private extension TableViewDemoController {
     func updatePeripheralAction(info: WWBluetoothManager.PeripheralValueInformation) {
                 
         guard let data = info.characteristicValue else { return }
-        
+                
         if let string = data._string() {
                         
             if (string == BOM) { receiveData = Data(); loading(); return }
@@ -260,6 +210,25 @@ private extension TableViewDemoController {
             receiveData.append(data)
         }
     }
+    
+    func sendDataAction() {
+        
+        let imageName = !isSwitch ? "Red.jpg" : "Green.png"
+        let imageUrl = Bundle.main.url(forResource: imageName, withExtension: nil)
+        let result = FileManager.default._readData(from: imageUrl)
+
+        isSwitch.toggle()
+        
+        switch result {
+        case .failure(let error): wwPrint(error)
+        case .success(let data):
+             
+            if let data = data {
+                wwPrint(data.count)
+                _ = bluetoothPeripheralManager?.sendData(data, BOM: BOM, EOM: EOM)
+            }
+        }
+    }
 }
 
 private extension TableViewDemoController {
@@ -267,9 +236,9 @@ private extension TableViewDemoController {
     func updateState(with manager: WWBluetoothManager, state: CBManagerState) {
         
         switch state {
-        case .poweredOn: wwPrint("藍牙已開啟，開始掃描設備")
-        case .poweredOff: wwPrint("藍牙已關閉")
-        case .resetting, .unauthorized, .unknown, .unsupported: wwPrint("就是這樣 => \(state)")
+        case .poweredOn: wwPrint("Bluetooth is turned on and scanning for devices begins.")
+        case .poweredOff: wwPrint("Bluetooth is turned off.")
+        case .resetting, .unauthorized, .unknown, .unsupported: wwPrint("state => \(state)")
         @unknown default: break
         }
     }
@@ -280,7 +249,7 @@ private extension TableViewDemoController {
             guard peripheral.name != nil else { return nil }
             return peripheral
         }
-                        
+        
         self.peripherals = peripherals
     }
     
@@ -299,7 +268,56 @@ private extension TableViewDemoController {
     }
 }
 
-// MARK: - Discover Peripheral Action
+private extension TableViewDemoController {
+    
+    func didConnectPeripheral(manager: WWBluetoothManager, result: Result<WWBluetoothManager.PeripheralConnectType, WWBluetoothManager.PeripheralError>) {
+        
+        unloading()
+        
+        switch result {
+        case .failure(let error): wwPrint(error)
+        case .success(let connentType):
+            
+            switch connentType {
+            case .didConnect(_): isConnented = true
+            case .didDisconnect(_): isConnented = false
+            }
+            
+            myTableView.reloadData()
+        }
+    }
+    
+    func didDiscoverPeripheral(manager: WWBluetoothManager, result: Result<WWBluetoothManager.DiscoverValueType, WWBluetoothManager.PeripheralError>) {
+        
+        switch result {
+        case .failure(let error): wwPrint(error)
+        case .success(let discoverValueType):
+            
+            switch discoverValueType {
+            case .services(let info): discoverPeripheralServices(with: manager, info: info)
+            case .characteristics(let info): discoverPeripheralCharacteristics(with: manager, info: info)
+            case .descriptors(let info): discoverPeripheralDescriptors(with: manager, info: info)
+            }
+        }
+    }
+    
+    func didUpdatePeripheral(manager: WWBluetoothManager, result: Result<WWBluetoothManager.PeripheralValueInformation, WWBluetoothManager.PeripheralError>) {
+        
+        switch result {
+        case .failure(let error): wwPrint(error)
+        case .success(let info): updatePeripheralAction(info: info)
+        }
+    }
+    
+    func didModifyServices(manager: WWBluetoothManager, information: WWBluetoothManager.ModifyServicesInformation) {
+        wwPrint(information)
+    }
+    
+    func didReadRSSI(manager: WWBluetoothManager, information: WWBluetoothManager.RSSIInformation) {
+        wwPrint("\(information.UUID): RSSI(\(information.RSSI))")
+    }
+}
+
 private extension TableViewDemoController {
     
     func discoverPeripheralServices(with manager: WWBluetoothManager, info: WWBluetoothManager.DiscoverServicesInformation) {

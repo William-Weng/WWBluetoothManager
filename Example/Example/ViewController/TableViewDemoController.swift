@@ -39,24 +39,9 @@ final class TableViewDemoController: UIViewController {
         isConnented = false
         WWBluetoothManager.shared.restartScan(delegate: self)
     }
-    
+        
     @IBAction func sendData(_ sender: UIBarButtonItem) {
-        
-        let imageName = !isSwitch ? "Red.jpg" : "Green.png"
-        let imageUrl = Bundle.main.url(forResource: imageName, withExtension: nil)
-        let result = FileManager.default._readData(from: imageUrl)
-
-        isSwitch.toggle()
-        
-        switch result {
-        case .failure(let error): wwPrint(error)
-        case .success(let data):
-             
-            if let data = data {
-                wwPrint(data.count)
-                _ = bluetoothPeripheralManager?.sendData(data, BOM: BOM, EOM: EOM)
-            }
-        }
+        sendDataAction()
     }
 }
 
@@ -96,51 +81,19 @@ extension TableViewDemoController: WWBluetoothManager.Delegate {
         discoveredPeripherals(with: manager, peripherals: peripherals, newPeripheralInformation: newPeripheralInformation)
     }
     
-    func didConnectPeripheral(manager: WWBluetoothManager, result: Result<WWBluetoothManager.PeripheralConnectType, WWBluetoothManager.PeripheralError>) {
-        
-        unloading()
-        
-        switch result {
-        case .failure(let error): wwPrint(error)
-        case .success(let connentType):
-            
-            switch connentType {
-            case .didConnect(_): isConnented = true
-            case .didDisconnect(_): isConnented = false
-            }
-            
-            myTableView.reloadData()
+    func peripheralEvent(manager: WWBluetoothManager, eventType: WWBluetoothManager.PeripheralEventType) {
+        switch eventType {
+        case .didConnect(let _result): didConnectPeripheral(manager: manager, result: _result)
+        case .didDiscover(let _result): didDiscoverPeripheral(manager: manager, result: _result)
+        case .didUpdate(let _result): didUpdatePeripheral(manager: manager, result: _result)
         }
     }
     
-    func didDiscoverPeripheral(manager: WWBluetoothManager, result: Result<WWBluetoothManager.DiscoverValueType, WWBluetoothManager.PeripheralError>) {
-        
-        switch result {
-        case .failure(let error): wwPrint(error)
-        case .success(let discoverValueType):
-            
-            switch discoverValueType {
-            case .services(let info): discoverPeripheralServices(with: manager, info: info)
-            case .characteristics(let info): discoverPeripheralCharacteristics(with: manager, info: info)
-            case .descriptors(let info): discoverPeripheralDescriptors(with: manager, info: info)
-            }
+    func peripheralAction(manager: WWBluetoothManager, actionType: WWBluetoothManager.PeripheralActionType) {
+        switch actionType {
+        case .didModifyServices(let info): didModifyServices(manager: manager, information: info)
+        case .didReadRSSI(let info): didReadRSSI(manager: manager, information: info)
         }
-    }
-    
-    func didUpdatePeripheral(manager: WWBluetoothManager, result: Result<WWBluetoothManager.PeripheralValueInformation, WWBluetoothManager.PeripheralError>) {
-        
-        switch result {
-        case .failure(let error): wwPrint(error)
-        case .success(let info): updatePeripheralAction(info: info)
-        }
-    }
-    
-    func didModifyServices(manager: WWBluetoothManager, information: WWBluetoothManager.ModifyServicesInformation) {
-        wwPrint(information)
-    }
-    
-    func didReadRSSI(manager: WWBluetoothManager, RSSI: NSNumber, for peripheral: CBPeripheral) {
-        wwPrint("\(peripheral): RSSI(\(RSSI))")
     }
 }
 
@@ -227,6 +180,26 @@ private extension TableViewDemoController {
             receiveData.append(data)
         }
     }
+    
+    /// 傳送圖片
+    func sendDataAction() {
+        
+        let imageName = !isSwitch ? "Red.jpg" : "Green.png"
+        let imageUrl = Bundle.main.url(forResource: imageName, withExtension: nil)
+        let result = FileManager.default._readData(from: imageUrl)
+
+        isSwitch.toggle()
+        
+        switch result {
+        case .failure(let error): wwPrint(error)
+        case .success(let data):
+             
+            if let data = data {
+                wwPrint(data.count)
+                _ = bluetoothPeripheralManager?.sendData(data, BOM: BOM, EOM: EOM)
+            }
+        }
+    }
 }
 
 // MARK: - Connect Action
@@ -239,9 +212,9 @@ private extension TableViewDemoController {
     func updateState(with manager: WWBluetoothManager, state: CBManagerState) {
         
         switch state {
-        case .poweredOn: wwPrint("藍牙已開啟，開始掃描設備")
-        case .poweredOff: wwPrint("藍牙已關閉")
-        case .resetting, .unauthorized, .unknown, .unsupported: wwPrint("就是這樣 => \(state)")
+        case .poweredOn: wwPrint("Bluetooth is turned on and scanning for devices begins.")
+        case .poweredOff: wwPrint("Bluetooth is turned off.")
+        case .resetting, .unauthorized, .unknown, .unsupported: wwPrint("state => \(state)")
         @unknown default: break
         }
     }
@@ -275,6 +248,77 @@ private extension TableViewDemoController {
         
         WWHUD.shared.updateProgess(text: "")
         WWHUD.shared.dismiss() { _ in }
+    }
+}
+
+// MARK: - 處理已收到的資訊
+private extension TableViewDemoController {
+    
+    /// 已連接設備的處理
+    /// - Parameters:
+    ///   - manager: WWBluetoothManager
+    ///   - result: Result<WWBluetoothManager.PeripheralConnectType, WWBluetoothManager.PeripheralError>
+    func didConnectPeripheral(manager: WWBluetoothManager, result: Result<WWBluetoothManager.PeripheralConnectType, WWBluetoothManager.PeripheralError>) {
+        
+        unloading()
+        
+        switch result {
+        case .failure(let error): wwPrint(error)
+        case .success(let connentType):
+            
+            switch connentType {
+            case .didConnect(_): isConnented = true
+            case .didDisconnect(_): isConnented = false
+            }
+            
+            myTableView.reloadData()
+        }
+    }
+    
+    /// 已發現設備的處理
+    /// - Parameters:
+    ///   - manager: WWBluetoothManager
+    ///   - result: Result<WWBluetoothManager.DiscoverValueType, WWBluetoothManager.PeripheralError>
+    func didDiscoverPeripheral(manager: WWBluetoothManager, result: Result<WWBluetoothManager.DiscoverValueType, WWBluetoothManager.PeripheralError>) {
+        
+        switch result {
+        case .failure(let error): wwPrint(error)
+        case .success(let discoverValueType):
+            
+            switch discoverValueType {
+            case .services(let info): discoverPeripheralServices(with: manager, info: info)
+            case .characteristics(let info): discoverPeripheralCharacteristics(with: manager, info: info)
+            case .descriptors(let info): discoverPeripheralDescriptors(with: manager, info: info)
+            }
+        }
+    }
+    
+    /// 已更新設備的處理
+    /// - Parameters:
+    ///   - manager: WWBluetoothManager
+    ///   - result: Result<WWBluetoothManager.PeripheralValueInformation, WWBluetoothManager.PeripheralError>
+    func didUpdatePeripheral(manager: WWBluetoothManager, result: Result<WWBluetoothManager.PeripheralValueInformation, WWBluetoothManager.PeripheralError>) {
+        
+        switch result {
+        case .failure(let error): wwPrint(error)
+        case .success(let info): updatePeripheralAction(info: info)
+        }
+    }
+    
+    /// 已更新服務的處理
+    /// - Parameters:
+    ///   - manager: WWBluetoothManager
+    ///   - information: WWBluetoothManager.ModifyServicesInformation
+    func didModifyServices(manager: WWBluetoothManager, information: WWBluetoothManager.ModifyServicesInformation) {
+        wwPrint(information)
+    }
+    
+    /// 已讀取RSSI的處理
+    /// - Parameters:
+    ///   - manager: WWBluetoothManager
+    ///   - information: WWBluetoothManager.RSSIInformation
+    func didReadRSSI(manager: WWBluetoothManager, information: WWBluetoothManager.RSSIInformation) {
+        wwPrint("\(information.UUID): RSSI(\(information.RSSI))")
     }
 }
 
