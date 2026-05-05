@@ -1,53 +1,30 @@
 //
-//  BluetoothManager+Delegate.swift
+//  Delegate.swift
 //  WWBluetoothManager
 //
-//  Created by William.Weng on 2023/11/29.
+//  Created by WilliamWeng on 2026/5/4.
 //
 
 import CoreBluetooth
-import WWOrderedSet
 
-// MARK: - WWBluetoothManager.Delegate
-extension WWBluetoothManager {
+// MARK: - Delegate
+public extension WWBluetoothManager {
     
-    // 藍牙管理的Delegate
-    public protocol Delegate {
+    /// 藍牙中心的Delegate
+    protocol CentralDelegate: AnyObject {
         
-        /// 手機藍牙的更新狀態
+        /// **CentralManager 事件**：狀態更新、掃描發現、連線狀態變化
         /// - Parameters:
-        ///   - manager: WWBluetoothManager
-        ///   - state: CBManagerState
-        func updateState(manager: WWBluetoothManager, state: CBManagerState)
+        ///   - central: Central 管理器實例
+        ///   - status: CentralStatus enum，包含所有中央管理器事件
+        func centralManager(_ central: Central, status: CentralStatus)
         
-        /// 搜尋到的週邊設備 (不重複)
+        /// **Peripheral 事件**：服務發現、特性操作、資料通訊
         /// - Parameters:
-        ///   - manager: WWBluetoothManager
-        ///   - peripherals: Set<CBPeripheral>
-        ///   - newPeripheralInformation: WWBluetoothManager.PeripheralInformation
-        func discoveredPeripherals(manager: WWBluetoothManager, peripherals: WWOrderedSet<CBPeripheral>, newPeripheralInformation: WWBluetoothManager.PeripheralInformation)
-        
-        /// 處理設備的事件資訊 (整合)
-        /// - Parameters:
-        ///   - manager: WWBluetoothManager
-        ///   - eventType: PeripheralEventType
-        func peripheralEvent(manager: WWBluetoothManager, eventType: PeripheralEventType)
-        
-        /// 處理設備的資訊取得 (整合)
-        /// - Parameters:
-        ///   - manager: WWBluetoothManager
-        ///   - actionType: PeripheralActionType
-        func peripheralAction(manager: WWBluetoothManager, actionType: PeripheralActionType)
+        ///   - central: Central 管理器實例
+        ///   - peripheral: 觸發事件的具體周邊設備
+        ///   - status: PeripheralStatus enum，包含所有外設操作事件
+        func centralManager(_ central: Central, peripheral: CBPeripheral, status: PeripheralStatus)
     }
 }
 
-// MARK: - WWBluetoothPeripheralManager.Delegate
-extension WWBluetoothPeripheralManager {
-    
-    public protocol Delegate: AnyObject {
-        
-        func managerIsReady(manager: WWBluetoothPeripheralManager, MTU: Int)    // 裝置準備完成
-        func receiveValue(manager: WWBluetoothPeripheralManager, value: Data)   // 接到的資訊
-        func errorMessage(manager: WWBluetoothPeripheralManager, error: Error)  // 錯誤訊息
-    }
-}

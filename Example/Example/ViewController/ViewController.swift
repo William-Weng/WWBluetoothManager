@@ -1,56 +1,17 @@
-# [WWBluetoothManager](https://swiftpackageindex.com/William-Weng)
+//
+//  ViewController.swift
+//  Example
+//
+//  Created by William.Weng on 2025/10/29.
+//
+// NSBluetoothAlwaysUsageDescription = 需要藍牙權限來搜尋並連接附近裝置
+// 掃描 → connect → didConnect → discoverServices → discoverCharacteristics
+//
+// 展示完整的 Bluetooth LE 開發流程：
+// 1. 掃描特定設備（"Control for SB1830"）
+// 2. 自動連線並發現服務/特性
+// 3. 啟用通知並發送寫入指令
 
-[![Swift-5.7](https://img.shields.io/badge/Swift-5.7-orange.svg?style=flat)](https://developer.apple.com/swift/)
-[![iOS-16.0](https://img.shields.io/badge/iOS-16.0-pink.svg?style=flat)](https://developer.apple.com/swift/)
-![TAG](https://img.shields.io/github/v/tag/William-Weng/WWBluetoothManager)
-[![Swift Package Manager-SUCCESS](https://img.shields.io/badge/Swift_Package_Manager-SUCCESS-blue.svg?style=flat)](https://developer.apple.com/swift/)
-[![LICENSE](https://img.shields.io/badge/LICENSE-MIT-yellow.svg?style=flat)](https://developer.apple.com/swift/)
-
-## 🎉 [相關說明](https://developer.apple.com/documentation/corebluetooth/)
-> [`WWBluetoothManager` is a lightweight `CoreBluetooth` wrapper library written in Swift. It simplifies the complex processes of `CBCentralManager` and `CBPeripheralDelegate` by providing a unified delegate interface that delivers clear status updates and automated handling logic.](https://developer.apple.com/documentation/corebluetooth/cbcentralmanager)
-
-> [`WWBluetoothManager` 是一個基於 Swift 的輕量級 `CoreBluetooth` 封裝庫。它簡化了 `CBCentralManager` 與 `CBPeripheralDelegate` 的複雜流程，透過統一的委派介面 (Delegate) 提供清晰的狀態回報與自動化處理邏輯。](https://ithelp.ithome.com.tw/articles/10334018)
-
-## 📷 [效果預覽](https://peterpanswift.github.io/iphone-bezels/)
-
-<div align="center">
-
-**⭐ 覺得好用就給個 Star 吧！**
-
-</div>
-
-## 💿 [安裝方式](https://medium.com/彼得潘的-swift-ios-app-開發問題解答集/使用-spm-安裝第三方套件-xcode-11-新功能-2c4ffcf85b4b)
-
-使用 **Swift Package Manager (SPM)**：
-
-```swift
-dependencies: [
-    .package(url: "https://github.com/William-Weng/WWBluetoothManager", .upToNextMinor(from: "1.0.0"))
-]
-```
-
-## 🧲 公開屬性 (Central)
-
-| 參數名稱 | 說明 |
-|-----------|------|
-| `delegate` | 委派物件，接收所有 CentralManager 和 Peripheral 事件 |
-| `state` | 目前 Bluetooth 適配器狀態 |
-| `peripherals` | 所有已發現的周邊設備列表（掃描期間累積） |
-
-## 🧲 公開 API (Central)
-
-| 參數名稱 | 說明 |
-|-----------|------|
-| `startScan(serviceUUIDs:allowDuplicates:)` | 開始掃描周邊設備 |
-| `startScan(serviceUUIDTypes:allowDuplicates:)` | 開始掃描周邊設備 |
-| `stopScan()` | 停止掃描 |
-| `connect(_:options:)` | 連接到指定周邊設備 |
-| `disconnect(_:)` | 斷開指定周邊設備連線 |
-| `discoverServices(_:for:)` | 開始發現指定設備的服務 |
-
-## 🚀 使用範例
-
-```swift
 import UIKit
 import CoreBluetooth
 import WWPrint
@@ -58,14 +19,14 @@ import WWBluetoothManager
 
 final class ViewController: UIViewController {
     
-    private let central = WWBluetoothManager.Central()
-    private let targetLocalName = "Control for SB1830"
-    private let writeUUID = "B7860002-11B8-B681-6343-5A6C2286633F"
-    private let notifyUUID = "B7860003-11B8-B681-6343-5A6C2286633F"
+    private let central = WWBluetoothManager.Central()                  // WWBluetoothManager 的 Central 管理器實例
+    private let targetLocalName = "Control for SB1830"                  // 目標設備名稱過濾（廣告資料中的 localName）
+    private let writeUUID = "B7860002-11B8-B681-6343-5A6C2286633F"      // 寫入特性 UUID
+    private let notifyUUID = "B7860003-11B8-B681-6343-5A6C2286633F"     // 通知特性 UUID
     
-    private var targetPeripheral: CBPeripheral?
-    private var writableCharacteristic: CBCharacteristic?
-    private var notifyCharacteristic: CBCharacteristic?
+    private var targetPeripheral: CBPeripheral?                         // 目標周邊設備（連線中的 SB1830）
+    private var writableCharacteristic: CBCharacteristic?               // 可寫入特性（用於發送控制指令）
+    private var notifyCharacteristic: CBCharacteristic?                 // 可通知特性（接收設備回報）
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -75,8 +36,10 @@ final class ViewController: UIViewController {
     @IBAction func sendHex01(_ sender: UIButton) { sendHex() }
 }
 
+// MARK: - WWBluetoothManager.CentralDelegate（事件中介層）
 extension ViewController: WWBluetoothManager.CentralDelegate {
     
+    /// CentralManager 事件處理（CBCentralManagerDelegate）
     func centralManager(_ central: WWBluetoothManager.Central, status: WWBluetoothManager.CentralStatus) {
         switch status {
         case .stateUpdated(let state): centralStateUpdated(state)
@@ -87,6 +50,7 @@ extension ViewController: WWBluetoothManager.CentralDelegate {
         }
     }
     
+    /// Peripheral 事件處理（CBPeripheralDelegate）
     func centralManager(_ central: WWBluetoothManager.Central, peripheral: CBPeripheral, status: WWBluetoothManager.PeripheralStatus) {
         switch status {
         case .discoveredServices(let services): discoveredServices(peripheral, services: services)
@@ -100,8 +64,11 @@ extension ViewController: WWBluetoothManager.CentralDelegate {
     }
 }
 
+// MARK: - CentralManager 事件實現
 private extension ViewController {
     
+    /// Bluetooth 狀態更新
+    /// - 僅在 `.poweredOn` 時自動開始掃描
     func centralStateUpdated(_ state: CBManagerState) {
         
         wwPrint("Bluetooth state => \(state.rawValue)")
@@ -110,6 +77,7 @@ private extension ViewController {
         central.startScan()
     }
     
+    /// 掃描發現設備，檢查目標設備並自動連線
     func centralDiscovered(_ result: WWBluetoothManager.Central.ScanResult) {
         
         guard let displayName = result.displayName,
@@ -123,12 +91,17 @@ private extension ViewController {
         central.connect(result.peripheral)
     }
     
+    /// 連線成功，記錄目標設備
     func centralConnected(_ peripheral: CBPeripheral) {
         
         targetPeripheral = peripheral
         wwPrint("Connected => \(peripheral.name ?? "Unknown")")
+        
+        let type = WWBluetoothManager.ServiceUUIDType(rawValue: peripheral.identifier.uuidString)
+        wwPrint(type)
     }
     
+    /// 斷線事件，清理所有狀態
     func centralDisconnected(_ peripheral: CBPeripheral, error: Error?) {
         
         wwPrint("Disconnected => \(peripheral.name ?? "Unknown"), error => \(String(describing: error))")
@@ -138,19 +111,23 @@ private extension ViewController {
         notifyCharacteristic = nil
     }
     
+    /// 連線失敗
     func centralFailedToConnect(_ peripheral: CBPeripheral, error: Error?) {
         wwPrint("Failed => \(peripheral.name ?? "Unknown"), error => \(String(describing: error))")
     }
 }
 
+// MARK: - Peripheral 事件實現
 private extension ViewController {
     
+    /// 服務發現完成，列印所有服務 UUID
     func discoveredServices(_ peripheral: CBPeripheral, services: [CBService]) {
         
-        wwPrint("Services of \(peripheral.name ?? "Unknown") (\(services.count) 個):")
+        wwPrint("Services of \(peripheral.name ?? "Unknown"): (\(services.count) 個)")
         services.forEach { service in wwPrint("Service => \(service.uuid.uuidString)") }
     }
     
+    /// 特性發現完成，尋找目標寫入/通知特性並啟用通知
     func discoveredCharacteristics(_ peripheral: CBPeripheral, service: CBService, characteristics: [CBCharacteristic]) {
         
         wwPrint("Characteristics of \(service.uuid.uuidString) (\(characteristics.count) 個):")
@@ -160,11 +137,13 @@ private extension ViewController {
             wwPrint("\(uuid)")
             wwPrint("Properties => \(characteristic.properties)")
             
+            // 找到寫入特性
             if uuid == writeUUID {
                 writableCharacteristic = characteristic
                 wwPrint("Writable characteristic found!")
             }
             
+            // 找到通知特性並自動啟用
             if uuid == notifyUUID {
                 notifyCharacteristic = characteristic
                 peripheral.setNotifyValue(true, for: characteristic)
@@ -173,14 +152,18 @@ private extension ViewController {
         }
     }
     
+    /// 服務發現失敗（空實作）
     func serviceDiscoveryFailed(_ peripheral: CBPeripheral, error: Error?) {}
     
+    /// 特性發現失敗（空實作）
     func characteristicDiscoveryFailed(_ peripheral: CBPeripheral, service: CBService, error: Error?) {}
     
+    /// 通知狀態更新
     func notificationStateUpdated(_ peripheral: CBPeripheral, characteristic: CBCharacteristic, error: Error?) {
         wwPrint("Notification state updated => \(characteristic.uuid.uuidString), isNotifying => \(characteristic.isNotifying), error => \(String(describing: error))")
     }
     
+    /// 接收通知資料
     func characteristicValueUpdated(_ peripheral: CBPeripheral, characteristic: CBCharacteristic, data: Data?, error: Error?) {
         
         wwPrint("Value updated => \(characteristic.uuid.uuidString), error => \(String(describing: error))")
@@ -190,17 +173,21 @@ private extension ViewController {
         wwPrint("Notify utf8 => \(data.string() ?? "<non-utf8>")")
     }
     
+    /// 寫入完成回調
     func characteristicWriteCompleted(_ peripheral: CBPeripheral, characteristic: CBCharacteristic, error: Error?) {
         wwPrint("Write completed => \(characteristic.uuid.uuidString), error => \(String(describing: error))")
     }
 }
 
+// MARK: - 小工具
 private extension ViewController {
     
+    /// 綁定 Bluetooth 委派，啟動事件監聽
     func bindBluetooth() {
         central.delegate = self
     }
     
+    /// 發送 0x01 控制指令（延遲 0.5 秒避免連續寫入）
     func sendHex(byte: UInt8 = 0x01) {
         
         guard let peripheral = targetPeripheral else { wwPrint("No connected peripheral"); return }
@@ -215,4 +202,3 @@ private extension ViewController {
         }
     }
 }
-```

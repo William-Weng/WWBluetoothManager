@@ -1,52 +1,55 @@
 //
-// BluetoothManager+Constant.swift
-// WWBluetoothManager
+//  Constant.swift
+//  WWBluetoothManager
 //
-// Created by William.Weng on 2023/11/29.
+//  Created by WilliamWeng on 2026/5/4.
 //
 
 import CoreBluetooth
 
-// MARK: - Typealias
+// MARK: - 事件狀態常數化
 public extension WWBluetoothManager {
     
-    typealias PeripheralInformation = (UUID: UUID, name: String?, advertisementData: [String : Any], RSSI: NSNumber)
-    typealias DiscoverServicesInformation = (UUID: UUID, name: String?, peripheral: CBPeripheral)
-    typealias DiscoverCharacteristics = (UUID: UUID, name: String?, service: CBService)
-    typealias DiscoverDescriptors = (UUID: UUID, name: String?, characteristic: CBCharacteristic)
-    typealias UpdateValueInformation = (UUID: UUID, characteristic: CBCharacteristic)
-    typealias UpdateNotificationStateInformation = (UUID: UUID, characteristic: CBCharacteristic)
-    typealias ModifyServicesInformation = (UUID: UUID, invalidatedServices: [CBService])
-    typealias RSSIInformation = (UUID: UUID, RSSI: NSNumber)
-    typealias PeripheralValueInformation = (peripheralId: UUID, characteristicId: CBUUID, characteristicValue: Data?)
+    /// CentralManager 相關的事件狀態，用於 `centralManager(_:status:)` 委派方法。
+    /// 這些事件來自 `CBCentralManagerDelegate`，代表 Bluetooth 中央設備管理器的核心操作：
+    /// - 狀態更新（開關、權限等）
+    /// - 設備掃描發現
+    /// - 設備連線/斷線狀態變化
+    /// **使用情境**：處理掃描、連線等中央管理器層級的事件。
+    enum CentralStatus {
+        
+        case stateUpdated(state: CBManagerState)                                                        // Bluetooth 狀態更新（`.poweredOn`, `.poweredOff`, `.unauthorized` 等）
+        case discovered(result: Central.ScanResult)                                                     // 掃描期間發現新的周邊設備
+        case connected(peripheral: CBPeripheral)                                                        // 成功連接到周邊設備，開始服務發現流程
+        case disconnected(peripheral: CBPeripheral, error: Error?)                                      // 周邊設備斷線，可能因使用者手動斷開、設備離開範圍或錯誤
+        case failedToConnect(peripheral: CBPeripheral, error: Error?)                                   // 連線失敗，可能因超時、設備拒絕連線或錯誤
+    }
+    
+    /// CBPeripheral 相關的事件狀態，用於 `centralManager(_:peripheral:status:)` 委派方法。
+    /// 這些事件來自 `CBPeripheralDelegate`，代表已連線周邊設備的詳細操作：
+    /// - 服務和特性發現
+    /// - 通知狀態變化
+    /// - 資料讀寫完成
+    /// **使用情境**：處理特定設備的 GATT 服務操作和資料通訊。
+    enum PeripheralStatus {
+        
+        case discoveredServices(services: [CBService])                                                  // 成功發現設備的所有服務
+        case discoveredCharacteristics(service: CBService, characteristics: [CBCharacteristic])         // 某個服務的特性發現完成
+        case notificationStateUpdated(characteristic: CBCharacteristic, error: Error?)                  // 通知狀態更新（啟用/停用），可能伴隨錯誤
+        case characteristicValueUpdated(characteristic: CBCharacteristic, data: Data?, error: Error?)   // 特性值更新（通知/指示觸發），包含接收到的資料
+        case characteristicWriteCompleted(characteristic: CBCharacteristic, error: Error?)              // 特性寫入操作完成，可能伴隨錯誤
+        case characteristicDiscoveryFailed(service: CBService, error: Error?)                           // 特性發現失敗
+        case serviceDiscoveryFailed(error: Error?)                                                      // 服務發現失敗
+    }
 }
 
-// MARK: - Enum
+// MARK: - enum
 public extension WWBluetoothManager {
-    
-    /// 設備ID類型
-    enum PeripheralIdType {
-        case UUID(_ UUID: UUID)
-        case UUIDString(_ UUIDString: String)
-    }
-    
-    /// 設備動作事件
-    enum PeripheralEventType {
-        case didConnect(_ result: Result<WWBluetoothManager.PeripheralConnectType, WWBluetoothManager.PeripheralError>)         // 已連接 (取得剛連上設備的資訊)
-        case didDiscover(_ result: Result<WWBluetoothManager.DiscoverValueType, WWBluetoothManager.PeripheralError>)            // 已發現 (處理已經連上設資訊)
-        case didUpdate(_ result: Result<WWBluetoothManager.PeripheralValueInformation, WWBluetoothManager.PeripheralError>)     // 已更新 (週邊設備數值相關的功能)
-    }
-    
-    /// 設備資訊取得
-    enum PeripheralActionType {
-        case didModifyServices(_ information: WWBluetoothManager.ModifyServicesInformation)                                     // 週邊設備服務更動的功能
-        case didReadRSSI(_ information: WWBluetoothManager.RSSIInformation)                                                     // 讀取到RSSI的值 (藍牙信號強度)
-    }
     
     /// [周邊設備的UUID代號類型](https://github.com/Eronwu/Getting-Started-with-Bluetooth-Low-Energy-in-Chinese/blob/master/chapter9.md)
     /// => [CBUUID(string: "0x180f") -> .batteryService (電池資料)](https://blog.csdn.net/chihuoyinshi/article/details/134726016)
-    enum PeripheralUUIDType: String {
-                                                                        /* GATT服務 */
+    enum ServiceUUIDType: String {
+        /* GATT服務 */
         case genericAccess = "0x1800"                                   // 通用訪問
         case alertNotificationService = "0x1811"                        // 鬧鐘通知
         case automationIO = "0x1815"                                    // 自動化輸入輸出
@@ -89,7 +92,7 @@ public extension WWBluetoothManager {
         case txPower = "0x1804"                                         // 傳送功率
         case userData = "0x181C"                                        // 使用者資料
         case weightScale = "0x181D"                                     // 體重計
-                                                                        /* GATT特徵 */
+        /* GATT特徵 */
         case aerobicHeartRateLowerLimit = "0x2A7E"                      // 有氧心律下限
         case aerobicHeartRateUpperLimit = "0x2A84"                      // 有氧心率上限
         case aerobicThreshold = "0x2A7F"                                // 有氧運動閾值
@@ -321,7 +324,7 @@ public extension WWBluetoothManager {
         case weightMeasurement = "0x2A9D"                               // 體重測量
         case weightScaleFeature = "0x2A9E"                              // 體重秤功能
         case windChill = "0x2A79"                                       // 風寒（係數吧）
-                                                                        /* GATT描述符 */
+        /* GATT描述符 */
         case characteristicAggregateFormat = "0x2905"                   // 特徵彙總格式
         case characteristicExtendedProperties = "0x2900"                // 特性擴展屬性
         case characteristicPresentationFormat = "0x2904"                // 特徵描述格式
@@ -337,7 +340,7 @@ public extension WWBluetoothManager {
         case timeTriggerSetting = "0x290E"                              // 時間觸發設定
         case validRange = "0x2906"                                      // 有效範圍
         case valueTriggerSetting = "0x290A"                             // 數值觸發設定
-                                                                        /* GATT聲明 */
+        /* GATT聲明 */
         case characteristicDeclaration = "0x2803"                       // 特徵聲明
         case include = "0x2802"                                         // 包括
         case primaryService = "0x2800"                                  // 主要服務
@@ -349,59 +352,19 @@ public extension WWBluetoothManager {
         
         /// [UUID數值](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Assigned_Numbers/out/en/Assigned_Numbers.pdf)
         /// - Returns: [CBUUID](https://blog.csdn.net/hjj801006/article/details/135593595)
-        public func value() -> CBUUID { return CBUUID(string: self.rawValue) }
-    }
-    
-    /// 搜尋數值的類型
-    enum DiscoverValueType {
-        case services(_ info: DiscoverServicesInformation)
-        case characteristics(_ info: DiscoverCharacteristics)
-        case descriptors(_ info: DiscoverDescriptors)
-    }
-    
-    /// 更新數值的類型
-    enum UpdateType {
-        case notificationState(_ info: UpdateNotificationStateInformation)
-        case value(_ info: UpdateValueInformation)
-    }
-
-    /// 相關錯誤
-    enum PeripheralError: Error {
-        case connect(_ UUID: UUID, name: String?, error: ConnectError)
-        case discover(_ UUID: UUID, name: String?, error: DiscoverError)
-        case update(_ UUID: UUID, name: String?, error: UpdateError)
-    }
-    
-    /// 設備連線狀態
-    enum PeripheralConnectType {
-        case didConnect(_ UUID: UUID)
-        case didDisconnect(_ UUID: UUID)
-    }
-    
-    /// 連接管理中心錯誤
-    enum ConnectError {
-        case centralManager(_ error: Error)
-    }
-    
-    /// 設備搜尋錯誤
-    enum DiscoverError {
-        case services(_ error: Error)
-        case characteristics(_ error: Error)
-        case descriptors(_ error: Error)
-    }
-    
-    /// 設備傳值錯誤
-    enum UpdateError {
-        case value(_ error: Error)
-        case notificationState(_ error: Error)
+        public func cbuuid() -> CBUUID { return CBUUID(string: self.rawValue) }
     }
 }
 
-// MARK: - Enum
-public extension WWBluetoothPeripheralManager {
+// MARK: - enum
+extension WWBluetoothManager {
     
-    enum DeviceError: Error {
-        case notPowerOn(state: CBManagerState)  // 藍牙未打開
-        case noValue                            // 沒有傳送有效數值
+    /// 廣告資料鍵值常數（CoreBluetooth 標準）
+    enum AdvertisementDataKey: String {
+        
+        case localName = "CBAdvertisementDataLocalNameKey"                                              // 設備本地名稱（廣告包中最優先的名稱來源）
+        case manufacturerData = "CBAdvertisementDataManufacturerDataKey"                                // 設備本地名稱（廣告包中最優先的名稱來源）
+        case serviceUUIDs = "CBAdvertisementDataServiceUUIDsKey"                                        // 廣告中宣告的服務 UUID 列表（設備支援的 GATT 服務）
+        case isConnectable = "CBAdvertisementDataIsConnectable"                                         // 可連線標記（iOS 11+，指示設備是否接受連線）
     }
 }

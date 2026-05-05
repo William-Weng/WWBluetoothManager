@@ -1,5 +1,5 @@
 {
-  "originHash" : "ee4bba48c3d6d07ceb51eae142a54af38190fd3f34154bf0057ff0befbee2f89",
+  "originHash" : "ee0dea41b68075af3a566124ac99ad642b35f1a87eb3e48a7eddb7bcc750f0b5",
   "pins" : [
     {
       "identity" : "wwbluetoothmanager",
@@ -11,21 +11,12 @@
       }
     },
     {
-      "identity" : "wwhud",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/William-Weng/WWHUD",
-      "state" : {
-        "revision" : "d1bb08c55e676e969c804a659867ba267739544f",
-        "version" : "1.4.2"
-      }
-    },
-    {
       "identity" : "wworderedset",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/William-Weng/WWOrderedSet",
       "state" : {
-        "revision" : "66bfe2ce0fcd2a7834d6ecdd3e54ccc9b574403e",
-        "version" : "1.0.1"
+        "revision" : "f55e78e72725103eeb09ca27b70442e2098b6241",
+        "version" : "1.0.2"
       }
     },
     {
@@ -33,8 +24,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/William-Weng/WWPrint",
       "state" : {
-        "revision" : "8f5928f5d36624d77f8fc563fd8e31a59cfac6b6",
-        "version" : "1.3.1"
+        "revision" : "0537185ed59873995a04742a96bfabe9159fcd7b",
+        "version" : "1.3.2"
       }
     }
   ],
