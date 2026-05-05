@@ -13,9 +13,9 @@
 
 ## 📷 [效果預覽](https://peterpanswift.github.io/iphone-bezels/)
 
-![](https://github.com/user-attachments/assets/ee6b9620-f2b5-4a45-9c31-ce55bfcfd95e)
+![](https://github.com/user-attachments/assets/b5bc09d8-366f-4917-ac18-f3ece8c8cb10)
 
-https://github.com/user-attachments/assets/5ad4d46a-2b58-4411-892b-bfa032ad5843
+https://github.com/user-attachments/assets/57755f9d-db9a-4d18-9c00-df17b4141531
 
 <div align="center">
 

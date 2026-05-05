@@ -6,8 +6,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/William-Weng/WWBluetoothManager",
       "state" : {
-        "revision" : "d8d9c365913af337fc537b8337a9d631f91d11a3",
-        "version" : "1.0.0"
+        "revision" : "cd55307cc9cf73be97281059556a0082d3211ab3",
+        "version" : "1.1.0"
       }
     },
     {
