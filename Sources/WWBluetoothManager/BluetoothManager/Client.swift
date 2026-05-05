@@ -47,7 +47,7 @@ public extension WWBluetoothManager.Client {
     /// - Parameters:
     ///   - serviceUUIDTypes: 一組預定義的 `ServiceUUIDType`，用於過濾包含這些服務的周邊設備。若為 nil 則掃描所有設備。
     ///   - allowDuplicates: 是否允許重複回報同一設備
-    func startScan(serviceUUIDTypes: [WWBluetoothManager.ServiceUUIDType], allowDuplicates: Bool = false) {
+    func startScan(serviceUUIDTypes: [WWBluetoothManager.UUIDType], allowDuplicates: Bool = false) {
         central.startScan(serviceUUIDTypes: serviceUUIDTypes, allowDuplicates: allowDuplicates)
     }
     

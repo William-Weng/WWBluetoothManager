@@ -96,9 +96,6 @@ private extension BluetoothCentralViewController {
         
         targetPeripheral = peripheral
         wwPrint("Connected => \(peripheral.name ?? "Unknown")")
-        
-        let type = WWBluetoothManager.ServiceUUIDType(rawValue: peripheral.identifier.uuidString)
-        wwPrint(type)
     }
     
     /// 斷線事件，清理所有狀態

@@ -29,7 +29,7 @@ https://github.com/user-attachments/assets/57755f9d-db9a-4d18-9c00-df17b4141531
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/William-Weng/WWBluetoothManager", .upToNextMinor(from: "1.1.0"))
+    .package(url: "https://github.com/William-Weng/WWBluetoothManager", .upToNextMinor(from: "1.1.1"))
 ]
 ```
 
@@ -287,7 +287,7 @@ final class BluetoothClientViewController: UIViewController {
     
     @IBAction func writeData(_ sender: UIBarButtonItem) {
     
-        let writeType: WWBluetoothManager.ServiceUUIDType = .write
+        let writeType: WWBluetoothManager.UUIDType = .write
         let result = client.write(Data([0x01]), to: writeType.cbuuid().uuidString, type: .withResponse)
         
         appendLog("\(result)")

@@ -97,7 +97,7 @@ public extension WWBluetoothManager {
     
     /// [周邊設備的UUID代號類型](https://github.com/Eronwu/Getting-Started-with-Bluetooth-Low-Energy-in-Chinese/blob/master/chapter9.md)
     /// => [CBUUID(string: "0x180f") -> .batteryService (電池資料)](https://blog.csdn.net/chihuoyinshi/article/details/134726016)
-    enum ServiceUUIDType: String {
+    enum UUIDType: String {
         /* GATT服務 */
         case genericAccess = "0x1800"                                   // 通用訪問
         case alertNotificationService = "0x1811"                        // 鬧鐘通知
@@ -394,7 +394,7 @@ public extension WWBluetoothManager {
         case include = "0x2802"                                         // 包括
         case primaryService = "0x2800"                                  // 主要服務
         case secondaryService = "0x2801"                                // 次要服務
-        
+        /* 自定義 */
         case continuity = "D0611E78-BBB4-4591-A5F8-487910AE4366"        // 接續互通
         case bluMidi = "03B80E5A-EDE8-4B33-A751-6CE34EC4C700"           // 藍芽Midi
         case read = "0000FF10-0000-1000-8000-00805F9B34FB"              // 讀取

@@ -23,7 +23,7 @@ final class BluetoothClientViewController: UIViewController {
     
     @IBAction func writeData(_ sender: UIBarButtonItem) {
         
-        let writeType: WWBluetoothManager.ServiceUUIDType = .write
+        let writeType: WWBluetoothManager.UUIDType = .write
         let result = client.write(Data([0x01]), to: writeType.cbuuid().uuidString, type: .withResponse)
         
         appendLog("\(result)")
