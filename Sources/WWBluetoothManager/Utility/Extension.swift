@@ -54,6 +54,13 @@ public extension Data {
     }
 }
 
+// MARK: - String
+extension String {
+    
+    /// 將字串轉換為 CBUUID
+    var asCBUUID: CBUUID? { return CBUUID(string: self) }
+}
+
 // MARK: - Dictionary
 extension Dictionary where Key == String, Value == Any {
     

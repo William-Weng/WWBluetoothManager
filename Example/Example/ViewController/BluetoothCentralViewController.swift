@@ -17,7 +17,7 @@ import CoreBluetooth
 import WWPrint
 import WWBluetoothManager
 
-final class ViewController: UIViewController {
+final class BluetoothCentralViewController: UIViewController {
     
     private let central = WWBluetoothManager.Central()                  // WWBluetoothManager 的 Central 管理器實例
     private let targetLocalName = "Control for SB1830"                  // 目標設備名稱過濾（廣告資料中的 localName）
@@ -37,7 +37,7 @@ final class ViewController: UIViewController {
 }
 
 // MARK: - WWBluetoothManager.CentralDelegate（事件中介層）
-extension ViewController: WWBluetoothManager.CentralDelegate {
+extension BluetoothCentralViewController: WWBluetoothManager.CentralDelegate {
     
     /// CentralManager 事件處理（CBCentralManagerDelegate）
     func centralManager(_ central: WWBluetoothManager.Central, status: WWBluetoothManager.CentralStatus) {
@@ -65,7 +65,7 @@ extension ViewController: WWBluetoothManager.CentralDelegate {
 }
 
 // MARK: - CentralManager 事件實現
-private extension ViewController {
+private extension BluetoothCentralViewController {
     
     /// Bluetooth 狀態更新
     /// - 僅在 `.poweredOn` 時自動開始掃描
@@ -118,7 +118,7 @@ private extension ViewController {
 }
 
 // MARK: - Peripheral 事件實現
-private extension ViewController {
+private extension BluetoothCentralViewController {
     
     /// 服務發現完成，列印所有服務 UUID
     func discoveredServices(_ peripheral: CBPeripheral, services: [CBService]) {
@@ -180,7 +180,7 @@ private extension ViewController {
 }
 
 // MARK: - 小工具
-private extension ViewController {
+private extension BluetoothCentralViewController {
     
     /// 綁定 Bluetooth 委派，啟動事件監聽
     func bindBluetooth() {

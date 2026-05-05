@@ -7,7 +7,7 @@
 
 import CoreBluetooth
 
-// MARK: - 事件狀態常數化
+// MARK: - Central事件狀態常數化
 public extension WWBluetoothManager {
     
     /// CentralManager 相關的事件狀態，用於 `centralManager(_:status:)` 委派方法。
@@ -43,7 +43,56 @@ public extension WWBluetoothManager {
     }
 }
 
-// MARK: - enum
+// MARK: - Client事件狀態常數化
+public extension WWBluetoothManager {
+    
+    /// 代表藍牙 Client 運作過程中產生的各種狀態與事件 => 透過訂閱這些事件，外部開發者可以即時掌握藍牙連線的生命週期與數據流向。
+    enum ClientEvent {
+        
+        case stateChanged(CBManagerState)                                                               // 藍牙硬體狀態變更 (例如：poweredOn, poweredOff, resetting)
+        case discovered(Device)                                                                         // 發現周邊設備
+        case connected(Device)                                                                          // 成功連線至周邊設備
+        case disconnected(Device?, Error?)                                                              // 設備斷線。回傳該設備與斷線原因 (若為 nil 代表正常斷線)
+        case servicesDiscovered(Device, [CBUUID])                                                       // 已成功發現設備的所有服務 (Services)
+        case characteristicsDiscovered(CBUUID, [CBUUID])                                                // 已成功發現指定服務下的所有特徵值 (Characteristics)
+        case notificationEnabled(CBUUID)                                                                // 特定特徵值的通知功能已開啟 (Notification/Indication enabled)
+        case valueUpdated(CBUUID, Data)                                                                 // 接收到來自藍牙裝置的數據更新
+        case writeCompleted(CBUUID, Error?)                                                             // 寫入資料操作已完成。回傳錯誤以標記是否發生失敗
+        case failed(Error)                                                                              // 操作失敗。包含所有階段（掃描、連線、發現、讀寫）的錯誤 => 建議配合 ClientError 進行類型匹配與處理
+    }
+    
+    /// 代表藍牙 Client 運作過程中產生的各種錯誤
+    enum ClientError: Error {
+        
+        case invalidUUID                                                                                // 無效的 UUID 格式，無法轉換為 CBUUID
+        case peripheralNotConnected                                                                     // 設備尚未連線或連線已斷開
+        case characteristicNotFound                                                                     // 特徵值不可用（未發現、無權限或該設備不支援）
+        case encodingFailed                                                                             // 字串轉 Data 編碼失敗 (例如：使用了不支援該字元集的編碼)
+        case operationFailed(Error)                                                                     // 底層藍牙作業錯誤（關聯到底層的錯誤訊息）
+    }
+}
+
+// MARK: - Event 轉換成文字
+extension WWBluetoothManager.ClientEvent: @retroactive CustomStringConvertible {
+    
+    public var description: String {
+        
+        switch self {
+        case .stateChanged(let state): return "State: \(state.rawValue)"
+        case .discovered(let device): return "Discovered: \(device.name) (RSSI: \(device.rssi))"
+        case .connected: return "Connected ✅"
+        case .disconnected(let device, let error): return "Disconnected: \(device?.name ?? "Unknown") \(error.map { "\($0)" } ?? "")"
+        case .servicesDiscovered(_, let services): return "Services: \(services.map { $0.uuidString })"
+        case .characteristicsDiscovered(let service, let chars): return "Chars \(service.uuidString): \(chars.map { $0.uuidString })"
+        case .notificationEnabled(let uuid): return "Notify ON: \(uuid.uuidString)"
+        case .valueUpdated(let uuid, let data): return "Notify \(uuid.uuidString): \(data.map { String(format: "%02x", $0) }.joined())"
+        case .writeCompleted(let uuid, let error): return "Write \(uuid.uuidString): \(error.map { "\($0)" } ?? "OK")"
+        case .failed(let error): return "Failed: \(error)"
+        }
+    }
+}
+
+// MARK: - ServiceUUIDType
 public extension WWBluetoothManager {
     
     /// [周邊設備的UUID代號類型](https://github.com/Eronwu/Getting-Started-with-Bluetooth-Low-Energy-in-Chinese/blob/master/chapter9.md)
@@ -349,6 +398,8 @@ public extension WWBluetoothManager {
         case continuity = "D0611E78-BBB4-4591-A5F8-487910AE4366"        // 接續互通
         case bluMidi = "03B80E5A-EDE8-4B33-A751-6CE34EC4C700"           // 藍芽Midi
         case read = "0000FF10-0000-1000-8000-00805F9B34FB"              // 讀取
+        case write = "B7860002-11B8-B681-6343-5A6C2286633F"             // 寫入
+        case notify = "B7860003-11B8-B681-6343-5A6C2286633F"            // 通知
         
         /// [UUID數值](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Assigned_Numbers/out/en/Assigned_Numbers.pdf)
         /// - Returns: [CBUUID](https://blog.csdn.net/hjj801006/article/details/135593595)

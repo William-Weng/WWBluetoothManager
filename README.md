@@ -29,21 +29,27 @@ https://github.com/user-attachments/assets/5ad4d46a-2b58-4411-892b-bfa032ad5843
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/William-Weng/WWBluetoothManager", .upToNextMinor(from: "1.0.0"))
+    .package(url: "https://github.com/William-Weng/WWBluetoothManager", .upToNextMinor(from: "1.1.0"))
 ]
 ```
 
-## 🧲 公開屬性 (Central)
+## 🧲 公開屬性
 
-| 參數名稱 | 說明 |
+| 參數名稱 (Central) | 說明 |
 |-----------|------|
 | `delegate` | 委派物件，接收所有 CentralManager 和 Peripheral 事件 |
 | `state` | 目前 Bluetooth 適配器狀態 |
 | `peripherals` | 所有已發現的周邊設備列表（掃描期間累積） |
 
-## 🧲 公開 API (Central)
+| 參數名稱 (Client) | 說明 |
+|-----------|------|
+| `onEvent` | 用於向外部回報藍牙事件的閉包 |
+| `scannedDevices` | 已掃描到的設備列表，以設備 UUID 為鍵值進行快取 |
+| `connectedDevice` | 目前已成功連線的設備 |
 
-| 參數名稱 | 說明 |
+## 💡 公開 API
+
+| API名稱 (Central) | 說明 |
 |-----------|------|
 | `startScan(serviceUUIDs:allowDuplicates:)` | 開始掃描周邊設備 |
 | `startScan(serviceUUIDTypes:allowDuplicates:)` | 開始掃描周邊設備 |
@@ -52,7 +58,19 @@ dependencies: [
 | `disconnect(_:)` | 斷開指定周邊設備連線 |
 | `discoverServices(_:for:)` | 開始發現指定設備的服務 |
 
-## 🚀 使用範例
+| API名稱 (Client) | 說明 |
+|-----------|------|
+| `startScan(serviceUUIDs:allowDuplicates:)` | 開始掃描周邊設備 |
+| `startScan(serviceUUIDTypes:allowDuplicates:)` | 開始掃描周邊設備 |
+| `stopScan()` | 停止掃描 |
+| `connect(_:options:)` | 連接到指定周邊設備 |
+| `disconnect(_:)` | 斷開指定周邊設備連線 |
+| `enableNotify(_:)` | 啟用特定特徵值的通知功能 |
+| `disableNotify(_:)` | 停用特定特徵值的通知功能 |
+| `write(_:to:type:)` | 將原始資料 (Data) 寫入指定特徵值 |
+| `write(_:to:encoding:type:)` | 將字串寫入指定特徵值 |
+
+## 🚀 使用範例 (Central)
 
 ```swift
 import UIKit
@@ -60,7 +78,7 @@ import CoreBluetooth
 import WWPrint
 import WWBluetoothManager
 
-final class ViewController: UIViewController {
+final class BluetoothCentralViewController: UIViewController {
     
     private let central = WWBluetoothManager.Central()
     private let targetLocalName = "Control for SB1830"
@@ -79,7 +97,7 @@ final class ViewController: UIViewController {
     @IBAction func sendHex01(_ sender: UIButton) { sendHex() }
 }
 
-extension ViewController: WWBluetoothManager.CentralDelegate {
+extension BluetoothCentralViewController: WWBluetoothManager.CentralDelegate {
     
     func centralManager(_ central: WWBluetoothManager.Central, status: WWBluetoothManager.CentralStatus) {
         switch status {
@@ -104,7 +122,7 @@ extension ViewController: WWBluetoothManager.CentralDelegate {
     }
 }
 
-private extension ViewController {
+private extension BluetoothCentralViewController {
     
     func centralStateUpdated(_ state: CBManagerState) {
         
@@ -147,7 +165,7 @@ private extension ViewController {
     }
 }
 
-private extension ViewController {
+private extension BluetoothCentralViewController {
     
     func discoveredServices(_ peripheral: CBPeripheral, services: [CBService]) {
         
@@ -199,7 +217,7 @@ private extension ViewController {
     }
 }
 
-private extension ViewController {
+private extension BluetoothCentralViewController {
     
     func bindBluetooth() {
         central.delegate = self
@@ -217,6 +235,87 @@ private extension ViewController {
             peripheral.writeValue(data, for: characteristic, type: writeType)
             wwPrint("Send hex => \(data.map { String(format: "%02x", $0) }.joined())")
         }
+    }
+}
+```
+
+## 🚀 使用範例 (Client)
+
+```swift
+import UIKit
+import CoreBluetooth
+import WWBluetoothManager
+
+final class BluetoothClientViewController: UIViewController {
+    
+    private let client = WWBluetoothManager.Client()
+    private let targetLocalName = "Control for SB1830"
+    
+    @IBOutlet weak var logTextView: UITextView!
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        setupBluetooth()
+    }
+    
+    @IBAction func writeData(_ sender: UIBarButtonItem) {
+    
+        let writeType: WWBluetoothManager.ServiceUUIDType = .write
+        let result = client.write(Data([0x01]), to: writeType.cbuuid().uuidString, type: .withResponse)
+        
+        appendLog("\(result)")
+    }
+}
+
+private extension BluetoothClientViewController {
+        
+    func setupBluetooth() {
+        
+        client.onEvent = { [weak self] event in
+            
+            guard let this = self else { return }
+            
+            DispatchQueue.main.async {
+                
+                this.appendLog("\(event)")
+                
+                switch event {
+                case .discovered(let device): this.connectDevice(device)
+                default: break
+                }
+            }
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            self.client.startScan()
+        }
+    }
+}
+
+private extension BluetoothClientViewController {
+    
+    func connectDevice(_ device: WWBluetoothManager.Device) {
+        
+        guard device.name == targetLocalName else { return }
+        
+        appendLog(device.jsonString ?? "")
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+            
+            guard let this = self else { return }
+            
+            this.client.connect(device)
+            this.client.stopScan()
+        }
+    }
+    
+    func appendLog(_ text: String) {
+        
+        let timestamp = DateFormatter.localizedString(from: Date(), dateStyle: .none, timeStyle: .medium)
+        let bottom = NSMakeRange(logTextView.text.count - 1, 1)
+        
+        logTextView.text += "[\(timestamp)] \(text)\n\n"
+        logTextView.scrollRangeToVisible(bottom)
     }
 }
 ```
