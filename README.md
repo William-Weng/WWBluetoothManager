@@ -33,6 +33,33 @@ dependencies: [
 ]
 ```
 
+## 🧭 架構圖
+
+```mermaid
+graph TD
+    %% 定義風格
+    classDef app fill:#f9f9f9,stroke:#333,stroke-width:2px;
+    classDef client fill:#e1f5fe,stroke:#0277bd,stroke-width:2px;
+    classDef central fill:#fff9c4,stroke:#fbc02d,stroke-width:2px;
+    classDef framework fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+
+    %% 節點定義
+    AppUI[iOS App UI 層]:::app
+    Client[WWBluetoothManager.Client]:::client
+    Central[WWBluetoothManager.Central]:::central
+    CoreBLE[Apple CoreBluetooth]:::framework
+
+    %% 關係連結
+    AppUI -- "呼叫方法 (connect, write)" --> Client
+    Client -- "處理回調 (onEvent)" --> AppUI
+    
+    Client -- "發送指令" --> Central
+    Central -- "轉發原始事件" --> Client
+    
+    Central -- "操作 (Scan, Connect)" --> CoreBLE
+    CoreBLE -- "觸發 Delegate 回調" --> Central
+```
+
 ## 🧲 公開屬性
 
 | 參數名稱 (Central) | 說明 |
