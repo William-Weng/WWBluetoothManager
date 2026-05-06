@@ -11,8 +11,17 @@ let package = Package(
     products: [
         .library(name: "WWBluetoothManager", targets: ["WWBluetoothManager"]),
     ],
+    dependencies: [
+        .package(url: "https://github.com/William-Weng/WWByteReader", .upToNextMinor(from: "1.2.0"))
+    ],
     targets: [
-        .target(name: "WWBluetoothManager", resources: [.copy("Privacy")])
+        .target(
+            name: "WWBluetoothManager",
+            dependencies: [
+                .product(name: "WWByteReader", package: "WWByteReader")
+            ],
+            resources: [.copy("Privacy")]
+        )
     ],
     swiftLanguageVersions: [
         .v5

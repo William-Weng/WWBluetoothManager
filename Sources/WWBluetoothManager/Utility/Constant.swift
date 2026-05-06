@@ -72,23 +72,49 @@ public extension WWBluetoothManager {
     }
 }
 
-// MARK: - Event 轉換成文字
-extension WWBluetoothManager.ClientEvent: @retroactive CustomStringConvertible {
+// MARK: - 檔案傳輸
+public extension WWBluetoothManager {
     
-    public var description: String {
+    /// 檔案傳輸協議的封包型別 => 設計概念參考 TLS/SSL handshake：先做握手協商，再進入資料傳輸，最後做完成確認 / 每一個 case 都代表一種「控制訊息」或「資料訊息」。
+    enum FileTransferRecordType: UInt8 {
         
-        switch self {
-        case .stateChanged(let state): return "State: \(state.rawValue)"
-        case .discovered(let device): return "Discovered: \(device.name) (RSSI: \(device.rssi))"
-        case .connected: return "Connected ✅"
-        case .disconnected(let device, let error): return "Disconnected: \(device?.name ?? "Unknown") \(error.map { "\($0)" } ?? "")"
-        case .servicesDiscovered(_, let services): return "Services: \(services.map { $0.uuidString })"
-        case .characteristicsDiscovered(let service, let chars): return "Chars \(service.uuidString): \(chars.map { $0.uuidString })"
-        case .notificationEnabled(let uuid): return "Notify ON: \(uuid.uuidString)"
-        case .valueUpdated(let uuid, let data): return "Notify \(uuid.uuidString): \(data.map { String(format: "%02x", $0) }.joined())"
-        case .writeCompleted(let uuid, let error): return "Write \(uuid.uuidString): \(error.map { "\($0)" } ?? "OK")"
-        case .failed(let error): return "Failed: \(error)"
-        }
+        case clientHello = 0x01     // 傳送端發起傳檔請求 => 類似 TLS 的 ClientHello
+        case serverHello = 0x02     // 接收端回覆已收到傳檔請求，並同意建立此次傳輸會話 => 類似 TLS 的 ServerHello
+        case ready = 0x03           // 傳送端確認握手完成，準備開始傳送資料片段
+        case data = 0x04            // 檔案內容的實際資料片段
+        case ack = 0x05             // 接收端確認已收到某個資料片段 (ACK = Acknowledgement)
+        case finish = 0x06          // 傳送端表示檔案資料已經全部送完 => 表示所有 `.data` 都已送出
+        case finishAck = 0x07       // 接收端確認整個檔案已成功接收並完成重組 => 類似傳輸流程中的最終完成確認
+        case error = 0x08           // 傳輸過程中發生錯誤 => 可表示握手失敗、資料缺片、格式錯誤、狀態不一致等問題
+    }
+    
+    /// 檔案傳輸狀態機目前所處的階段 => `FileTransferRecordType` = 「收到 / 送出的封包是什麼」 / `FileTransferPhase` = 「整個傳檔流程現在走到哪裡」
+    enum FileTransferPhase: Equatable {
+        
+        case idle                           // 尚未開始傳輸 => 初始狀態，或重置後的待命狀態。
+        case waitingServerHello             // 已送出 `clientHello`，等待接收端回覆 `serverHello` => 這表示傳送端正在等待對方接受此次傳輸會話
+        case waitingReady                   // 已完成前半段握手，等待進入正式傳輸狀態 => 接收端剛收到 `clientHello`，準備等待 `ready` / 傳送端剛收到 `serverHello`，即將送出 `ready`
+        case sendingData                    // 正在傳送或接收資料片段 => 進入此狀態後，通常會持續處理 `.data` 與 `.ack`，直到所有 chunk 傳輸完成
+        case waitingFinishAck               // 所有資料片段都已送出，等待接收端回覆 `finishAck` => 傳送端在送出 `finish` 後，會停留在這個狀態，直到對方確認整個檔案已完整接收
+        case receivingData                  // 正在接收資料片段 => 這個狀態通常出現在接收端，表示目前正在累積多個 `data` chunk，等待重組完整檔案
+        case completed                      // 傳輸已成功完成 => 傳送端或接收端在整個流程結束後都可以進入此狀態
+        case failed(FileTransferError)      // 傳輸失敗 => 會附帶錯誤描述，用來表示此次傳輸失敗的原因
+    }
+    
+    /// 檔案傳輸錯誤
+    ///
+    /// 表示本次檔案傳輸過程中發生的領域錯誤，
+    /// 用於 `WWBluetoothManager.FileTransferController` 的狀態機與回調。
+    enum FileTransferError: Error, Equatable {
+        
+        case writeFailed(String)            // 寫入藍牙 characteristic 失敗
+        case updateFailed(String)           // characteristic 資料更新失敗
+        case invalidRecord                  // 收到的傳輸記錄格式無法解碼或無效
+        case missingChunks                  // 所有資料切片尚未集齊，無法組成完整檔案
+        case peerReturnedError              // 對端回傳了錯誤訊號，表示傳輸異常
+        case invalidTransferId              // 收到的傳輸 ID 與本端不符，可能為不屬於本次傳輸的封包
+        case invalidPhase                   // 傳輸狀態機進入非法狀態，表示內部流程錯誤
+        case missingCharacteristic          // 所需的藍牙 characteristic 不存在（例如 data / control characteristic 為 nil）
     }
 }
 
@@ -400,22 +426,83 @@ public extension WWBluetoothManager {
         case read = "0000FF10-0000-1000-8000-00805F9B34FB"              // 讀取
         case write = "B7860002-11B8-B681-6343-5A6C2286633F"             // 寫入
         case notify = "B7860003-11B8-B681-6343-5A6C2286633F"            // 通知
-        
-        /// [UUID數值](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Assigned_Numbers/out/en/Assigned_Numbers.pdf)
-        /// - Returns: [CBUUID](https://blog.csdn.net/hjj801006/article/details/135593595)
-        public func cbuuid() -> CBUUID { return CBUUID(string: self.rawValue) }
     }
 }
 
-// MARK: - enum
+// MARK: - UUID類型
+public extension WWBluetoothManager.UUIDType {
+    
+    /// 尋找UUIDType
+    /// - Parameter uuidString: String
+    /// - Returns: UUIDType?
+    static func find(uuidString: String) -> Self? {
+        return Self(rawValue: uuidString)
+    }
+    
+    /// 尋找UUIDType
+    /// - Parameter uuid: CBUUID
+    /// - Returns: UUIDType?
+    static func find(uuid: CBUUID) -> Self? {
+        return Self.find(uuidString: uuid.uuidString)
+    }
+}
+
+// MARK: - UUID類型 (GATT)
+public extension WWBluetoothManager.UUIDType {
+        
+    /// [UUID數值](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Assigned_Numbers/out/en/Assigned_Numbers.pdf)
+    /// - Returns: [CBUUID](https://blog.csdn.net/hjj801006/article/details/135593595)
+    func cbuuid() -> CBUUID { return CBUUID(string: self.rawValue) }
+}
+
+// MARK: - FileTransferError
+extension WWBluetoothManager.FileTransferError: LocalizedError {
+    
+    /// 自訂錯誤訊息
+    public var errorDescription: String? {
+        
+        switch self {
+        case .writeFailed(let message): return "Write failed: \(message)"
+        case .updateFailed(let message): return "Value update failed: \(message)"
+        case .invalidRecord: return "Invalid transfer record"
+        case .missingChunks: return "Missing chunks"
+        case .peerReturnedError: return "Peer returned error"
+        case .invalidTransferId: return "Invalid transfer ID"
+        case .invalidPhase: return "Invalid transfer phase"
+        case .missingCharacteristic: return "Missing characteristic"
+        }
+    }
+}
+
+// MARK: - AdvertisementDataKey
 extension WWBluetoothManager {
     
     /// 廣告資料鍵值常數（CoreBluetooth 標準）
     enum AdvertisementDataKey: String {
         
-        case localName = "CBAdvertisementDataLocalNameKey"                                              // 設備本地名稱（廣告包中最優先的名稱來源）
-        case manufacturerData = "CBAdvertisementDataManufacturerDataKey"                                // 設備本地名稱（廣告包中最優先的名稱來源）
-        case serviceUUIDs = "CBAdvertisementDataServiceUUIDsKey"                                        // 廣告中宣告的服務 UUID 列表（設備支援的 GATT 服務）
-        case isConnectable = "CBAdvertisementDataIsConnectable"                                         // 可連線標記（iOS 11+，指示設備是否接受連線）
+        case localName = "CBAdvertisementDataLocalNameKey"                      // 設備本地名稱（廣告包中最優先的名稱來源）
+        case manufacturerData = "CBAdvertisementDataManufacturerDataKey"        // 設備本地名稱（廣告包中最優先的名稱來源）
+        case serviceUUIDs = "CBAdvertisementDataServiceUUIDsKey"                // 廣告中宣告的服務 UUID 列表（設備支援的 GATT 服務）
+        case isConnectable = "CBAdvertisementDataIsConnectable"                 // 可連線標記（iOS 11+，指示設備是否接受連線）
+    }
+}
+
+// MARK: - Event 轉換成文字
+extension WWBluetoothManager.ClientEvent: @retroactive CustomStringConvertible {
+    
+    public var description: String {
+        
+        switch self {
+        case .stateChanged(let state): return "State: \(state.rawValue)"
+        case .discovered(let device): return "Discovered: \(device.name) (RSSI: \(device.rssi))"
+        case .connected: return "Connected ✅"
+        case .disconnected(let device, let error): return "Disconnected: \(device?.name ?? "Unknown") \(error.map { "\($0)" } ?? "")"
+        case .servicesDiscovered(_, let services): return "Services: \(services.map { $0.uuidString })"
+        case .characteristicsDiscovered(let service, let chars): return "Chars \(service.uuidString): \(chars.map { $0.uuidString })"
+        case .notificationEnabled(let uuid): return "Notify ON: \(uuid.uuidString)"
+        case .valueUpdated(let uuid, let data): return "Notify \(uuid.uuidString): \(data.map { String(format: "%02x", $0) }.joined())"
+        case .writeCompleted(let uuid, let error): return "Write \(uuid.uuidString): \(error.map { "\($0)" } ?? "OK")"
+        case .failed(let error): return "Failed: \(error)"
+        }
     }
 }

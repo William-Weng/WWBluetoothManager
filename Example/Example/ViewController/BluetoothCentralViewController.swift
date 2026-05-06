@@ -130,21 +130,24 @@ private extension BluetoothCentralViewController {
         wwPrint("Characteristics of \(service.uuid.uuidString) (\(characteristics.count) 個):")
         
         characteristics.forEach { characteristic in
-            let uuid = characteristic.uuid.uuidString
+            
+            let uuid = characteristic.uuid
+            let uuidType = WWBluetoothManager.UUIDType.find(uuid: uuid)
+            
             wwPrint("\(uuid)")
             wwPrint("Properties => \(characteristic.properties)")
             
-            // 找到寫入特性
-            if uuid == writeUUID {
+            switch uuidType {
+            case .write:    // 找到寫入特性
                 writableCharacteristic = characteristic
                 wwPrint("Writable characteristic found!")
-            }
-            
-            // 找到通知特性並自動啟用
-            if uuid == notifyUUID {
+
+            case .notify:   // 找到通知特性並自動啟用
                 notifyCharacteristic = characteristic
                 peripheral.setNotifyValue(true, for: characteristic)
                 wwPrint("Notify enabled!")
+
+            default: break
             }
         }
     }
