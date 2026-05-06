@@ -29,7 +29,7 @@ https://github.com/user-attachments/assets/57755f9d-db9a-4d18-9c00-df17b4141531
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/William-Weng/WWBluetoothManager", .upToNextMinor(from: "1.1.1"))
+    .package(url: "https://github.com/William-Weng/WWBluetoothManager", .upToNextMinor(from: "1.1.2"))
 ]
 ```
 
@@ -95,7 +95,9 @@ graph TD
 | `enableNotify(_:)` | 啟用特定特徵值的通知功能 |
 | `disableNotify(_:)` | 停用特定特徵值的通知功能 |
 | `write(_:to:type:)` | 將原始資料 (Data) 寫入指定特徵值 |
-| `write(_:to:encoding:type:)` | 將字串寫入指定特徵值 |
+| `write(_:uuidType:type:)` | 將原始資料 (Data) 寫入指定特徵值 |
+| `write(_:to:encoding:type:)` | 將字串 (String) 寫入指定特徵值 |
+| `write(_:uuidType:encoding:type:)` | 將字串 (String) 寫入指定特徵值 |
 
 ## 🚀 使用範例 (Central)
 
@@ -286,10 +288,7 @@ final class BluetoothClientViewController: UIViewController {
     }
     
     @IBAction func writeData(_ sender: UIBarButtonItem) {
-    
-        let writeType: WWBluetoothManager.UUIDType = .write
-        let result = client.write(Data([0x01]), to: writeType.cbuuid().uuidString, type: .withResponse)
-        
+        let result = client.write(Data([0x01]), uuidType: .write, type: .withResponse)
         appendLog("\(result)")
     }
 }

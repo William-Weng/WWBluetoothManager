@@ -1,8 +1,8 @@
 //
-//  BluetoothTestViewController.swift
+//  BluetoothClientViewController.swift
 //  Example
 //
-//  Created by William.Weng on 2025/10/29.
+//  Created by William.Weng on 2026/05/05.
 //
 
 import UIKit
@@ -22,10 +22,7 @@ final class BluetoothClientViewController: UIViewController {
     }
     
     @IBAction func writeData(_ sender: UIBarButtonItem) {
-        
-        let writeType: WWBluetoothManager.UUIDType = .write
-        let result = client.write(Data([0x01]), to: writeType.cbuuid().uuidString, type: .withResponse)
-        
+        let result = client.write(Data([0x01]), uuidType: .write, type: .withResponse)
         appendLog("\(result)")
     }
 }

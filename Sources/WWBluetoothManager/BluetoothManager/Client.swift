@@ -123,6 +123,16 @@ public extension WWBluetoothManager.Client {
         return .success(true)
     }
 
+    /// 將原始資料 (Data) 寫入指定特徵值 => 自動判斷寫入模式：優先使用傳入的 type，否則依據屬性決定
+    /// - Parameters:
+    ///   - data: 要寫入的資料
+    ///   - uuidType: 目標特徵值的 UUID 類型
+    ///   - type: 寫入類型 (預設會根據屬性自動決定使用 .withResponse 或 .withoutResponse)
+    /// - Returns: Result<Bool, WWBluetoothManager.ClientError>
+    func write(_ data: Data, uuidType: WWBluetoothManager.UUIDType, type: CBCharacteristicWriteType? = nil) -> Result<Bool, WWBluetoothManager.ClientError> {
+        return write(data, to: uuidType.rawValue, type: type)
+    }
+    
     /// 將字串寫入指定特徵值 (自動轉換為 UTF-8 資料)
     /// - Parameters:
     ///   - string: 要寫入的字串
@@ -136,6 +146,17 @@ public extension WWBluetoothManager.Client {
         write(data, to: uuidString, type: type)
         
         return .success(true)
+    }
+    
+    /// 將字串寫入指定特徵值 (自動轉換為 UTF-8 資料)
+    /// - Parameters:
+    ///   - string: 要寫入的字串
+    ///   - uuidType: 目標特徵值的 UUID 類型
+    ///   - encoding: 編碼格式，預設為 UTF-8
+    ///   - type: 寫入類型
+    /// - Returns: Result<Bool, WWBluetoothManager.ClientError>
+    func write(_ string: String, uuidType: WWBluetoothManager.UUIDType, encoding: String.Encoding = .utf8, type: CBCharacteristicWriteType? = nil) -> Result<Bool, WWBluetoothManager.ClientError> {
+        return write(string, to: uuidType.rawValue, encoding: encoding, type: type)
     }
 }
 

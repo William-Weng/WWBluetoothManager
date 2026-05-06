@@ -1,8 +1,8 @@
 //
-//  ViewController.swift
+//  BluetoothCentralViewController.swift
 //  Example
 //
-//  Created by William.Weng on 2025/10/29.
+//  Created by William.Weng on 2026/05/05.
 //
 // NSBluetoothAlwaysUsageDescription = 需要藍牙權限來搜尋並連接附近裝置
 // 掃描 → connect → didConnect → discoverServices → discoverCharacteristics
