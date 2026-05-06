@@ -62,13 +62,13 @@ graph TD
 
 ## 🧲 公開屬性
 
-| 參數名稱 (Central) | 說明 |
+| Central 參數名稱 | 說明 |
 |-----------|------|
 | `delegate` | 委派物件，接收所有 CentralManager 和 Peripheral 事件 |
 | `state` | 目前 Bluetooth 適配器狀態 |
 | `peripherals` | 所有已發現的周邊設備列表（掃描期間累積） |
 
-| 參數名稱 (Client) | 說明 |
+| Client 參數名稱 | 說明 |
 |-----------|------|
 | `onEvent` | 用於向外部回報藍牙事件的閉包 |
 | `scannedDevices` | 已掃描到的設備列表，以設備 UUID 為鍵值進行快取 |
@@ -76,7 +76,7 @@ graph TD
 
 ## 💡 公開 API
 
-| API名稱 (Central) | 說明 |
+| Central API名稱 | 說明 |
 |-----------|------|
 | `startScan(serviceUUIDs:allowDuplicates:)` | 開始掃描周邊設備 |
 | `startScan(serviceUUIDTypes:allowDuplicates:)` | 開始掃描周邊設備 |
@@ -85,7 +85,7 @@ graph TD
 | `disconnect(_:)` | 斷開指定周邊設備連線 |
 | `discoverServices(_:for:)` | 開始發現指定設備的服務 |
 
-| API名稱 (Client) | 說明 |
+| Client API名稱 | 說明 |
 |-----------|------|
 | `startScan(serviceUUIDs:allowDuplicates:)` | 開始掃描周邊設備 |
 | `startScan(serviceUUIDTypes:allowDuplicates:)` | 開始掃描周邊設備 |
@@ -99,7 +99,7 @@ graph TD
 | `write(_:to:encoding:type:)` | 將字串 (String) 寫入指定特徵值 |
 | `write(_:uuidType:encoding:type:)` | 將字串 (String) 寫入指定特徵值 |
 
-## 🚀 使用範例 (Central)
+## 🚀 Central 使用範例
 
 ```swift
 import UIKit
@@ -268,7 +268,7 @@ private extension BluetoothCentralViewController {
 }
 ```
 
-## 🚀 使用範例 (Client)
+## 🚀 Client 使用範例
 
 ```swift
 import UIKit
