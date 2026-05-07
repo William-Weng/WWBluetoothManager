@@ -29,7 +29,7 @@ https://github.com/user-attachments/assets/57755f9d-db9a-4d18-9c00-df17b4141531
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/William-Weng/WWBluetoothManager", .upToNextMinor(from: "1.2.0"))
+    .package(url: "https://github.com/William-Weng/WWBluetoothManager", .upToNextMinor(from: "1.2.1"))
 ]
 ```
 
@@ -124,7 +124,9 @@ graph TD
 | Peripheral API名稱 | 說明 |
 |-----------|------|
 | `publish(serviceUUID:controlUUID:dataUUID:)` | 建立並發布檔案傳輸用的 Service 與兩條 characteristic |
+| `publish(serviceType:controlType:dataType:)` | 建立並發布檔案傳輸用的 Service 與兩條 characteristic |
 | `startAdvertising(localName:serviceUUIDs:)` | 開始 BLE 廣播，公開裝置名稱與服務 UUID |
+| `startAdvertising(localName:serviceTypes:)` | 開始 BLE 廣播，公開裝置名稱與服務 UUID |
 | `stopAdvertising()` | 停止目前的 BLE 廣播 |
 | `removeAllServices()` | 移除目前已發布的所有 services，並清空內部參考 |
 | `notifyValue(_:for:)` | 對已訂閱的 Central 推送 notify 資料 |

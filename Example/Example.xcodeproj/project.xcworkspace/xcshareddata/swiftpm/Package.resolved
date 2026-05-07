@@ -6,8 +6,17 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/William-Weng/WWBluetoothManager",
       "state" : {
-        "revision" : "8620be82dbadf54a39298858b5049647c3899f6b",
-        "version" : "1.1.2"
+        "revision" : "91eac1206e05d1b2cef8a507592c3c9665e3695e",
+        "version" : "1.2.0"
+      }
+    },
+    {
+      "identity" : "wwbytereader",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/William-Weng/WWByteReader",
+      "state" : {
+        "revision" : "bcf4901c88298ae5ff44ad4c0f30336450643234",
+        "version" : "1.2.0"
       }
     },
     {

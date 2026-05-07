@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="23727" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="NC8-it-nx4">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="23727" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="F1x-wK-WAc">
     <device id="retina5_9" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
@@ -256,13 +256,14 @@
                 <tabBarController automaticallyAdjustsScrollViewInsets="NO" id="NC8-it-nx4" sceneMemberID="viewController">
                     <toolbarItems/>
                     <tabBar key="tabBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="ZFn-aW-zmE">
+                        <rect key="frame" x="0.0" y="0.0" width="1000" height="1000"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <color key="selectedImageTintColor" red="0.016804177310000001" green="0.19835099580000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                     </tabBar>
                     <connections>
-                        <segue destination="4Zl-bd-3kl" kind="relationship" relationship="viewControllers" id="Q98-6d-2EH"/>
-                        <segue destination="vL0-Fv-1fc" kind="relationship" relationship="viewControllers" id="Kew-uu-LiT"/>
+                        <segue destination="vL0-Fv-1fc" kind="relationship" relationship="viewControllers" id="Zt2-CQ-0EX"/>
+                        <segue destination="4Zl-bd-3kl" kind="relationship" relationship="viewControllers" id="sNP-lx-0gI"/>
                     </connections>
                 </tabBarController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dJx-SO-7bR" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>

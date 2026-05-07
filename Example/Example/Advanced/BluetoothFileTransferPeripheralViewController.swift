@@ -16,10 +16,10 @@ final class BluetoothFileTransferPeripheralViewController: UIViewController {
     private let peripheral = WWBluetoothManager.Peripheral()
     
     private let localName = "WWFileTransfer"
-    private let serviceUUID = CBUUID(string: "0000FF10-0000-1000-8000-00805F9B34FB")
-    private let controlUUID = CBUUID(string: "0000FF11-0000-1000-8000-00805F9B34FB")
-    private let dataUUID = CBUUID(string: "0000FF12-0000-1000-8000-00805F9B34FB")
-    
+    private let serviceType: WWBluetoothManager.UUIDType = .service
+    private let controlType: WWBluetoothManager.UUIDType = .control
+    private let dataType: WWBluetoothManager.UUIDType = .data
+
     private var isAdvertisingStarted = false
     
     override func viewDidLoad() {
@@ -29,7 +29,7 @@ final class BluetoothFileTransferPeripheralViewController: UIViewController {
     
     @IBAction func startAdvertisingAction(_ sender: UIBarButtonItem) {
         logTextView.appendLog("Publish file transfer service...")
-        peripheral.publish(serviceUUID: serviceUUID, controlUUID: controlUUID, dataUUID: dataUUID)
+        peripheral.publish(serviceType: serviceType, controlType: controlType, dataType: dataType)
     }
     
     @IBAction func stopAdvertisingAction(_ sender: UIBarButtonItem) {
@@ -52,8 +52,8 @@ final class BluetoothFileTransferPeripheralViewController: UIViewController {
             return
         }
         
-        let result = peripheral.notifyValue(data, for: dataCharacteristic)
-        logTextView.appendLog("Send notify => \(result ? "success" : "buffer full")")
+        let isSuccess = peripheral.notifyValue(data, for: dataCharacteristic)
+        logTextView.appendLog("Send notify => \(isSuccess ? "success" : "buffer full")")
     }
 }
 
@@ -73,7 +73,7 @@ extension BluetoothFileTransferPeripheralViewController: WWBluetoothManager.Peri
             guard !isAdvertisingStarted else { return }
             
             isAdvertisingStarted = true
-            self.peripheral.startAdvertising(localName: localName, serviceUUIDs: [serviceUUID])
+            self.peripheral.startAdvertising(localName: localName, serviceTypes: [serviceType])
             
         case .advertisingStarted(let error):
             logTextView.appendLog("Advertising started, error => \(String(describing: error))")

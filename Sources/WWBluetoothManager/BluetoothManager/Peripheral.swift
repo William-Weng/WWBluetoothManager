@@ -105,6 +105,15 @@ public extension WWBluetoothManager.Peripheral {
         peripheralManager.add(service)
     }
     
+    /// 發布一個檔案傳輸用的 GATT Service
+    /// - Parameters:
+    ///   - serviceUUID: Service 的 UUID 類型（整個檔案傳輸服務的容器）
+    ///   - controlUUID: 控制用 Characteristic 的 UUID 類型（例如 hello / ack / ready / finish）
+    ///   - dataUUID: 資料用 Characteristic 的 UUID 類型（例如檔案 chunk）
+    func publish(serviceType: WWBluetoothManager.UUIDType, controlType: WWBluetoothManager.UUIDType, dataType: WWBluetoothManager.UUIDType) {
+        publish(serviceUUID: serviceType.cbUUID, controlUUID: controlType.cbUUID, dataUUID: dataType.cbUUID)
+    }
+    
     /// 開始廣播目前 Peripheral 的檔案傳輸服務 => 在 iOS 的 BLE peripheral advertising 中，最常使用的資料就是 local name 與 service UUIDs
     /// - Parameters:
     ///   - localName: 廣播時顯示的裝置名稱
@@ -119,6 +128,16 @@ public extension WWBluetoothManager.Peripheral {
         ]
         
         peripheralManager.startAdvertising(advertisementData: advertisementData)
+    }
+    
+    /// 開始廣播目前 Peripheral 的檔案傳輸服務 => 在 iOS 的 BLE peripheral advertising 中，最常使用的資料就是 local name 與 service UUIDs
+    /// - Parameters:
+    ///   - localName: 廣播時顯示的裝置名稱
+    ///   - serviceTypes: 要放進廣告資料中的 service UUID 清單類型
+    func startAdvertising(localName: String, serviceTypes: [WWBluetoothManager.UUIDType]) {
+        
+        let serviceUUIDs = serviceTypes.map { $0.cbUUID }
+        startAdvertising(localName: localName, serviceUUIDs: serviceUUIDs)
     }
     
     /// 停止目前的 BLE advertising => 呼叫 `CBPeripheralManager.stopAdvertising()` 停止廣播
