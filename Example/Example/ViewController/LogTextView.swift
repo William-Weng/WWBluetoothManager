@@ -2,7 +2,7 @@
 //  LogTextView.swift
 //  Example
 //
-//  Created by iOS on 2026/5/7.
+//  Created by WilliamWeng on 2026/5/6.
 //
 
 import UIKit

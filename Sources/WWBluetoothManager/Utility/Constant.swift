@@ -162,12 +162,24 @@ extension WWBluetoothManager.FileTransferError: LocalizedError {
 extension WWBluetoothManager {
     
     /// 廣告資料鍵值常數（CoreBluetooth 標準）
-    enum AdvertisementDataKey: String {
+    enum AdvertisementDataKey {
         
-        case localName = "CBAdvertisementDataLocalNameKey"                      // 設備本地名稱（廣告包中最優先的名稱來源）
-        case manufacturerData = "CBAdvertisementDataManufacturerDataKey"        // 設備本地名稱（廣告包中最優先的名稱來源）
-        case serviceUUIDs = "CBAdvertisementDataServiceUUIDsKey"                // 廣告中宣告的服務 UUID 列表（設備支援的 GATT 服務）
-        case isConnectable = "CBAdvertisementDataIsConnectable"                 // 可連線標記（iOS 11+，指示設備是否接受連線）
+        case localName              // 設備本地名稱（廣告包中最優先的名稱來源）
+        case manufacturerData       // 設備本地名稱（廣告包中最優先的名稱來源）
+        case serviceUUIDs           // 廣告中宣告的服務 UUID 列表（設備支援的 GATT 服務）
+        case isConnectable          // 可連線標記（iOS 11+，指示設備是否接受連線）
+        
+        /// 取得原始值
+        /// - Returns: String
+        func value() -> String {
+            
+            switch self {
+            case .localName: return CBAdvertisementDataLocalNameKey
+            case .manufacturerData: return CBAdvertisementDataManufacturerDataKey
+            case .serviceUUIDs: return CBAdvertisementDataServiceUUIDsKey
+            case .isConnectable: return CBAdvertisementDataIsConnectable
+            }
+        }
     }
 }
 

@@ -2,11 +2,12 @@
 //  BluetoothSFileViewController.swift
 //  Example
 //
-//  Created by iOS on 2026/5/7.
+//  Created by WilliamWeng on 2026/5/6.
 //
 
 import UIKit
 import CoreBluetooth
+import WWPrint
 import WWBluetoothManager
 
 final class BluetoothFileTransferViewController: UIViewController {
@@ -17,6 +18,9 @@ final class BluetoothFileTransferViewController: UIViewController {
     private let fileTransfer = WWBluetoothManager.FileTransferController()
     
     private let targetLocalName = "WWFileTransfer"
+    private let serviceUUID = CBUUID(string: "0000FF10-0000-1000-8000-00805F9B34FB")
+    private let controlUUID = CBUUID(string: "0000FF11-0000-1000-8000-00805F9B34FB")
+    private let dataUUID = CBUUID(string: "0000FF12-0000-1000-8000-00805F9B34FB")
     
     private var targetPeripheral: CBPeripheral?
     private var controlCharacteristic: CBCharacteristic?
@@ -103,12 +107,12 @@ private extension BluetoothFileTransferViewController {
     }
     
     func handleDiscovered(_ result: WWBluetoothManager.Central.ScanResult) {
-        
-        guard let displayName = result.displayName,
-              displayName == targetLocalName
-        else {
-            return
-        }
+                
+        guard let displayName = result.displayName else { return }
+        logTextView.appendLog("設備 displayName => \(displayName)")
+        logTextView.appendLog("設備 localName => \(result.localName ?? "Unknown")")
+
+        guard displayName == targetLocalName else { return }
         
         logTextView.appendLog("找到目標設備 => \(result.jsonString())")
         central.stopScan()
@@ -117,6 +121,9 @@ private extension BluetoothFileTransferViewController {
     
     func handleConnected(_ peripheral: CBPeripheral) {
         targetPeripheral = peripheral
+        controlCharacteristic = nil
+        dataCharacteristic = nil
+        isReceivePrepared = false
         logTextView.appendLog("Connected => \(peripheral.name ?? "Unknown")")
     }
     
@@ -153,15 +160,13 @@ private extension BluetoothFileTransferViewController {
             
             logTextView.appendLog("Characteristic => \(characteristic.uuid.uuidString), properties => \(characteristic.properties.rawValue)")
             
-            let uuidType = WWBluetoothManager.UUIDType.find(uuid: characteristic.uuid)
-            
-            switch uuidType {
-            case .notify:
+            switch characteristic.uuid {
+            case controlUUID:
                 controlCharacteristic = characteristic
                 peripheral.setNotifyValue(true, for: characteristic)
                 logTextView.appendLog("Control characteristic ready => \(characteristic.uuid.uuidString)")
                 
-            case .write:
+            case dataUUID:
                 dataCharacteristic = characteristic
                 logTextView.appendLog("Data characteristic ready => \(characteristic.uuid.uuidString)")
                 

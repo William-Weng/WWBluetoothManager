@@ -19,6 +19,7 @@ public extension WWBluetoothManager.Central {
     }
 }
 
+/// 掃描結果細節
 public extension WWBluetoothManager.Central.ScanResult {
     
     var localName: String? { getLocalName() }                           // 本地設備名稱（廣告資料優先）
@@ -61,13 +62,7 @@ extension WWBluetoothManager.Central.ScanResult: CustomStringConvertible, Custom
 
 // MARK: - JSON 序列化
 extension WWBluetoothManager.Central.ScanResult: Encodable {
-    
-    enum CodingKeys: String, CodingKey {
-        case displayName, rssi, isConnectable, localName
-        case manufacturerHex = "manufacturerHexString"
-        case serviceUUIDs, peripheral
-    }
-    
+        
     public func encode(to encoder: Encoder) throws {
         
         var container = encoder.container(keyedBy: CodingKeys.self)
@@ -83,13 +78,6 @@ extension WWBluetoothManager.Central.ScanResult: Encodable {
         try peripheralContainer.encode(peripheral.name, forKey: .name)
         try peripheralContainer.encode(peripheral.identifier.uuidString, forKey: .identifier)
         try peripheralContainer.encode(peripheral.state.rawValue, forKey: .state)
-    }
-}
-
-private extension WWBluetoothManager.Central.ScanResult {
-    
-    enum PeripheralKey: String, CodingKey {
-        case name, identifier, state
     }
 }
 
@@ -111,6 +99,20 @@ public extension WWBluetoothManager.Central.ScanResult {
         }
         
         return jsonString
+    }
+}
+
+// MARK: - CodingKey
+private extension WWBluetoothManager.Central.ScanResult {
+    
+    enum CodingKeys: String, CodingKey {
+        case displayName, rssi, isConnectable, localName
+        case manufacturerHex = "manufacturerHexString"
+        case serviceUUIDs, peripheral
+    }
+    
+    enum PeripheralKey: String, CodingKey {
+        case name, identifier, state
     }
 }
 
@@ -160,7 +162,7 @@ private extension WWBluetoothManager.Central.ScanResult {
     /// 2. `peripheral.name`（系統快取）
     /// 3. 預設名稱 `"Unknown"`
     func getDisplayName() -> String? {
-        
+                
         if let localName = getLocalName(), !localName.isEmpty { return localName }
         if let name = peripheral.name, !name.isEmpty { return name }
         

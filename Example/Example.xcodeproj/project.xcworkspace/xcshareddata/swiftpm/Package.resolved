@@ -1,13 +1,13 @@
 {
-  "originHash" : "f67602575bb0a809e0dec671c1ba01e6eac9079eecd45375598393ea8204ddf2",
+  "originHash" : "ee0dea41b68075af3a566124ac99ad642b35f1a87eb3e48a7eddb7bcc750f0b5",
   "pins" : [
     {
-      "identity" : "wwbytereader",
+      "identity" : "wwbluetoothmanager",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/William-Weng/WWByteReader",
+      "location" : "https://github.com/William-Weng/WWBluetoothManager",
       "state" : {
-        "revision" : "bcf4901c88298ae5ff44ad4c0f30336450643234",
-        "version" : "1.2.0"
+        "revision" : "8620be82dbadf54a39298858b5049647c3899f6b",
+        "version" : "1.1.2"
       }
     },
     {

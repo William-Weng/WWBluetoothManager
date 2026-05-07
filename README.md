@@ -29,7 +29,7 @@ https://github.com/user-attachments/assets/57755f9d-db9a-4d18-9c00-df17b4141531
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/William-Weng/WWBluetoothManager", .upToNextMinor(from: "1.1.3"))
+    .package(url: "https://github.com/William-Weng/WWBluetoothManager", .upToNextMinor(from: "1.2.0"))
 ]
 ```
 
@@ -60,6 +60,21 @@ graph TD
     CoreBLE -- "觸發 Delegate 回調" --> Central
 ```
 
+## 🤝 委派協定
+
+| Delegate 名稱 | 說明 |
+|-----------|------|
+| `CentralDelegate` | `WWBluetoothManager.Central` 的委派協定，負責接收中央管理器狀態、掃描結果、連線狀態，以及指定 Peripheral 的服務與 characteristic 事件。 |
+| `PeripheralDelegate` | `WWBluetoothManager.Peripheral` 的委派協定，負責接收 PeripheralManager 狀態、服務發布、訂閱、寫入請求與 notify 相關事件。 |
+
+## 📬 Delegate 方法
+
+| Delegate 方法 | 說明 |
+|-----------|------|
+| `centralManager(_ central: Central, status: CentralStatus)` | 接收 CentralManager 事件，例如藍牙狀態更新、掃描結果與連線狀態變化。 |
+| `centralManager(_ central: Central, peripheral: CBPeripheral, status: PeripheralStatus)` | 接收指定 Peripheral 的事件，例如服務探索、characteristic 探索、讀寫結果與通知更新。 |
+| `peripheralManager(_ peripheral: WWBluetoothManager.Peripheral, status: PeripheralManagerStatus)` | 接收 PeripheralManager 事件，例如狀態更新、Service 新增結果、Central 訂閱、讀寫請求與送出 notify 結果。 |
+
 ## 🧲 公開屬性
 
 | Central 參數名稱 | 說明 |
@@ -73,6 +88,13 @@ graph TD
 | `onEvent` | 用於向外部回報藍牙事件的閉包 |
 | `scannedDevices` | 已掃描到的設備列表，以設備 UUID 為鍵值進行快取 |
 | `connectedDevice` | 目前已成功連線的設備 |
+
+| Peripheral 屬性名稱 | 說明 |
+|-----------|------|
+| `delegate` | 委派物件，接收所有 PeripheralManager 相關事件。 |
+| `state` | 目前 PeripheralManager 的藍牙狀態。 |
+| `controlCharacteristic` | 檔案傳輸控制通道用的 characteristic。 |
+| `dataCharacteristic` | 檔案傳輸資料通道用的 characteristic。 |
 
 ## 💡 公開 API
 
@@ -98,6 +120,19 @@ graph TD
 | `write(_:uuidType:type:)` | 將原始資料 (Data) 寫入指定特徵值 |
 | `write(_:to:encoding:type:)` | 將字串 (String) 寫入指定特徵值 |
 | `write(_:uuidType:encoding:type:)` | 將字串 (String) 寫入指定特徵值 |
+
+| Peripheral API名稱 | 說明 |
+|-----------|------|
+| `publish(serviceUUID:controlUUID:dataUUID:)` | 建立並發布檔案傳輸用的 Service 與兩條 characteristic |
+| `startAdvertising(localName:serviceUUIDs:)` | 開始 BLE 廣播，公開裝置名稱與服務 UUID |
+| `stopAdvertising()` | 停止目前的 BLE 廣播 |
+| `removeAllServices()` | 移除目前已發布的所有 services，並清空內部參考 |
+| `notifyValue(_:for:)` | 對已訂閱的 Central 推送 notify 資料 |
+| `state` | 目前 PeripheralManager 的藍牙狀態 |
+| `controlCharacteristic` | 目前建立好的控制通道 characteristic |
+| `dataCharacteristic` | 目前建立好的資料通道 characteristic |
+| `delegate` | Peripheral 事件委派 |
+| `peripheralManager(_:status:)` | 接收 Peripheral 狀態事件與 callback |
 
 ## 🚀 Central 使用範例
 

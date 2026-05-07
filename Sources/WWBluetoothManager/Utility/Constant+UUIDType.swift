@@ -1,8 +1,8 @@
 //
-//  File.swift
+//  Constant+UUIDType.swift
 //  WWBluetoothManager
 //
-//  Created by iOS on 2026/5/7.
+//  Created by William.Weng on 2026/5/7.
 //
 
 import Foundation

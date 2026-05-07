@@ -65,7 +65,7 @@ extension String {
 extension Dictionary where Key == String, Value == Any {
     
     subscript(key: WWBluetoothManager.AdvertisementDataKey) -> Value? {
-        self[key.rawValue]
+        self[key.value()]
     }
 }
 
@@ -78,7 +78,7 @@ extension CBPeripheralManager {
         var options: [String: Any] = [:]
         
         for (key, value) in advertisementData {
-            options[key.rawValue] = value
+            options[key.value()] = value
         }
         
         startAdvertising(options)
