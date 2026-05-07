@@ -11,11 +11,11 @@ import WWBluetoothManager
 
 final class BluetoothClientViewController: UIViewController {
     
-    private let client = WWBluetoothManager.Client()
-    private let targetLocalName = "Control for SB1830"
-    
     @IBOutlet weak var logTextView: UITextView!
     
+    private let client = WWBluetoothManager.Client()
+    private let targetLocalName = "Control for SB1830"
+        
     override func viewDidLoad() {
         super.viewDidLoad()
         setupBluetooth()

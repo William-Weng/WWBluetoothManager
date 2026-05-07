@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="23727" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="23727" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="NC8-it-nx4">
     <device id="retina5_9" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
@@ -48,9 +48,9 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="msx-dr-nrW" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2150.3816793893129" y="4.9295774647887329"/>
+            <point key="canvasLocation" x="-866" y="1374"/>
         </scene>
-        <!--Bluetooth Central View Controller-->
+        <!--Central-->
         <scene sceneID="tne-QT-ifu">
             <objects>
                 <viewController id="BYZ-38-t0r" customClass="BluetoothCentralViewController" customModule="Example" customModuleProvider="target" sceneMemberID="viewController">
@@ -84,15 +84,17 @@
                             <constraint firstItem="tWa-FX-iY0" firstAttribute="centerY" secondItem="8bC-Xf-vdC" secondAttribute="centerY" id="Rf7-Bq-jbB"/>
                         </constraints>
                     </view>
+                    <tabBarItem key="tabBarItem" title="Central" image="folder.fill.badge.plus" catalog="system" id="Rm5-OU-Eog"/>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="140" y="5"/>
+            <point key="canvasLocation" x="-1855" y="600"/>
         </scene>
-        <!--Navigation Controller-->
+        <!--Client-->
         <scene sceneID="R8Z-Wo-eWU">
             <objects>
                 <navigationController automaticallyAdjustsScrollViewInsets="NO" id="UtZ-T9-Yd1" sceneMemberID="viewController">
+                    <tabBarItem key="tabBarItem" title="Client" image="book.closed.circle.fill" catalog="system" id="Wjr-CZ-vV4"/>
                     <toolbarItems/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="FQ7-q4-gel">
                         <rect key="frame" x="0.0" y="100" width="375" height="44"/>
@@ -105,10 +107,193 @@
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="XAD-PU-S9g" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1223.6641221374045" y="4.9295774647887329"/>
+            <point key="canvasLocation" x="-866" y="601"/>
+        </scene>
+        <!--Tab Bar Controller-->
+        <scene sceneID="dXZ-Ul-t0c">
+            <objects>
+                <tabBarController automaticallyAdjustsScrollViewInsets="NO" id="F1x-wK-WAc" sceneMemberID="viewController">
+                    <toolbarItems/>
+                    <tabBar key="tabBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="J5u-NC-ZGg">
+                        <rect key="frame" x="0.0" y="0.0" width="1000" height="1000"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <color key="selectedImageTintColor" red="1" green="0.14913141730000001" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                    </tabBar>
+                    <connections>
+                        <segue destination="BYZ-38-t0r" kind="relationship" relationship="viewControllers" id="JPI-8D-ph0"/>
+                        <segue destination="UtZ-T9-Yd1" kind="relationship" relationship="viewControllers" id="ny5-eZ-kRh"/>
+                    </connections>
+                </tabBarController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="i4r-n3-VDF" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-1386" y="-273"/>
+        </scene>
+        <!--Send-->
+        <scene sceneID="Csm-IP-y8V">
+            <objects>
+                <viewController id="xVo-2B-Vl2" customClass="BluetoothFileTransferViewController" customModule="Example" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="8Ia-w7-kaL">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="Iaf-Hq-zPl" customClass="LogTextView" customModule="Example" customModuleProvider="target">
+                                <rect key="frame" x="0.0" y="144" width="375" height="668"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                <color key="textColor" systemColor="labelColor"/>
+                                <fontDescription key="fontDescription" type="boldSystem" pointSize="16"/>
+                                <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                            </textView>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="k0D-2Z-Pw6"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="Iaf-Hq-zPl" firstAttribute="leading" secondItem="k0D-2Z-Pw6" secondAttribute="leading" id="GVE-Ug-eCW"/>
+                            <constraint firstAttribute="bottom" secondItem="Iaf-Hq-zPl" secondAttribute="bottom" id="Wk9-op-rLi"/>
+                            <constraint firstItem="Iaf-Hq-zPl" firstAttribute="trailing" secondItem="k0D-2Z-Pw6" secondAttribute="trailing" id="b69-Ti-wQz"/>
+                            <constraint firstItem="Iaf-Hq-zPl" firstAttribute="top" secondItem="k0D-2Z-Pw6" secondAttribute="top" id="czS-Qf-Sbg"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" title="Send" id="WS6-Ac-o3m">
+                        <barButtonItem key="leftBarButtonItem" image="hand.raised.fingers.spread.fill" catalog="system" id="7Xf-i5-5pj">
+                            <color key="tintColor" red="0.016804177310000001" green="0.19835099580000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                            <connections>
+                                <action selector="prepareReceiveAction:" destination="xVo-2B-Vl2" id="K2L-j2-vGQ"/>
+                            </connections>
+                        </barButtonItem>
+                        <barButtonItem key="rightBarButtonItem" systemItem="compose" id="mGx-fA-HNa">
+                            <color key="tintColor" red="0.016804177310000001" green="0.19835099580000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                            <connections>
+                                <action selector="sendDemoFileAction:" destination="xVo-2B-Vl2" id="CvK-la-J6H"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
+                    <connections>
+                        <outlet property="logTextView" destination="Iaf-Hq-zPl" id="WUI-LG-jhz"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="1hm-yG-f58" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="268" y="1374"/>
+        </scene>
+        <!--Send-->
+        <scene sceneID="mnD-jo-KHK">
+            <objects>
+                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="4Zl-bd-3kl" sceneMemberID="viewController">
+                    <tabBarItem key="tabBarItem" title="Send" image="sensor.fill" catalog="system" id="3i5-43-XCJ"/>
+                    <toolbarItems/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="J2X-5k-crh">
+                        <rect key="frame" x="0.0" y="100" width="375" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <nil name="viewControllers"/>
+                    <connections>
+                        <segue destination="xVo-2B-Vl2" kind="relationship" relationship="rootViewController" id="H8f-iV-XTr"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="vMv-rg-ZO8" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="268" y="601"/>
+        </scene>
+        <!--Peripheral-->
+        <scene sceneID="oKC-ef-O4e">
+            <objects>
+                <viewController id="KeB-Gs-yP4" customClass="BluetoothFileTransferPeripheralViewController" customModule="Example" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="GHD-Dd-ku3">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="vUK-zy-TPo" customClass="LogTextView" customModule="Example" customModuleProvider="target">
+                                <rect key="frame" x="0.0" y="144" width="375" height="668"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                <color key="textColor" systemColor="labelColor"/>
+                                <fontDescription key="fontDescription" type="boldSystem" pointSize="16"/>
+                                <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                            </textView>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="YuK-qx-lk9"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstAttribute="bottom" secondItem="vUK-zy-TPo" secondAttribute="bottom" id="4CZ-b5-Ef1"/>
+                            <constraint firstItem="vUK-zy-TPo" firstAttribute="trailing" secondItem="YuK-qx-lk9" secondAttribute="trailing" id="53i-14-lUp"/>
+                            <constraint firstItem="vUK-zy-TPo" firstAttribute="leading" secondItem="YuK-qx-lk9" secondAttribute="leading" id="rNI-b0-PDM"/>
+                            <constraint firstItem="vUK-zy-TPo" firstAttribute="top" secondItem="YuK-qx-lk9" secondAttribute="top" id="ulP-7Q-IzL"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" title="Peripheral" id="sKr-Cf-Njb">
+                        <barButtonItem key="leftBarButtonItem" systemItem="action" id="0xr-Jr-uhf">
+                            <color key="tintColor" red="0.016804177310000001" green="0.19835099580000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                            <connections>
+                                <action selector="sendTestNotifyAction:" destination="KeB-Gs-yP4" id="D1r-9d-zdH"/>
+                            </connections>
+                        </barButtonItem>
+                        <rightBarButtonItems>
+                            <barButtonItem systemItem="add" id="doI-zZ-3F4">
+                                <color key="tintColor" red="0.016804177310000001" green="0.19835099580000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <connections>
+                                    <action selector="startAdvertisingAction:" destination="KeB-Gs-yP4" id="Wjj-W3-zte"/>
+                                </connections>
+                            </barButtonItem>
+                            <barButtonItem systemItem="stop" id="vvS-ac-joB">
+                                <color key="tintColor" red="0.016804177310000001" green="0.19835099580000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <connections>
+                                    <action selector="stopAdvertisingAction:" destination="KeB-Gs-yP4" id="oEH-vE-S7v"/>
+                                </connections>
+                            </barButtonItem>
+                        </rightBarButtonItems>
+                    </navigationItem>
+                    <connections>
+                        <outlet property="logTextView" destination="vUK-zy-TPo" id="fDQ-IH-jZp"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="AgH-zX-eAW" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1173.5999999999999" y="1373.6453201970444"/>
+        </scene>
+        <!--Tab Bar Controller-->
+        <scene sceneID="EAi-9Y-qSG">
+            <objects>
+                <tabBarController automaticallyAdjustsScrollViewInsets="NO" id="NC8-it-nx4" sceneMemberID="viewController">
+                    <toolbarItems/>
+                    <tabBar key="tabBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="ZFn-aW-zmE">
+                        <autoresizingMask key="autoresizingMask"/>
+                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <color key="selectedImageTintColor" red="0.016804177310000001" green="0.19835099580000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                    </tabBar>
+                    <connections>
+                        <segue destination="4Zl-bd-3kl" kind="relationship" relationship="viewControllers" id="o43-eN-wyn"/>
+                    </connections>
+                </tabBarController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="dJx-SO-7bR" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="708" y="-273"/>
+        </scene>
+        <!--Peripheral-->
+        <scene sceneID="LkG-em-Mkp">
+            <objects>
+                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="vL0-Fv-1fc" sceneMemberID="viewController">
+                    <tabBarItem key="tabBarItem" title="Peripheral" image="books.vertical.fill" catalog="system" id="uV7-Mj-iQg"/>
+                    <toolbarItems/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="Qiu-SB-qP1">
+                        <rect key="frame" x="0.0" y="100" width="375" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <nil name="viewControllers"/>
+                    <connections>
+                        <segue destination="KeB-Gs-yP4" kind="relationship" relationship="rootViewController" id="eJ4-6M-qX7"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="3AJ-Rx-LhK" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1175" y="600"/>
         </scene>
     </scenes>
     <resources>
+        <image name="book.closed.circle.fill" catalog="system" width="128" height="123"/>
+        <image name="books.vertical.fill" catalog="system" width="128" height="110"/>
+        <image name="folder.fill.badge.plus" catalog="system" width="128" height="93"/>
+        <image name="hand.raised.fingers.spread.fill" catalog="system" width="128" height="125"/>
+        <image name="sensor.fill" catalog="system" width="128" height="87"/>
         <systemColor name="labelColor">
             <color white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>

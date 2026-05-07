@@ -21,8 +21,6 @@ final class BluetoothCentralViewController: UIViewController {
     
     private let central = WWBluetoothManager.Central()                  // WWBluetoothManager 的 Central 管理器實例
     private let targetLocalName = "Control for SB1830"                  // 目標設備名稱過濾（廣告資料中的 localName）
-    private let writeUUID = "B7860002-11B8-B681-6343-5A6C2286633F"      // 寫入特性 UUID
-    private let notifyUUID = "B7860003-11B8-B681-6343-5A6C2286633F"     // 通知特性 UUID
     
     private var targetPeripheral: CBPeripheral?                         // 目標周邊設備（連線中的 SB1830）
     private var writableCharacteristic: CBCharacteristic?               // 可寫入特性（用於發送控制指令）
@@ -124,18 +122,14 @@ private extension BluetoothCentralViewController {
         services.forEach { service in wwPrint("Service => \(service.uuid.uuidString)") }
     }
     
-    /// 特性發現完成，尋找目標寫入/通知特性並啟用通知
+    /// 特性發現完成，尋找目標寫入 / 通知特性並啟用通知
     func discoveredCharacteristics(_ peripheral: CBPeripheral, service: CBService, characteristics: [CBCharacteristic]) {
         
-        wwPrint("Characteristics of \(service.uuid.uuidString) (\(characteristics.count) 個):")
+        wwPrint("Characteristics of \(service.uuid.uuidString): (\(characteristics.count) 個)")
         
         characteristics.forEach { characteristic in
             
-            let uuid = characteristic.uuid
-            let uuidType = WWBluetoothManager.UUIDType.find(uuid: uuid)
-            
-            wwPrint("\(uuid)")
-            wwPrint("Properties => \(characteristic.properties)")
+            let uuidType = WWBluetoothManager.UUIDType.find(uuid: characteristic.uuid)
             
             switch uuidType {
             case .write:    // 找到寫入特性

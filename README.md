@@ -29,7 +29,7 @@ https://github.com/user-attachments/assets/57755f9d-db9a-4d18-9c00-df17b4141531
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/William-Weng/WWBluetoothManager", .upToNextMinor(from: "1.1.2"))
+    .package(url: "https://github.com/William-Weng/WWBluetoothManager", .upToNextMinor(from: "1.1.3"))
 ]
 ```
 
@@ -111,8 +111,6 @@ final class BluetoothCentralViewController: UIViewController {
     
     private let central = WWBluetoothManager.Central()
     private let targetLocalName = "Control for SB1830"
-    private let writeUUID = "B7860002-11B8-B681-6343-5A6C2286633F"
-    private let notifyUUID = "B7860003-11B8-B681-6343-5A6C2286633F"
     
     private var targetPeripheral: CBPeripheral?
     private var writableCharacteristic: CBCharacteristic?
@@ -204,22 +202,23 @@ private extension BluetoothCentralViewController {
     
     func discoveredCharacteristics(_ peripheral: CBPeripheral, service: CBService, characteristics: [CBCharacteristic]) {
         
-        wwPrint("Characteristics of \(service.uuid.uuidString) (\(characteristics.count) 個):")
+        wwPrint("Characteristics of \(service.uuid.uuidString): (\(characteristics.count) 個)")
         
         characteristics.forEach { characteristic in
-            let uuid = characteristic.uuid.uuidString
-            wwPrint("\(uuid)")
-            wwPrint("Properties => \(characteristic.properties)")
             
-            if uuid == writeUUID {
+            let uuidType = WWBluetoothManager.UUIDType.find(uuid: characteristic.uuid)
+            
+            switch uuidType {
+            case .write:    // 找到寫入特性
                 writableCharacteristic = characteristic
                 wwPrint("Writable characteristic found!")
-            }
-            
-            if uuid == notifyUUID {
+
+            case .notify:   // 找到通知特性並自動啟用
                 notifyCharacteristic = characteristic
                 peripheral.setNotifyValue(true, for: characteristic)
                 wwPrint("Notify enabled!")
+
+            default: break
             }
         }
     }

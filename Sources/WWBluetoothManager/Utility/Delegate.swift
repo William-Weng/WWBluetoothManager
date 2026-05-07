@@ -26,5 +26,14 @@ public extension WWBluetoothManager {
         ///   - status: PeripheralStatus enum，包含所有外設操作事件
         func centralManager(_ central: Central, peripheral: CBPeripheral, status: PeripheralStatus)
     }
+    
+    /// Peripheral 的委派協定 => 負責接收 `WWBluetoothManager.Peripheral` 封裝後的所有事件
+    protocol PeripheralDelegate: AnyObject {
+        
+        /// PeripheralManager 事件回呼
+        /// - Parameters:
+        ///   - peripheral: 事件來源的 `WWBluetoothManager.Peripheral`
+        ///   - status: 封裝後的 Peripheral 事件狀態
+        func peripheralManager(_ peripheral: WWBluetoothManager.Peripheral, status: PeripheralManagerStatus)
+    }
 }
-

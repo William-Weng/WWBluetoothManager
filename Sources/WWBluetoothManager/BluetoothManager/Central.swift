@@ -53,7 +53,7 @@ public extension WWBluetoothManager.Central {
     ///   - allowDuplicates: 是否允許掃描期間重複回報同一個設備。預設為 false。
     func startScan(serviceUUIDTypes: [WWBluetoothManager.UUIDType], allowDuplicates: Bool = false) {
         
-        let uuids = serviceUUIDTypes.map { $0.cbuuid() }
+        let uuids = serviceUUIDTypes.map { $0.cbUUID }
         startScan(serviceUUIDs: uuids, allowDuplicates: allowDuplicates)
     }
     

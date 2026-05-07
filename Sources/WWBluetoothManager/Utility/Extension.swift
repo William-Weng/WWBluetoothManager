@@ -69,6 +69,22 @@ extension Dictionary where Key == String, Value == Any {
     }
 }
 
+// MARK: - CBPeripheralManager
+extension CBPeripheralManager {
+    
+    /// 使用型別化的廣告資料鍵值，開始 BLE advertising
+    func startAdvertising(advertisementData: [WWBluetoothManager.AdvertisementDataKey: Any]) {
+        
+        var options: [String: Any] = [:]
+        
+        for (key, value) in advertisementData {
+            options[key.rawValue] = value
+        }
+        
+        startAdvertising(options)
+    }
+}
+
 // MARK: - 私有實現
 private extension CBCharacteristicProperties {
     

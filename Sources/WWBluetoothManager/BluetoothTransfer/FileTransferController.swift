@@ -4,6 +4,7 @@
 //
 //  Created by WilliamWeng on 2026/5/6.
 //
+//  狀態機：clientHello → serverHello → ready → data/ack → finish/finishAck
 
 import Foundation
 import CoreBluetooth
@@ -95,10 +96,6 @@ public extension WWBluetoothManager.FileTransferController {
         peripheral.setNotifyValue(true, for: controlCharacteristic)
         peripheral.setNotifyValue(true, for: dataCharacteristic)
     }
-}
-
-// MARK: - 小工具
-private extension WWBluetoothManager.FileTransferController {
     
     /// 處理藍牙周邊裝置回傳的狀態事件。
     /// - Parameters:
@@ -112,6 +109,10 @@ private extension WWBluetoothManager.FileTransferController {
         default: break
         }
     }
+}
+
+// MARK: - 小工具
+private extension WWBluetoothManager.FileTransferController {
     
     /// 處理 characteristic 寫入完成事件
     /// - Parameter error: 寫入失敗時的錯誤資訊
