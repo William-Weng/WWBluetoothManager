@@ -11,10 +11,8 @@ import CoreBluetooth
 public extension WWBluetoothManager {
     
     final class Accessory: NSObject {
-        
-        public typealias EventHandler = (AccessoryEvent) -> Void
-        
-        public var onEvent: EventHandler?
+                
+        public var onEvent: ((AccessoryEvent) -> Void)?
         
         public private(set) var peripheral: Peripheral
         
@@ -84,6 +82,11 @@ public extension WWBluetoothManager.Accessory {
     /// 將資料以 notify 的方式推送給已訂閱此 characteristic 的 Central
     func notifyValue(_ data: Data, for characteristic: CBMutableCharacteristic) -> Bool {
         peripheral.notifyValue(data, for: characteristic)
+    }
+    
+    /// 回應 Central 發出的 Read / Write request
+    func respond(to request: CBATTRequest, withResult result: CBATTError.Code) {
+        peripheral.respond(to: request, withResult: result)
     }
 }
 

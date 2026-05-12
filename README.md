@@ -33,7 +33,7 @@ dependencies: [
 ]
 ```
 
-## 🧭 架構圖
+## 🧭 [架構圖](https://chiikawa-wallpaper.com/zh-Hant/mobile)
 
 ```mermaid
 graph TD

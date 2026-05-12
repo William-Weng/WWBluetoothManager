@@ -161,6 +161,11 @@ public extension WWBluetoothManager.Peripheral {
     func notifyValue(_ data: Data, for characteristic: CBMutableCharacteristic) -> Bool {
         peripheralManager.updateValue(data, for: characteristic, onSubscribedCentrals: nil)
     }
+    
+    /// 回應 Central 發出的 Read / Write request
+    func respond(to request: CBATTRequest, withResult result: CBATTError.Code) {
+        peripheralManager.respond(to: request, withResult: result)
+    }
 }
 
 // MARK: - CBPeripheralManagerDelegate

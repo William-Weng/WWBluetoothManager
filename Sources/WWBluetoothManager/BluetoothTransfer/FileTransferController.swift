@@ -189,10 +189,21 @@ private extension WWBluetoothManager.FileTransferController {
             return
         }
         
-        phase = .waitingReady
+        let ready = WWBluetoothManager.FileTransferRecord(
+            type: .ready,
+            transferId: record.transferId,
+            index: 0,
+            total: record.total
+        )
         
-        let ready = WWBluetoothManager.FileTransferRecord(type: .ready, transferId: record.transferId, index: 0, total: record.total)
+        print("handleServerHello => transferId: \(record.transferId), phase: \(phase)")
         peripheral.writeValue(ready.encode(), for: controlCharacteristic, type: .withResponse)
+        
+        phase = .sendingData
+        print("phase after serverHello => \(phase)")
+        print("start sendNextChunk after ready")
+        
+        sendNextChunk(using: peripheral)
     }
     
     /// 處理 ready 記錄，開始送出資料切片
@@ -202,6 +213,9 @@ private extension WWBluetoothManager.FileTransferController {
     func handleReady(peripheral: CBPeripheral, record: WWBluetoothManager.FileTransferRecord) {
         
         guard record.transferId == transferId else { return }
+        
+        print("handleReady => transferId: \(record.transferId), phase: \(phase)")
+        print("start sendNextChunk")
         
         phase = .sendingData
         sendNextChunk(using: peripheral)
@@ -315,6 +329,8 @@ private extension WWBluetoothManager.FileTransferController {
         
         let record = makeCurrentDataChunkRecord()
         peripheral.writeValue(record.encode(), for: dataCharacteristic, type: .withResponse)
+        
+        print("send data chunk => index: \(sendingIndex), total: \(totalChunks), payload: \(currentChunkPayload().count)")
     }
     
     /// 建立目前索引對應的資料封包

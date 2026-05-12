@@ -17,11 +17,11 @@ public extension WWBluetoothManager {
         
         static let minimumCount = 13        // 最小長度 = type(1) + transferId(4) + index(4) + total(4) = 13 bytes
         
-        let type: FileTransferRecordType
-        let transferId: UInt32
-        let index: UInt32
-        let total: UInt32
-        let payload: Data
+        public let type: FileTransferRecordType
+        public let transferId: UInt32
+        public let index: UInt32
+        public let total: UInt32
+        public let payload: Data
         
         /// 建立一筆檔案傳輸封包
         /// - Parameters:
@@ -30,7 +30,7 @@ public extension WWBluetoothManager {
         ///   - index: 目前片段索引 => 對 `data` / `ack` 這類需要順序的封包特別重要，可用來表示「這是第幾片」
         ///   - total: 此次傳輸的總片數 => 接收端可搭配 `index` 與 `total` 來判斷是否已收齊所有資料片段
         ///   - payload: 封包承載的實際資料內容 => 在握手封包中，這裡可能放檔案大小、chunk size 等額外資訊；在 `data` 封包中，這裡則是實際的檔案片段內容
-        init(type: FileTransferRecordType, transferId: UInt32, index: UInt32, total: UInt32, payload: Data = .init()) {
+        public init(type: FileTransferRecordType, transferId: UInt32, index: UInt32, total: UInt32, payload: Data = .init()) {
             self.type = type
             self.transferId = transferId
             self.index = index

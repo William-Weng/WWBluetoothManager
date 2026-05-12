@@ -351,15 +351,15 @@ public extension WWBluetoothManager.UUIDType {
 private extension WWBluetoothManager.UUIDType {
     
     static let bluetoothBaseUUIDSuffix = "-0000-1000-8000-00805F9B34FB"
+    static let uuid128StringLength = 36
     
     /// 將 UUID 字串正規化成 16-bit 形式，例如 "0x180F"
     static func normalized16BitString(from uuidString: String) -> String {
         
         let uppercased = uuidString.uppercased().replacingOccurrences(of: "0X", with: "")
         let baseSuffix = Self.bluetoothBaseUUIDSuffix
-        let uuid128String = Self.batteryService.uuid128String
         
-        if uppercased.hasSuffix(baseSuffix), uppercased.count == uuid128String.count {
+        if uppercased.hasSuffix(baseSuffix), uppercased.count == Self.uuid128StringLength {
             
             let prefix = String(uppercased.prefix(8))
             let short = String(prefix.suffix(4))
@@ -370,7 +370,7 @@ private extension WWBluetoothManager.UUIDType {
         if uppercased.count == 4 { return "0x\(uppercased)" }
         if uppercased.count == 8, uppercased.hasPrefix("0000") { return "0x\(uppercased.suffix(4))" }
         
-        return "0x\(uppercased)"
+        return "\(uppercased)"
     }
 }
 
