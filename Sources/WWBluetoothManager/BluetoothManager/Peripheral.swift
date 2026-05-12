@@ -76,9 +76,6 @@ public extension WWBluetoothManager.Peripheral {
     }
 }
 
-// MARK: - CBPeripheralManagerDelegate
-extension WWBluetoothManager.Peripheral: CBPeripheralManagerDelegate {}
-
 // MARK: - 公開函式
 public extension WWBluetoothManager.Peripheral {
     
@@ -165,6 +162,9 @@ public extension WWBluetoothManager.Peripheral {
         peripheralManager.updateValue(data, for: characteristic, onSubscribedCentrals: nil)
     }
 }
+
+// MARK: - CBPeripheralManagerDelegate
+extension WWBluetoothManager.Peripheral: CBPeripheralManagerDelegate {}
 
 // MARK: - 私用工具
 private extension WWBluetoothManager.Peripheral {

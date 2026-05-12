@@ -29,7 +29,7 @@ https://github.com/user-attachments/assets/57755f9d-db9a-4d18-9c00-df17b4141531
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/William-Weng/WWBluetoothManager", .upToNextMinor(from: "1.2.1"))
+    .package(url: "https://github.com/William-Weng/WWBluetoothManager", .upToNextMinor(from: "1.2.2"))
 ]
 ```
 
@@ -121,7 +121,7 @@ graph TD
 | `write(_:to:encoding:type:)` | 將字串 (String) 寫入指定特徵值 |
 | `write(_:uuidType:encoding:type:)` | 將字串 (String) 寫入指定特徵值 |
 
-| Peripheral API名稱 | 說明 |
+| Peripheral / Accessory API名稱 | 說明 |
 |-----------|------|
 | `publish(serviceUUID:controlUUID:dataUUID:)` | 建立並發布檔案傳輸用的 Service 與兩條 characteristic |
 | `publish(serviceType:controlType:dataType:)` | 建立並發布檔案傳輸用的 Service 與兩條 characteristic |
@@ -130,10 +130,6 @@ graph TD
 | `stopAdvertising()` | 停止目前的 BLE 廣播 |
 | `removeAllServices()` | 移除目前已發布的所有 services，並清空內部參考 |
 | `notifyValue(_:for:)` | 對已訂閱的 Central 推送 notify 資料 |
-| `state` | 目前 PeripheralManager 的藍牙狀態 |
-| `controlCharacteristic` | 目前建立好的控制通道 characteristic |
-| `dataCharacteristic` | 目前建立好的資料通道 characteristic |
-| `delegate` | Peripheral 事件委派 |
 | `peripheralManager(_:status:)` | 接收 Peripheral 狀態事件與 callback |
 
 ## 🚀 Central 使用範例
@@ -144,7 +140,7 @@ import CoreBluetooth
 import WWPrint
 import WWBluetoothManager
 
-final class BluetoothCentralViewController: UIViewController {
+final class CentralViewController: UIViewController {
     
     private let central = WWBluetoothManager.Central()
     private let targetLocalName = "Control for SB1830"
@@ -161,7 +157,7 @@ final class BluetoothCentralViewController: UIViewController {
     @IBAction func sendHex01(_ sender: UIButton) { sendHex() }
 }
 
-extension BluetoothCentralViewController: WWBluetoothManager.CentralDelegate {
+extension CentralViewController: WWBluetoothManager.CentralDelegate {
     
     func centralManager(_ central: WWBluetoothManager.Central, status: WWBluetoothManager.CentralStatus) {
         switch status {
@@ -186,7 +182,7 @@ extension BluetoothCentralViewController: WWBluetoothManager.CentralDelegate {
     }
 }
 
-private extension BluetoothCentralViewController {
+private extension CentralViewController {
     
     func centralStateUpdated(_ state: CBManagerState) {
         
@@ -229,7 +225,7 @@ private extension BluetoothCentralViewController {
     }
 }
 
-private extension BluetoothCentralViewController {
+private extension CentralViewController {
     
     func discoveredServices(_ peripheral: CBPeripheral, services: [CBService]) {
         
@@ -282,7 +278,7 @@ private extension BluetoothCentralViewController {
     }
 }
 
-private extension BluetoothCentralViewController {
+private extension CentralViewController {
     
     func bindBluetooth() {
         central.delegate = self
@@ -311,7 +307,7 @@ import UIKit
 import CoreBluetooth
 import WWBluetoothManager
 
-final class BluetoothClientViewController: UIViewController {
+final class ClientViewController: UIViewController {
     
     private let client = WWBluetoothManager.Client()
     private let targetLocalName = "Control for SB1830"
@@ -329,7 +325,7 @@ final class BluetoothClientViewController: UIViewController {
     }
 }
 
-private extension BluetoothClientViewController {
+private extension ClientViewController {
         
     func setupBluetooth() {
         
@@ -354,7 +350,7 @@ private extension BluetoothClientViewController {
     }
 }
 
-private extension BluetoothClientViewController {
+private extension ClientViewController {
     
     func connectDevice(_ device: WWBluetoothManager.Device) {
         

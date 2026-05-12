@@ -1,5 +1,5 @@
 //
-//  BluetoothCentralViewController.swift
+//  CentralViewController.swift
 //  Example
 //
 //  Created by WilliamWeng on 2026/5/6.
@@ -17,7 +17,7 @@ import CoreBluetooth
 import WWPrint
 import WWBluetoothManager
 
-final class BluetoothCentralViewController: UIViewController {
+final class CentralViewController: UIViewController {
     
     private let central = WWBluetoothManager.Central()                  // WWBluetoothManager 的 Central 管理器實例
     private let targetLocalName = "Control for SB1830"                  // 目標設備名稱過濾（廣告資料中的 localName）
@@ -35,7 +35,7 @@ final class BluetoothCentralViewController: UIViewController {
 }
 
 // MARK: - WWBluetoothManager.CentralDelegate（事件中介層）
-extension BluetoothCentralViewController: WWBluetoothManager.CentralDelegate {
+extension CentralViewController: WWBluetoothManager.CentralDelegate {
     
     /// CentralManager 事件處理（CBCentralManagerDelegate）
     func centralManager(_ central: WWBluetoothManager.Central, status: WWBluetoothManager.CentralStatus) {
@@ -63,7 +63,7 @@ extension BluetoothCentralViewController: WWBluetoothManager.CentralDelegate {
 }
 
 // MARK: - CentralManager 事件實現
-private extension BluetoothCentralViewController {
+private extension CentralViewController {
     
     /// Bluetooth 狀態更新
     /// - 僅在 `.poweredOn` 時自動開始掃描
@@ -113,7 +113,7 @@ private extension BluetoothCentralViewController {
 }
 
 // MARK: - Peripheral 事件實現
-private extension BluetoothCentralViewController {
+private extension CentralViewController {
     
     /// 服務發現完成，列印所有服務 UUID
     func discoveredServices(_ peripheral: CBPeripheral, services: [CBService]) {
@@ -174,7 +174,7 @@ private extension BluetoothCentralViewController {
 }
 
 // MARK: - 小工具
-private extension BluetoothCentralViewController {
+private extension CentralViewController {
     
     /// 綁定 Bluetooth 委派，啟動事件監聽
     func bindBluetooth() {

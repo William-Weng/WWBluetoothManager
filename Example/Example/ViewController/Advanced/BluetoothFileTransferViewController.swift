@@ -1,5 +1,5 @@
 //
-//  BluetoothSFileViewController.swift
+//  FileTransferViewController.swift
 //  Example
 //
 //  Created by WilliamWeng on 2026/5/6.
@@ -10,17 +10,13 @@ import CoreBluetooth
 import WWPrint
 import WWBluetoothManager
 
-final class BluetoothFileTransferViewController: UIViewController {
+final class FileTransferViewController: UIViewController {
     
     @IBOutlet weak var logTextView: LogTextView!
     
+    private let targetLocalName = "WWFileTransfer"
     private let central = WWBluetoothManager.Central()
     private let fileTransfer = WWBluetoothManager.FileTransferController()
-    
-    private let targetLocalName = "WWFileTransfer"
-    private let serviceUUID = CBUUID(string: "0000FF10-0000-1000-8000-00805F9B34FB")
-    private let controlUUID = CBUUID(string: "0000FF11-0000-1000-8000-00805F9B34FB")
-    private let dataUUID = CBUUID(string: "0000FF12-0000-1000-8000-00805F9B34FB")
     
     private var targetPeripheral: CBPeripheral?
     private var controlCharacteristic: CBCharacteristic?
@@ -55,7 +51,7 @@ final class BluetoothFileTransferViewController: UIViewController {
 }
 
 // MARK: - WWBluetoothManager.CentralDelegate
-extension BluetoothFileTransferViewController: WWBluetoothManager.CentralDelegate {
+extension FileTransferViewController: WWBluetoothManager.CentralDelegate {
     
     func centralManager(_ central: WWBluetoothManager.Central, status: WWBluetoothManager.CentralStatus) {
         
@@ -95,7 +91,7 @@ extension BluetoothFileTransferViewController: WWBluetoothManager.CentralDelegat
 }
 
 // MARK: - Central event
-private extension BluetoothFileTransferViewController {
+private extension FileTransferViewController {
     
     func handleCentralStateUpdated(_ state: CBManagerState) {
         
@@ -144,7 +140,7 @@ private extension BluetoothFileTransferViewController {
 }
 
 // MARK: - Peripheral event
-private extension BluetoothFileTransferViewController {
+private extension FileTransferViewController {
     
     func handleDiscoveredServices(_ peripheral: CBPeripheral, services: [CBService]) {
         
@@ -160,13 +156,15 @@ private extension BluetoothFileTransferViewController {
             
             logTextView.appendLog("Characteristic => \(characteristic.uuid.uuidString), properties => \(characteristic.properties.rawValue)")
             
-            switch characteristic.uuid {
-            case controlUUID:
+            guard let uuidType = WWBluetoothManager.UUIDType(rawValue: characteristic.uuid.uuidString) else { return }
+            
+            switch uuidType {
+            case .control:
                 controlCharacteristic = characteristic
                 peripheral.setNotifyValue(true, for: characteristic)
                 logTextView.appendLog("Control characteristic ready => \(characteristic.uuid.uuidString)")
                 
-            case dataUUID:
+            case .data:
                 dataCharacteristic = characteristic
                 logTextView.appendLog("Data characteristic ready => \(characteristic.uuid.uuidString)")
                 
@@ -224,7 +222,7 @@ private extension BluetoothFileTransferViewController {
 }
 
 // MARK: - File transfer
-private extension BluetoothFileTransferViewController {
+private extension FileTransferViewController {
     
     func prepareReceiveMode() {
         
@@ -332,7 +330,7 @@ private extension BluetoothFileTransferViewController {
 }
 
 // MARK: - Tool
-private extension BluetoothFileTransferViewController {
+private extension FileTransferViewController {
     
     func bindBluetooth() {
         logTextView.configure()

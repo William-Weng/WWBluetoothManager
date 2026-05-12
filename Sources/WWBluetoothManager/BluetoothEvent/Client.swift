@@ -198,7 +198,7 @@ private extension WWBluetoothManager.Client {
     
     /// 藍牙適配器狀態變更 (如：開啟、關閉)
     func centralStateUpdated(_ state: CBManagerState) {
-        onEvent?(.stateChanged(state))
+        onEvent?(.stateChanged(state: state))
     }
     
     /// 掃描到新裝置：將原始 ScanResult 轉換為 Client 專用的 Device 模型，並快取起來
@@ -212,7 +212,7 @@ private extension WWBluetoothManager.Client {
         )
         
         scannedDevices[device.id] = device
-        onEvent?(.discovered(device))
+        onEvent?(.discovered(device: device))
     }
     
     /// 裝置連線成功：更新當前連線狀態並發布連線事件 => 嘗試從掃描清單中取回裝置資訊，若無則建立一個臨時實例
@@ -228,7 +228,7 @@ private extension WWBluetoothManager.Client {
         )
         
         connectedDevice = device
-        onEvent?(.connected(device))
+        onEvent?(.connected(device: device))
     }
     
     /// 裝置斷線：清除連線快取與所有特徵值對應表 => 清除快取，避免錯誤操作
@@ -240,13 +240,13 @@ private extension WWBluetoothManager.Client {
         connectedDevice = nil
         writableCharacteristics.removeAll()
         notifyCharacteristics.removeAll()
-        onEvent?(.disconnected(device, error))
+        onEvent?(.disconnected(device: device, error: error))
     }
     
     /// 連線失敗處理
     func centralFailedToConnect(_ peripheral: CBPeripheral, error: Error?) {
         guard let error else { return }
-        onEvent?(.failed(error))
+        onEvent?(.failed(error: error))
     }
 }
 
@@ -257,7 +257,7 @@ private extension WWBluetoothManager.Client {
     func discoveredServices(_ peripheral: CBPeripheral, services: [CBService]) {
         
         guard let device = scannedDevices[peripheral.identifier] ?? connectedDevice else { return }
-        onEvent?(.servicesDiscovered(device, services.map(\.uuid)))
+        onEvent?(.servicesDiscovered(device: device, uuids: services.map(\.uuid)))
     }
         
     /// 特性發現成功：自動分類並快取具備通知 (Notify) 或寫入 (Write) 功能的特性
@@ -268,7 +268,7 @@ private extension WWBluetoothManager.Client {
             if characteristic.properties.canWrite { self.writableCharacteristics[characteristic.uuid] = characteristic }
         }
         
-        onEvent?(.characteristicsDiscovered(service.uuid, characteristics.map(\.uuid)))
+        onEvent?(.characteristicsDiscovered(uuid: service.uuid, uuids: characteristics.map(\.uuid)))
     }
     
     /// 可根據需求加入錯誤日誌記錄
@@ -276,35 +276,35 @@ private extension WWBluetoothManager.Client {
     
     /// 特徵值發現錯誤
     func characteristicDiscoveryFailed(_ peripheral: CBPeripheral, service: CBService, error: Error?) {
-        if let error { onEvent?(.failed(error)) }
+        if let error { onEvent?(.failed(error: error)) }
     }
     
     /// 通知狀態變更：監聽通知是否成功開啟
     func notificationStateUpdated(_ peripheral: CBPeripheral, characteristic: CBCharacteristic, error: Error?) {
         
-        if let error { onEvent?(.failed(error)); return }
-        if characteristic.isNotifying { onEvent?(.notificationEnabled(characteristic.uuid)) }
+        if let error { onEvent?(.failed(error: error)); return }
+        if characteristic.isNotifying { onEvent?(.notificationEnabled(uuid: characteristic.uuid)) }
     }
     
     /// 接收到資料更新：從藍牙裝置獲取回傳數據
     func characteristicValueUpdated(_ peripheral: CBPeripheral, characteristic: CBCharacteristic, data: Data?, error: Error?) {
         
-        if let error { onEvent?(.failed(error)); return }
+        if let error { onEvent?(.failed(error: error)); return }
         
         guard let data else { return }
-        onEvent?(.valueUpdated(characteristic.uuid, data))
+        onEvent?(.valueUpdated(uuid: characteristic.uuid, data: data))
     }
     
     /// 寫入資料完成：通知外部寫入指令是否成功
     func characteristicWriteCompleted(_ peripheral: CBPeripheral, characteristic: CBCharacteristic, error: Error?) {
-        onEvent?(.writeCompleted(characteristic.uuid, error))
+        onEvent?(.writeCompleted(uuid: characteristic.uuid, error: error))
     }
 }
 
 // MARK: - 小工具
 private extension WWBluetoothManager.Client {
     
-    /// 綁定 WWBluetoothManager.Central
+    /// 綁定 CentralDelegate
     func bindCentral() {
         central.delegate = self
     }

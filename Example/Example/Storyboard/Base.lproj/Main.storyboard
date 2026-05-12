@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="23727" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="F1x-wK-WAc">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="24506" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="NC8-it-nx4">
     <device id="retina5_9" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23721"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24504"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -12,13 +12,13 @@
         <!--Client-->
         <scene sceneID="Xv1-JU-ynU">
             <objects>
-                <viewController id="Aq9-Oa-3Wc" customClass="BluetoothClientViewController" customModule="Example" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="Aq9-Oa-3Wc" customClass="ClientViewController" customModule="Example" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="Sl5-Uk-4Ug">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="uP9-DY-bhP">
-                                <rect key="frame" x="0.0" y="144" width="375" height="668"/>
+                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="uP9-DY-bhP" customClass="LogTextView" customModule="Example" customModuleProvider="target">
+                                <rect key="frame" x="0.0" y="154" width="375" height="658"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <color key="textColor" systemColor="labelColor"/>
                                 <fontDescription key="fontDescription" type="boldSystem" pointSize="16"/>
@@ -35,7 +35,7 @@
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="Client" id="qoK-O1-3Nm">
-                        <barButtonItem key="rightBarButtonItem" style="plain" systemItem="action" id="J5a-E6-lBX">
+                        <barButtonItem key="rightBarButtonItem" style="done" systemItem="action" id="J5a-E6-lBX">
                             <color key="tintColor" red="1" green="0.14913141730000001" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             <connections>
                                 <action selector="writeData:" destination="Aq9-Oa-3Wc" id="fwb-uj-ikP"/>
@@ -53,7 +53,7 @@
         <!--Central-->
         <scene sceneID="tne-QT-ifu">
             <objects>
-                <viewController id="BYZ-38-t0r" customClass="BluetoothCentralViewController" customModule="Example" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="BYZ-38-t0r" customClass="CentralViewController" customModule="Example" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -97,7 +97,7 @@
                     <tabBarItem key="tabBarItem" title="Client" image="book.closed.circle.fill" catalog="system" id="Wjr-CZ-vV4"/>
                     <toolbarItems/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="FQ7-q4-gel">
-                        <rect key="frame" x="0.0" y="100" width="375" height="44"/>
+                        <rect key="frame" x="0.0" y="100" width="375" height="54"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
                     <nil name="viewControllers"/>
@@ -138,7 +138,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="Iaf-Hq-zPl" customClass="LogTextView" customModule="Example" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="144" width="375" height="668"/>
+                                <rect key="frame" x="0.0" y="154" width="375" height="658"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <color key="textColor" systemColor="labelColor"/>
                                 <fontDescription key="fontDescription" type="boldSystem" pointSize="16"/>
@@ -183,7 +183,7 @@
                     <tabBarItem key="tabBarItem" title="Send" image="sensor.fill" catalog="system" id="3i5-43-XCJ"/>
                     <toolbarItems/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="J2X-5k-crh">
-                        <rect key="frame" x="0.0" y="100" width="375" height="44"/>
+                        <rect key="frame" x="0.0" y="100" width="375" height="54"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
                     <nil name="viewControllers"/>
@@ -198,13 +198,13 @@
         <!--Peripheral-->
         <scene sceneID="oKC-ef-O4e">
             <objects>
-                <viewController id="KeB-Gs-yP4" customClass="BluetoothFileTransferPeripheralViewController" customModule="Example" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="KeB-Gs-yP4" customClass="AccessoryViewController" customModule="Example" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="GHD-Dd-ku3">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="vUK-zy-TPo" customClass="LogTextView" customModule="Example" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="144" width="375" height="668"/>
+                                <rect key="frame" x="0.0" y="154" width="375" height="658"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <color key="textColor" systemColor="labelColor"/>
                                 <fontDescription key="fontDescription" type="boldSystem" pointSize="16"/>
@@ -277,7 +277,7 @@
                     <tabBarItem key="tabBarItem" title="Peripheral" image="books.vertical.fill" catalog="system" id="uV7-Mj-iQg"/>
                     <toolbarItems/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="Qiu-SB-qP1">
-                        <rect key="frame" x="0.0" y="100" width="375" height="44"/>
+                        <rect key="frame" x="0.0" y="100" width="375" height="54"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
                     <nil name="viewControllers"/>

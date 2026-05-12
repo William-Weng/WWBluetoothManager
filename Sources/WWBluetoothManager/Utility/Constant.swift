@@ -49,16 +49,16 @@ public extension WWBluetoothManager {
     /// 代表藍牙 Client 運作過程中產生的各種狀態與事件 => 透過訂閱這些事件，外部開發者可以即時掌握藍牙連線的生命週期與數據流向。
     enum ClientEvent {
         
-        case stateChanged(CBManagerState)                                                               // 藍牙硬體狀態變更 (例如：poweredOn, poweredOff, resetting)
-        case discovered(Device)                                                                         // 發現周邊設備
-        case connected(Device)                                                                          // 成功連線至周邊設備
-        case disconnected(Device?, Error?)                                                              // 設備斷線。回傳該設備與斷線原因 (若為 nil 代表正常斷線)
-        case servicesDiscovered(Device, [CBUUID])                                                       // 已成功發現設備的所有服務 (Services)
-        case characteristicsDiscovered(CBUUID, [CBUUID])                                                // 已成功發現指定服務下的所有特徵值 (Characteristics)
-        case notificationEnabled(CBUUID)                                                                // 特定特徵值的通知功能已開啟 (Notification/Indication enabled)
-        case valueUpdated(CBUUID, Data)                                                                 // 接收到來自藍牙裝置的數據更新
-        case writeCompleted(CBUUID, Error?)                                                             // 寫入資料操作已完成。回傳錯誤以標記是否發生失敗
-        case failed(Error)                                                                              // 操作失敗。包含所有階段（掃描、連線、發現、讀寫）的錯誤 => 建議配合 ClientError 進行類型匹配與處理
+        case stateChanged(state: CBManagerState)                                                        // 藍牙硬體狀態變更 (例如：poweredOn, poweredOff, resetting)
+        case discovered(device: Device)                                                                 // 發現周邊設備
+        case connected(device: Device)                                                                  // 成功連線至周邊設備
+        case disconnected(device: Device?, error: Error?)                                               // 設備斷線。回傳該設備與斷線原因 (若為 nil 代表正常斷線)
+        case servicesDiscovered(device: Device, uuids: [CBUUID])                                        // 已成功發現設備的所有服務 (Services)
+        case characteristicsDiscovered(uuid: CBUUID, uuids: [CBUUID])                                   // 已成功發現指定服務下的所有特徵值 (Characteristics)
+        case notificationEnabled(uuid: CBUUID)                                                          // 特定特徵值的通知功能已開啟 (Notification/Indication enabled)
+        case valueUpdated(uuid: CBUUID, data: Data)                                                     // 接收到來自藍牙裝置的數據更新
+        case writeCompleted(uuid: CBUUID, error: Error?)                                                // 寫入資料操作已完成。回傳錯誤以標記是否發生失敗
+        case failed(error: Error)                                                                       // 操作失敗。包含所有階段（掃描、連線、發現、讀寫）的錯誤 => 建議配合 ClientError 進行類型匹配與處理
     }
     
     /// 代表藍牙 Client 運作過程中產生的各種錯誤
@@ -68,7 +68,23 @@ public extension WWBluetoothManager {
         case peripheralNotConnected                                                                     // 設備尚未連線或連線已斷開
         case characteristicNotFound                                                                     // 特徵值不可用（未發現、無權限或該設備不支援）
         case encodingFailed                                                                             // 字串轉 Data 編碼失敗 (例如：使用了不支援該字元集的編碼)
-        case operationFailed(Error)                                                                     // 底層藍牙作業錯誤（關聯到底層的錯誤訊息）
+    }
+}
+
+// MARK: - Accessory事件狀態常數化
+public extension WWBluetoothManager {
+    
+    enum AccessoryEvent {
+        
+        case stateUpdated(state: CBManagerState)
+        case serviceAdded(service: CBService, error: Error?)
+        case advertisingStarted(error: Error?)
+        case advertisingStopped
+        case subscribed(central: CBCentral, characteristic: CBCharacteristic)
+        case unsubscribed(central: CBCentral, characteristic: CBCharacteristic)
+        case didReceiveReadRequest(request: CBATTRequest)
+        case didReceiveWriteRequests(requests: [CBATTRequest])
+        case readyToUpdateSubscribers
     }
 }
 
