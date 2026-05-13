@@ -59,7 +59,7 @@ final class FileTransferViewController: UIViewController {
     
     @IBAction func sendDemoImageAction(_ sender: UIBarButtonItem) {
         
-        let image: UIImage = .chiikawa
+        let image: UIImage = .demo
         
         guard let rawData = image.pngData() else {
             logTextView.appendLog("建立測試圖片失敗")
@@ -223,7 +223,6 @@ private extension FileTransferViewController {
         )
         
         fileTransfer.handle(peripheral: peripheral, status: status)
-        logTextView.appendLog("Phase after handle => \(fileTransfer.phase)")
     }
     
     func handleCharacteristicWriteCompleted(_ peripheral: CBPeripheral, characteristic: CBCharacteristic, error: Error?) {
@@ -336,8 +335,6 @@ private extension FileTransferViewController {
         )
         
         logTextView.appendLog("Start send file => \(data.count) bytes")
-        logTextView.appendLog("Phase => \(fileTransfer.phase)")
-        logTextView.appendLog("Chunk size => \(fileTransfer.chunkSize), total chunks => \(fileTransfer.totalChunks)")
     }
     
     func handleReceivedTransferFile(_ file: TransferFile) {

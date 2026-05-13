@@ -294,8 +294,8 @@ private extension AccessoryViewController {
         
         if record.index == 0 {
             logTextView.appendLog("RECV payload.count => \(record.payload.count)")
-            logTextView.appendLog("RECV payload.head => \(record.payload.prefix(16).hexString)")
-            logTextView.appendLog("RECV payload.tail => \(record.payload.suffix(16).hexString)")
+            logTextView.appendLog("RECV payload.head => \(record.payload.prefix(16).hexString())")
+            logTextView.appendLog("RECV payload.tail => \(record.payload.suffix(16).hexString())")
         }
         
         if session.chunks[record.index] != nil {
@@ -394,14 +394,37 @@ private extension AccessoryViewController {
     
     func updatePreviewIfPossible(with data: Data, filename: String) {
         
-        guard let image = UIImage(data: data) else {
-            logTextView.appendLog("Image validation => not an image or decode failed")
-            return
+        do {
+            let transferFile = try TransferFile.decode(from: data)
+            
+            print("decoded fileName => \(transferFile.fileName)")
+            print("decoded typeIdentifier => \(transferFile.typeIdentifier)")
+            print("decoded data.count => \(transferFile.data.count)")
+            print("decoded data.head => \(transferFile.data.prefix(16).hexString())")
+            
+            guard transferFile.isImage else {
+                logTextView.appendLog("Preview skipped => not an image")
+                return
+            }
+            
+            guard let image = UIImage(data: transferFile.data) else {
+                logTextView.appendLog("Image validation => failed")
+                print("image decode => failed")
+                return
+            }
+            
+            DispatchQueue.main.async {
+                self.previewImageView.image = image
+                self.logTextView.appendLog("Image validation => success")
+                self.logTextView.appendLog("Preview updated => \(transferFile.normalizedFileName)")
+            }
+            
+            print("image decode => success")
+            
+        } catch {
+            logTextView.appendLog("TransferFile decode => failed")
+            print("TransferFile decode failed => \(error)")
         }
-        
-        previewImageView.image = image
-        logTextView.appendLog("Image validation => success")
-        logTextView.appendLog("Preview updated => \(filename)")
     }
 }
 
