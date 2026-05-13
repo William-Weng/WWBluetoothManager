@@ -7,28 +7,29 @@
 
 import UIKit
 import CoreBluetooth
+import UniformTypeIdentifiers
 import WWPrint
+import WWByteReader
 import WWBluetoothManager
 
 final class AccessoryViewController: UIViewController {
     
     @IBOutlet weak var logTextView: LogTextView!
+    @IBOutlet weak var previewImageView: UIImageView!
     
     private let accessory = WWBluetoothManager.Accessory()
     
-    private let localName = "Accessory"
+    private let localName = "🤣🤣🤣🤣"
     private let serviceType: WWBluetoothManager.UUIDType = .service
     private let controlType: WWBluetoothManager.UUIDType = .control
     private let dataType: WWBluetoothManager.UUIDType = .data
     
     private var isAdvertisingStarted = false
-    
-    private var transferId: UInt32 = 0
-    private var expectedTotalChunks: UInt32 = 0
-    private var receivedChunks: [UInt32: Data] = [:]
+    private var currentSession: IncomingFileSession?
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        configurePreviewImageView()
         bindAccessory()
     }
     
@@ -61,13 +62,18 @@ final class AccessoryViewController: UIViewController {
         let isSuccess = accessory.notifyValue(data, for: dataCharacteristic)
         logTextView.appendLog("Send notify => \(isSuccess ? "success" : "buffer full")")
     }
-
+    
     @IBAction func cleanLogText(_ sender: UIBarButtonItem) {
-        logTextView.text =  ""
+        logTextView.text = ""
+    }
+    
+    @IBAction func clearPreviewAction(_ sender: UIBarButtonItem) {
+        previewImageView.image = nil
+        logTextView.appendLog("Preview cleared.")
     }
 }
 
-// MARK: - 小工具
+// MARK: - Bluetooth
 private extension AccessoryViewController {
     
     func bindAccessory() {
@@ -77,54 +83,62 @@ private extension AccessoryViewController {
         
         accessory.onEvent = { [weak self] event in
             
-            guard let this = self else { return }
+            guard let self else { return }
             
             switch event {
             case .stateUpdated(let state):
-                this.logTextView.appendLog("Peripheral state => \(state.rawValue)")
+                self.logTextView.appendLog("Peripheral state => \(state.rawValue)")
                 
             case .advertisingStarted(let error):
-                this.logTextView.appendLog("Advertising started, error => \(String(describing: error))")
+                self.logTextView.appendLog("Advertising started, error => \(String(describing: error))")
                 
             case .advertisingStopped:
-                this.logTextView.appendLog("Advertising stopped.")
+                self.logTextView.appendLog("Advertising stopped.")
                 
             case .subscribed(let central, let characteristic):
-                this.logTextView.appendLog("Central subscribed => \(central.identifier.uuidString), characteristic => \(characteristic.uuid.uuidString)")
+                self.logTextView.appendLog("Central subscribed => \(central.identifier.uuidString), characteristic => \(characteristic.uuid.uuidString)")
                 
             case .unsubscribed(let central, let characteristic):
-                this.logTextView.appendLog("Central unsubscribed => \(central.identifier.uuidString), characteristic => \(characteristic.uuid.uuidString)")
+                self.logTextView.appendLog("Central unsubscribed => \(central.identifier.uuidString), characteristic => \(characteristic.uuid.uuidString)")
                 
             case .didReceiveWriteRequests(let requests):
-                this.receiveWriteRequests(requests: requests)
+                self.receiveWriteRequests(requests)
                 
             case .readyToUpdateSubscribers:
-                this.logTextView.appendLog("Ready to update subscribers again.")
+                self.logTextView.appendLog("Ready to update subscribers again.")
                 
             case .serviceAdded(let service, let error):
                 
-                this.logTextView.appendLog("Service added => \(service.uuid.uuidString), error => \(String(describing: error))")
+                self.logTextView.appendLog("Service added => \(service.uuid.uuidString), error => \(String(describing: error))")
                 
                 guard error == nil else { return }
-                guard !this.isAdvertisingStarted else { return }
+                guard !self.isAdvertisingStarted else { return }
                 
-                this.isAdvertisingStarted = true
-                this.accessory.startAdvertising(localName: this.localName, serviceTypes: [this.serviceType])
-
+                self.isAdvertisingStarted = true
+                self.accessory.startAdvertising(localName: self.localName, serviceTypes: [self.serviceType])
+                
             case .didReceiveReadRequest:
                 break
             }
         }
     }
     
-    func receiveWriteRequests(requests: [CBATTRequest]) {
+    func receiveWriteRequests(_ requests: [CBATTRequest]) {
+        
+        guard let firstRequest = requests.first else { return }
         
         logTextView.appendLog("Receive write requests => \(requests.count)")
+        
+        var responseResult: CBATTError.Code = .success
+        
+        defer {
+            accessory.respond(to: firstRequest, withResult: responseResult)
+        }
         
         for request in requests {
             
             guard let data = request.value else {
-                accessory.respond(to: request, withResult: .invalidPdu)
+                responseResult = .invalidPdu
                 continue
             }
             
@@ -133,31 +147,28 @@ private extension AccessoryViewController {
             logTextView.appendLog("Hex => \(data.hexString)")
             
             guard let uuidType = WWBluetoothManager.UUIDType.find(uuid: request.characteristic.uuid) else {
-                accessory.respond(to: request, withResult: .requestNotSupported)
+                responseResult = .requestNotSupported
                 continue
             }
             
             switch uuidType {
             case .control:
-                handleControlRequest(request: request, data: data)
-                
+                if !handleControlRequest(data: data) { responseResult = .invalidPdu }
             case .data:
-                handleDataRequest(request: request, data: data)
-                
+                if !handleDataRequest(data: data) { responseResult = .invalidPdu }
             default:
-                accessory.respond(to: request, withResult: .requestNotSupported)
+                responseResult = .requestNotSupported
             }
         }
     }
     
-    func handleControlRequest(request: CBATTRequest, data: Data) {
-        
-        accessory.respond(to: request, withResult: .success)
+    @discardableResult
+    func handleControlRequest(data: Data) -> Bool {
         
         guard let record = try? WWBluetoothManager.FileTransferRecord.decode(from: data) else {
             logTextView.appendLog("Decode control record failed.")
-            sendErrorRecord(transferId: transferId, total: expectedTotalChunks)
-            return
+            sendErrorRecord(transferId: currentSession?.transferId ?? 0, total: currentSession?.expectedTotalChunks ?? 0)
+            return false
         }
         
         logTextView.appendLog("Control type => \(record.type)")
@@ -167,58 +178,79 @@ private extension AccessoryViewController {
         switch record.type {
         case .clientHello:
             handleClientHello(record)
-            
         case .ready:
             handleReady(record)
-            
         case .ack:
             logTextView.appendLog("Receive ACK => \(record.index)")
-            
         case .finishAck:
             logTextView.appendLog("Receive finishAck.")
             resetTransferState()
-            
         case .error:
             logTextView.appendLog("Receive error record.")
             resetTransferState()
-            
         case .serverHello:
             logTextView.appendLog("Unexpected serverHello from central.")
-            
         case .data, .finish:
             logTextView.appendLog("Unexpected control record => \(record.type)")
         }
+        
+        return true
     }
     
-    func handleDataRequest(request: CBATTRequest, data: Data) {
-        
-        accessory.respond(to: request, withResult: .success)
+    @discardableResult
+    func handleDataRequest(data: Data) -> Bool {
         
         guard let record = try? WWBluetoothManager.FileTransferRecord.decode(from: data) else {
             logTextView.appendLog("Decode data record failed.")
-            sendErrorRecord(transferId: transferId, total: expectedTotalChunks)
-            return
+            sendErrorRecord(transferId: currentSession?.transferId ?? 0, total: currentSession?.expectedTotalChunks ?? 0)
+            return false
         }
         
         switch record.type {
         case .data:
             handleDataRecord(record)
-            
         case .finish:
             handleFinishRecord(record)
-            
         default:
             logTextView.appendLog("Unexpected data characteristic record => \(record.type)")
         }
+        
+        return true
     }
+}
+
+// MARK: - Record handlers
+private extension AccessoryViewController {
     
     func handleClientHello(_ record: WWBluetoothManager.FileTransferRecord) {
         
-        transferId = record.transferId
-        expectedTotalChunks = record.total
-        receivedChunks.removeAll()
+        let metadata = decodeClientHelloPayload(record.payload)
         
-        logTextView.appendLog("Receive clientHello")
+        let session = IncomingFileSession(
+            transferId: record.transferId,
+            expectedTotalChunks: record.total,
+            fileName: metadata?.fileName ?? "received-file",
+            typeIdentifier: metadata?.typeIdentifier ?? "public.data",
+            fileSize: metadata?.fileSize ?? 0,
+            chunkSize: metadata?.chunkSize ?? 0
+        )
+        
+        if session.fileSize > 0, session.chunkSize > 0 {
+            let calculatedTotal = session.calculatedTotalChunks
+            if calculatedTotal != Int(record.total) {
+                logTextView.appendLog("Warning => total mismatch, record.total => \(record.total), calculated => \(calculatedTotal)")
+            }
+        }
+        
+        currentSession = session
+        
+        logTextView.appendLog(
+            "Start receiving => \(session.fileName), " +
+            "type => \(session.typeIdentifier), " +
+            "size => \(session.fileSize), " +
+            "chunk => \(session.chunkSize), " +
+            "total => \(session.expectedTotalChunks)"
+        )
         
         let serverHello = WWBluetoothManager.FileTransferRecord(
             type: .serverHello,
@@ -236,14 +268,51 @@ private extension AccessoryViewController {
     
     func handleDataRecord(_ record: WWBluetoothManager.FileTransferRecord) {
         
-        guard record.transferId == transferId else {
+        guard var session = currentSession else {
+            logTextView.appendLog("No active transfer session.")
+            sendErrorRecord(transferId: record.transferId, total: record.total)
+            return
+        }
+        
+        guard record.transferId == session.transferId else {
             logTextView.appendLog("Transfer ID mismatch on data.")
             sendErrorRecord(transferId: record.transferId, total: record.total)
             return
         }
         
-        receivedChunks[record.index] = record.payload
-        logTextView.appendLog("Receive data chunk => \(record.index + 1)/\(record.total), payload => \(record.payload.count) bytes")
+        guard record.index < session.expectedTotalChunks else {
+            logTextView.appendLog("Chunk index out of range => \(record.index)")
+            sendErrorRecord(transferId: record.transferId, total: record.total)
+            return
+        }
+        
+        if session.chunkSize > 0, record.payload.count > Int(session.chunkSize) {
+            logTextView.appendLog("Chunk payload too large => index \(record.index), size \(record.payload.count)")
+            sendErrorRecord(transferId: record.transferId, total: record.total)
+            return
+        }
+        
+        if record.index == 0 {
+            logTextView.appendLog("RECV payload.count => \(record.payload.count)")
+            logTextView.appendLog("RECV payload.head => \(record.payload.prefix(16).hexString)")
+            logTextView.appendLog("RECV payload.tail => \(record.payload.suffix(16).hexString)")
+        }
+        
+        if session.chunks[record.index] != nil {
+            logTextView.appendLog("Duplicate chunk => \(record.index), overwrite")
+        }
+        
+        session.chunks[record.index] = record.payload
+        currentSession = session
+        
+        let receivedCount = session.chunks.count
+        let total = Int(session.expectedTotalChunks)
+        let percent = total > 0 ? Int((Double(receivedCount) / Double(total)) * 100.0) : 0
+        
+        if percent != session.lastLoggedReceivePercent {
+            currentSession?.lastLoggedReceivePercent = percent
+            logTextView.appendLog("Receiving progress => \(percent)% (\(receivedCount)/\(total))")
+        }
         
         let ack = WWBluetoothManager.FileTransferRecord(
             type: .ack,
@@ -252,30 +321,50 @@ private extension AccessoryViewController {
             total: record.total
         )
         
-        sendControlRecord(ack, log: "Send ACK => \(record.index)")
+        sendControlRecord(ack, log: "ACK \(record.index)")
     }
     
     func handleFinishRecord(_ record: WWBluetoothManager.FileTransferRecord) {
         
-        guard record.transferId == transferId else {
+        guard let session = currentSession else {
+            logTextView.appendLog("No active transfer session on finish.")
+            sendErrorRecord(transferId: record.transferId, total: record.total)
+            return
+        }
+        
+        guard record.transferId == session.transferId else {
             logTextView.appendLog("Transfer ID mismatch on finish.")
             sendErrorRecord(transferId: record.transferId, total: record.total)
             return
         }
         
-        let chunks = (0..<record.total).compactMap { receivedChunks[$0] }
-        
-        guard chunks.count == Int(record.total) else {
-            logTextView.appendLog("Missing chunks => expect \(record.total), actual \(chunks.count)")
-            sendErrorRecord(transferId: record.transferId, total: record.total)
+        guard let fileData = session.mergedData() else {
+            logTextView.appendLog("Missing chunks => expect \(session.expectedTotalChunks), actual \(session.chunks.count)")
+            sendErrorRecord(transferId: record.transferId, total: session.expectedTotalChunks)
             return
         }
         
-        let fileData = chunks.reduce(into: Data()) { partialResult, chunk in
-            partialResult.append(chunk)
+        if session.fileSize > 0, fileData.count != Int(session.fileSize) {
+            logTextView.appendLog("File size mismatch => expect \(session.fileSize), actual \(fileData.count)")
+            sendErrorRecord(transferId: record.transferId, total: session.expectedTotalChunks)
+            return
         }
         
-        logTextView.appendLog("Receive completed => \(fileData.count) bytes")
+        do {
+            let fileURL = try saveReceivedFile(data: fileData, filename: session.fileName, typeIdentifier: session.typeIdentifier)
+            
+            logTextView.appendLog("Receive completed => 100%")
+            logTextView.appendLog("Saved file => \(fileURL.lastPathComponent)")
+            logTextView.appendLog("File size => \(fileData.count) bytes")
+            logTextView.appendLog("Path => \(fileURL.path)")
+            
+            updatePreviewIfPossible(with: fileData, filename: fileURL.lastPathComponent)
+            
+        } catch {
+            logTextView.appendLog("Save file failed => \(error.localizedDescription)")
+            sendErrorRecord(transferId: record.transferId, total: session.expectedTotalChunks)
+            return
+        }
         
         let finishAck = WWBluetoothManager.FileTransferRecord(
             type: .finishAck,
@@ -284,9 +373,40 @@ private extension AccessoryViewController {
             total: record.total
         )
         
+        logTextView.appendLog("Merged bytes => \(fileData.count)")
+        logTextView.appendLog("Merged head => \(fileData.prefix(16).hexString)")
+        logTextView.appendLog("Merged tail => \(fileData.suffix(16).hexString)")
+        
         sendControlRecord(finishAck, log: "Send finishAck")
         resetTransferState()
     }
+}
+
+// MARK: - Preview
+private extension AccessoryViewController {
+    
+    func configurePreviewImageView() {
+        previewImageView.contentMode = .scaleAspectFit
+        previewImageView.clipsToBounds = true
+        previewImageView.backgroundColor = .secondarySystemBackground
+        previewImageView.image = nil
+    }
+    
+    func updatePreviewIfPossible(with data: Data, filename: String) {
+        
+        guard let image = UIImage(data: data) else {
+            logTextView.appendLog("Image validation => not an image or decode failed")
+            return
+        }
+        
+        previewImageView.image = image
+        logTextView.appendLog("Image validation => success")
+        logTextView.appendLog("Preview updated => \(filename)")
+    }
+}
+
+// MARK: - Helpers
+private extension AccessoryViewController {
     
     func sendControlRecord(_ record: WWBluetoothManager.FileTransferRecord, log: String) {
         
@@ -315,15 +435,74 @@ private extension AccessoryViewController {
     }
     
     func resetTransferState() {
-        transferId = 0
-        expectedTotalChunks = 0
-        receivedChunks.removeAll()
+        currentSession = nil
+    }
+    
+    func saveReceivedFile(data: Data, filename: String, typeIdentifier: String) throws -> URL {
+        
+        let directory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+            .appendingPathComponent("ReceivedFiles", isDirectory: true)
+        
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        
+        var safeFilename = filename.isEmpty ? "received-file" : filename
+        let hasExtension = !URL(fileURLWithPath: safeFilename).pathExtension.isEmpty
+        
+        if !hasExtension,
+           let type = UTType(typeIdentifier),
+           let ext = type.preferredFilenameExtension {
+            safeFilename += ".\(ext)"
+        }
+        
+        let fileURL = uniqueFileURL(for: safeFilename, in: directory)
+        try data.write(to: fileURL, options: .atomic)
+        
+        return fileURL
+    }
+    
+    func uniqueFileURL(for filename: String, in directory: URL) -> URL {
+        
+        let baseURL = directory.appendingPathComponent(filename)
+        
+        guard FileManager.default.fileExists(atPath: baseURL.path) else {
+            return baseURL
+        }
+        
+        let ext = baseURL.pathExtension
+        let name = baseURL.deletingPathExtension().lastPathComponent
+        
+        for index in 1...9999 {
+            let candidateName = ext.isEmpty ? "\(name)-\(index)" : "\(name)-\(index).\(ext)"
+            let candidateURL = directory.appendingPathComponent(candidateName)
+            if !FileManager.default.fileExists(atPath: candidateURL.path) {
+                return candidateURL
+            }
+        }
+        
+        return directory.appendingPathComponent(UUID().uuidString + (ext.isEmpty ? "" : ".\(ext)"))
+    }
+    
+    func decodeClientHelloPayload(_ data: Data) -> (fileName: String, typeIdentifier: String, fileSize: UInt32, chunkSize: UInt16)? {
+        
+        do {
+            var reader = WWByteReader(data: data)
+            
+            let fileName = try reader.readLengthPrefixedString()
+            let typeIdentifier = try reader.readLengthPrefixedString()
+            let fileSize: UInt32 = try reader.readUIntValue()
+            let chunkSize: UInt16 = try reader.readUIntValue()
+            
+            guard !fileName.isEmpty else { return nil }
+            guard fileSize > 0 else { return nil }
+            guard chunkSize > 0 else { return nil }
+            
+            wwPrint("\(fileName) => \(typeIdentifier), \(fileSize), \(chunkSize)")
+            return (fileName, typeIdentifier, fileSize, chunkSize)
+            
+        } catch {
+            return nil
+        }
     }
 }
 
-private extension Data {
-    
-    var hexString: String {
-        map { String(format: "%02X", $0) }.joined(separator: " ")
-    }
-}
+

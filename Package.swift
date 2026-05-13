@@ -12,7 +12,7 @@ let package = Package(
         .library(name: "WWBluetoothManager", targets: ["WWBluetoothManager"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/William-Weng/WWByteReader", .upToNextMinor(from: "1.2.2"))
+        .package(url: "https://github.com/William-Weng/WWByteReader", .upToNextMinor(from: "1.3.0"))
     ],
     targets: [
         .target(

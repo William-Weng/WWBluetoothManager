@@ -16,7 +16,7 @@ final class FileTransferViewController: UIViewController {
     @IBOutlet weak var logTextView: LogTextView!
     @IBOutlet weak var previewImageView: UIImageView!
     
-    private let targetLocalName = "Accessory"
+    private let targetLocalName = "🤣🤣🤣🤣"
     private let central = WWBluetoothManager.Central()
     private let fileTransfer = WWBluetoothManager.FileTransferController()
     
@@ -328,6 +328,8 @@ private extension FileTransferViewController {
         
         fileTransfer.sendFile(
             using: peripheral,
+            fileName: "demo.png",
+            typeIdentifier: "public.png",
             data: data,
             controlCharacteristic: controlCharacteristic,
             dataCharacteristic: dataCharacteristic

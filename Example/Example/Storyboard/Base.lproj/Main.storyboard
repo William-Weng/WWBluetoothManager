@@ -227,9 +227,12 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="FvN-Xn-t9S">
+                                <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
+                            </imageView>
                             <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="vUK-zy-TPo" customClass="LogTextView" customModule="Example" customModuleProvider="target">
                                 <rect key="frame" x="0.0" y="154" width="375" height="658"/>
-                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <color key="textColor" systemColor="labelColor"/>
                                 <fontDescription key="fontDescription" type="boldSystem" pointSize="16"/>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
@@ -239,7 +242,11 @@
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
                             <constraint firstAttribute="bottom" secondItem="vUK-zy-TPo" secondAttribute="bottom" id="4CZ-b5-Ef1"/>
+                            <constraint firstAttribute="bottom" secondItem="FvN-Xn-t9S" secondAttribute="bottom" id="4ns-1J-ed1"/>
                             <constraint firstItem="vUK-zy-TPo" firstAttribute="trailing" secondItem="YuK-qx-lk9" secondAttribute="trailing" id="53i-14-lUp"/>
+                            <constraint firstItem="FvN-Xn-t9S" firstAttribute="leading" secondItem="YuK-qx-lk9" secondAttribute="leading" id="VnP-rB-Bxd"/>
+                            <constraint firstItem="FvN-Xn-t9S" firstAttribute="top" secondItem="GHD-Dd-ku3" secondAttribute="top" id="XYf-It-fI8"/>
+                            <constraint firstItem="FvN-Xn-t9S" firstAttribute="trailing" secondItem="YuK-qx-lk9" secondAttribute="trailing" id="ilj-nJ-phz"/>
                             <constraint firstItem="vUK-zy-TPo" firstAttribute="leading" secondItem="YuK-qx-lk9" secondAttribute="leading" id="rNI-b0-PDM"/>
                             <constraint firstItem="vUK-zy-TPo" firstAttribute="top" secondItem="YuK-qx-lk9" secondAttribute="top" id="ulP-7Q-IzL"/>
                         </constraints>
@@ -276,6 +283,7 @@
                     </navigationItem>
                     <connections>
                         <outlet property="logTextView" destination="vUK-zy-TPo" id="fDQ-IH-jZp"/>
+                        <outlet property="previewImageView" destination="FvN-Xn-t9S" id="StE-DW-wRt"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="AgH-zX-eAW" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
@@ -294,7 +302,7 @@
                         <color key="selectedImageTintColor" red="0.016804177310000001" green="0.19835099580000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                     </tabBar>
                     <connections>
-                        <segue destination="4Zl-bd-3kl" kind="relationship" relationship="viewControllers" id="fr9-gO-3We"/>
+                        <segue destination="4Zl-bd-3kl" kind="relationship" relationship="viewControllers" id="lHH-0N-9WH"/>
                     </connections>
                 </tabBarController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dJx-SO-7bR" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>

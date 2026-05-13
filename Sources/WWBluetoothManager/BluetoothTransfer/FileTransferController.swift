@@ -50,8 +50,8 @@ public extension WWBluetoothManager.FileTransferController {
     ///   - data: 準備傳送的完整檔案資料
     ///   - controlCharacteristic: 用來傳送握手與控制訊息的 characteristic
     ///   - dataCharacteristic: 用來傳送資料片段的 characteristic
-    func sendFile(using peripheral: CBPeripheral, data: Data, controlCharacteristic: CBCharacteristic, dataCharacteristic: CBCharacteristic) {
-                
+    func sendFile(using peripheral: CBPeripheral, fileName: String, typeIdentifier: String, data: Data, controlCharacteristic: CBCharacteristic, dataCharacteristic: CBCharacteristic) {
+        
         let maximumLength = peripheral.maximumWriteValueLength(for: .withResponse)
         let headerSize = WWBluetoothManager.FileTransferRecord.minimumCount
         
@@ -62,16 +62,30 @@ public extension WWBluetoothManager.FileTransferController {
         self.sendingData = data
         self.sendingIndex = 0
         self.transferId = UInt32.random(in: .min ... .max)
-        
         self.chunkSize = max(1, maximumLength - headerSize)
         self.totalChunks = UInt32((data.count + chunkSize - 1) / chunkSize)
         self.phase = .waitingServerHello
         
+        try! writer.writeString(fileName)
+        try! writer.writeString(typeIdentifier)
         writer.writeInteger(UInt32(data.count))
         writer.writeInteger(UInt16(chunkSize))
         
-        let hello = WWBluetoothManager.FileTransferRecord(type: .clientHello, transferId: transferId, index: 0, total: totalChunks, payload: writer.data)
-        peripheral.writeValue(hello.encode(), for: controlCharacteristic, type: .withResponse)
+        let hello = WWBluetoothManager.FileTransferRecord(
+            type: .clientHello,
+            transferId: transferId,
+            index: 0,
+            total: totalChunks,
+            payload: writer.data
+        )
+        
+        let encoded = hello.encode()
+        
+        print("encoded data record head => \(encoded.prefix(24).map { String(format: "%02X", $0) }.joined(separator: " "))")
+        print("sendFile => generated transferId: \(self.transferId)")
+        print("sendFile => hello hex: \(encoded.map { String(format: "%02X", $0) }.joined(separator: " "))")
+        
+        peripheral.writeValue(encoded, for: controlCharacteristic, type: .withResponse)
     }
     
     /// 初始化檔案接收流程，並開始監聽控制與資料 characteristic 的通知 => 開啟通知後，後續收到的封包資料會透過 `CBPeripheralDelegate` 回傳，並由外部流程再進一步解析成 `FileTransferRecord`
@@ -158,12 +172,21 @@ private extension WWBluetoothManager.FileTransferController {
         case .error: handleErrorRecord()
         }
     }
+}
+
+// MARK: - 小工具
+private extension WWBluetoothManager.FileTransferController {
     
     /// 處理接收端發來的 clientHello
     /// - Parameters:
     ///   - peripheral: 目前互動中的藍牙周邊裝置
     ///   - record: clientHello 記錄
     func handleClientHello(peripheral: CBPeripheral, record: WWBluetoothManager.FileTransferRecord) {
+        
+        guard phase == .idle || phase == .receivingData || phase == .waitingReady else {
+            print("handleClientHello => ignore, current phase: \(phase)")
+            return
+        }
         
         transferId = record.transferId
         expectedTotalChunks = record.total
@@ -172,7 +195,13 @@ private extension WWBluetoothManager.FileTransferController {
         
         guard let controlCharacteristic else { return }
         
-        let serverHello = WWBluetoothManager.FileTransferRecord(type: .serverHello, transferId: record.transferId, index: 0, total: record.total)
+        let serverHello = WWBluetoothManager.FileTransferRecord(
+            type: .serverHello,
+            transferId: record.transferId,
+            index: 0,
+            total: record.total
+        )
+        
         peripheral.writeValue(serverHello.encode(), for: controlCharacteristic, type: .withResponse)
     }
     
@@ -182,10 +211,16 @@ private extension WWBluetoothManager.FileTransferController {
     ///   - record: serverHello 記錄
     func handleServerHello(peripheral: CBPeripheral, record: WWBluetoothManager.FileTransferRecord) {
         
+        print("handleServerHello => phase: \(phase)")
+        print("handleServerHello => record.transferId: \(record.transferId)")
+        print("handleServerHello => self.transferId: \(transferId)")
+        print("handleServerHello => hasControlCharacteristic: \(controlCharacteristic != nil)")
+        
         guard phase == .waitingServerHello,
               record.transferId == transferId,
               let controlCharacteristic
         else {
+            print("handleServerHello => guard failed")
             return
         }
         
