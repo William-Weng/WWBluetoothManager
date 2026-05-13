@@ -15,7 +15,8 @@ public extension WWBluetoothManager {
     /// 檔案傳輸協議中的單一封包資料模型 => 代表一次在 BLE characteristic 間傳送的協議單位
     struct FileTransferRecord {
         
-        static let minimumCount = 13        // 最小長度 = type(1) + transferId(4) + index(4) + total(4) = 13 bytes
+        static let minimumCount = 13                                                            // 最小長度 = type(1) + transferId(4) + index(4) + total(4) = 13 bytes
+        static let emptyData: Self = .init(type: .data, transferId: 0, index: 0, total: 0)      // 表示沒有有效 payload 的空資料 record，通常用於 sender session 不存在時的保底回傳
         
         public let type: FileTransferRecordType
         public let transferId: UInt32
