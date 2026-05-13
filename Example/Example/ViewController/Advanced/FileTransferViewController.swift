@@ -325,7 +325,7 @@ private extension FileTransferViewController {
         
         pendingSendFileData = nil
         
-        fileTransfer.sendFile(
+        try! fileTransfer.sendFile(
             using: peripheral,
             fileName: "demo.png",
             typeIdentifier: "public.png",
