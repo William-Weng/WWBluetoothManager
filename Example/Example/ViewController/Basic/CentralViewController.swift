@@ -14,7 +14,6 @@
 
 import UIKit
 import CoreBluetooth
-import WWPrint
 import WWBluetoothManager
 
 final class CentralViewController: UIViewController {
@@ -69,7 +68,7 @@ private extension CentralViewController {
     /// - 僅在 `.poweredOn` 時自動開始掃描
     func centralStateUpdated(_ state: CBManagerState) {
         
-        wwPrint("Bluetooth state => \(state.rawValue)")
+        print("Bluetooth state => \(state.rawValue)")
         
         guard state == .poweredOn else { return }
         central.startScan()
@@ -84,7 +83,7 @@ private extension CentralViewController {
             return
         }
         
-        wwPrint("\(result.jsonString())")
+        print("\(result.jsonString())")
         central.stopScan()
         central.connect(result.peripheral)
     }
@@ -93,13 +92,13 @@ private extension CentralViewController {
     func centralConnected(_ peripheral: CBPeripheral) {
         
         targetPeripheral = peripheral
-        wwPrint("Connected => \(peripheral.name ?? "Unknown")")
+        print("Connected => \(peripheral.name ?? "Unknown")")
     }
     
     /// 斷線事件，清理所有狀態
     func centralDisconnected(_ peripheral: CBPeripheral, error: Error?) {
         
-        wwPrint("Disconnected => \(peripheral.name ?? "Unknown"), error => \(String(describing: error))")
+        print("Disconnected => \(peripheral.name ?? "Unknown"), error => \(String(describing: error))")
         
         targetPeripheral = nil
         writableCharacteristic = nil
@@ -108,7 +107,7 @@ private extension CentralViewController {
     
     /// 連線失敗
     func centralFailedToConnect(_ peripheral: CBPeripheral, error: Error?) {
-        wwPrint("Failed => \(peripheral.name ?? "Unknown"), error => \(String(describing: error))")
+        print("Failed => \(peripheral.name ?? "Unknown"), error => \(String(describing: error))")
     }
 }
 
@@ -118,14 +117,14 @@ private extension CentralViewController {
     /// 服務發現完成，列印所有服務 UUID
     func discoveredServices(_ peripheral: CBPeripheral, services: [CBService]) {
         
-        wwPrint("Services of \(peripheral.name ?? "Unknown"): (\(services.count) 個)")
-        services.forEach { service in wwPrint("Service => \(service.uuid.uuidString)") }
+        print("Services of \(peripheral.name ?? "Unknown"): (\(services.count) 個)")
+        services.forEach { service in print("Service => \(service.uuid.uuidString)") }
     }
     
     /// 特性發現完成，尋找目標寫入 / 通知特性並啟用通知
     func discoveredCharacteristics(_ peripheral: CBPeripheral, service: CBService, characteristics: [CBCharacteristic]) {
         
-        wwPrint("Characteristics of \(service.uuid.uuidString): (\(characteristics.count) 個)")
+        print("Characteristics of \(service.uuid.uuidString): (\(characteristics.count) 個)")
         
         characteristics.forEach { characteristic in
             
@@ -134,12 +133,12 @@ private extension CentralViewController {
             switch uuidType {
             case .write:    // 找到寫入特性
                 writableCharacteristic = characteristic
-                wwPrint("Writable characteristic found!")
+                print("Writable characteristic found!")
 
             case .notify:   // 找到通知特性並自動啟用
                 notifyCharacteristic = characteristic
                 peripheral.setNotifyValue(true, for: characteristic)
-                wwPrint("Notify enabled!")
+                print("Notify enabled!")
 
             default: break
             }
@@ -154,22 +153,22 @@ private extension CentralViewController {
     
     /// 通知狀態更新
     func notificationStateUpdated(_ peripheral: CBPeripheral, characteristic: CBCharacteristic, error: Error?) {
-        wwPrint("Notification state updated => \(characteristic.uuid.uuidString), isNotifying => \(characteristic.isNotifying), error => \(String(describing: error))")
+        print("Notification state updated => \(characteristic.uuid.uuidString), isNotifying => \(characteristic.isNotifying), error => \(String(describing: error))")
     }
     
     /// 接收通知資料
     func characteristicValueUpdated(_ peripheral: CBPeripheral, characteristic: CBCharacteristic, data: Data?, error: Error?) {
         
-        wwPrint("Value updated => \(characteristic.uuid.uuidString), error => \(String(describing: error))")
-        guard let data else { wwPrint("  Notify data => nil"); return }
+        print("Value updated => \(characteristic.uuid.uuidString), error => \(String(describing: error))")
+        guard let data else { print("  Notify data => nil"); return }
         
-        wwPrint("Notify hex => \(data.hexString())")
-        wwPrint("Notify utf8 => \(data.string() ?? "<non-utf8>")")
+        print("Notify hex => \(data.hexString())")
+        print("Notify utf8 => \(data.string() ?? "<non-utf8>")")
     }
     
     /// 寫入完成回調
     func characteristicWriteCompleted(_ peripheral: CBPeripheral, characteristic: CBCharacteristic, error: Error?) {
-        wwPrint("Write completed => \(characteristic.uuid.uuidString), error => \(String(describing: error))")
+        print("Write completed => \(characteristic.uuid.uuidString), error => \(String(describing: error))")
     }
 }
 
@@ -184,15 +183,15 @@ private extension CentralViewController {
     /// 發送 0x01 控制指令（延遲 0.5 秒避免連續寫入）
     func sendHex(byte: UInt8 = 0x01) {
         
-        guard let peripheral = targetPeripheral else { wwPrint("No connected peripheral"); return }
-        guard let characteristic = writableCharacteristic else { wwPrint("No writable characteristic"); return }
+        guard let peripheral = targetPeripheral else { print("No connected peripheral"); return }
+        guard let characteristic = writableCharacteristic else { print("No writable characteristic"); return }
         
         let data = Data([byte])
         let writeType: CBCharacteristicWriteType = characteristic.properties.contains(.writeWithoutResponse) ? .withoutResponse : .withResponse
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             peripheral.writeValue(data, for: characteristic, type: writeType)
-            wwPrint("Send hex => \(data.map { String(format: "%02x", $0) }.joined())")
+            print("Send hex => \(data.map { String(format: "%02x", $0) }.joined())")
         }
     }
 }

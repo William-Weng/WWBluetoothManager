@@ -55,7 +55,7 @@ public extension WWBluetoothManager {
         case connected(device: Device)                                                                  // 成功連線至周邊設備
         case disconnected(device: Device?, error: Error?)                                               // 設備斷線。回傳該設備與斷線原因 (若為 nil 代表正常斷線)
         case servicesDiscovered(device: Device, uuids: [CBUUID])                                        // 已成功發現設備的所有服務 (Services)
-        case characteristicsDiscovered(uuid: CBUUID, uuids: [CBUUID])                                   // 已成功發現指定服務下的所有特徵值 (Characteristics)
+        case characteristicsDiscovered(service: CBService, characteristics: [CBCharacteristic])         // 已成功發現指定服務下的所有特徵值，並回傳實際的 characteristic 物件
         case notificationEnabled(uuid: CBUUID)                                                          // 特定特徵值的通知功能已開啟 (Notification/Indication enabled)
         case valueUpdated(uuid: CBUUID, data: Data)                                                     // 接收到來自藍牙裝置的數據更新
         case writeCompleted(uuid: CBUUID, error: Error?)                                                // 寫入資料操作已完成。回傳錯誤以標記是否發生失敗
@@ -196,7 +196,7 @@ extension WWBluetoothManager.ClientEvent: @retroactive CustomStringConvertible {
         case .connected: return "Connected ✅"
         case .disconnected(let device, let error): return "Disconnected: \(device?.name ?? "Unknown") \(error.map { "\($0)" } ?? "")"
         case .servicesDiscovered(_, let services): return "Services: \(services.map { $0.uuidString })"
-        case .characteristicsDiscovered(let service, let chars): return "Chars \(service.uuidString): \(chars.map { $0.uuidString })"
+        case .characteristicsDiscovered(let service, let chars): return "Chars \(service.uuid.uuidString): \(chars.map { $0.uuid.uuidString })"
         case .notificationEnabled(let uuid): return "Notify ON: \(uuid.uuidString)"
         case .valueUpdated(let uuid, let data): return "Notify \(uuid.uuidString): \(data.map { String(format: "%02x", $0) }.joined())"
         case .writeCompleted(let uuid, let error): return "Write \(uuid.uuidString): \(error.map { "\($0)" } ?? "OK")"

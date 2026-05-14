@@ -114,23 +114,20 @@ extension WWBluetoothManager.FileTransferController {
     var currentSenderTransferId: UInt32? { senderSession?.transferId }                          // 目前 sender session 的 transferId。
 }
 
+// MARK: - 公用工具
 extension WWBluetoothManager.FileTransferController {
     
-    /// 處理 peripheral 狀態事件，並產生給 `ClientTransfer` 使用的事件結果。
+    /// 處理 peripheral 狀態事件，並產生給 `ClientTransfer` 使用的事件結果
     ///
-    /// 目前先保留為最小橋接層，後續可再依 sender session 的 phase、
-    /// sendingIndex 或 ack 結果細化成 `didSendChunk` / `didFinish` 等事件。
+    /// 目前先保留為最小橋接層，後續可再依 sender session 的 phase、sendingIndex 或 ack 結果細化成 `didSendChunk` / `didFinish` 等事件
     ///
     /// - Parameters:
-    ///   - peripheral: 目前互動中的遠端裝置。
-    ///   - status: 由藍牙層回傳的 peripheral 狀態事件。
-    /// - Returns: 對應的 `ClientTransferResult`。
+    ///   - peripheral: 目前互動中的遠端裝置
+    ///   - status: 由藍牙層回傳的 peripheral 狀態事件
+    /// - Returns: 對應的 `ClientTransferResult`
     func handleAndMakeClientTransferEvent(peripheral: CBPeripheral, status: WWBluetoothManager.PeripheralStatus) throws -> WWBluetoothManager.ClientTransferResult {
         
         handle(peripheral: peripheral, status: status)
-        
-        // 之後可以依你的 senderSession.phase / sendingIndex / ack
-        // 把 chunk 與 finish 事件接進來。
         return .none
     }
 }

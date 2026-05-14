@@ -268,7 +268,7 @@ private extension WWBluetoothManager.Client {
             if characteristic.properties.canWrite { self.writableCharacteristics[characteristic.uuid] = characteristic }
         }
         
-        onEvent?(.characteristicsDiscovered(uuid: service.uuid, uuids: characteristics.map(\.uuid)))
+        onEvent?(.characteristicsDiscovered(service: service, characteristics: characteristics))
     }
     
     /// 可根據需求加入錯誤日誌記錄

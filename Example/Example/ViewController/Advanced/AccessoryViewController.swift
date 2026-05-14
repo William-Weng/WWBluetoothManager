@@ -8,22 +8,22 @@
 import UIKit
 import CoreBluetooth
 import UniformTypeIdentifiers
-import WWPrint
 import WWByteReader
 import WWBluetoothManager
 
 final class AccessoryViewController: UIViewController {
     
     @IBOutlet weak var logTextView: LogTextView!
+    @IBOutlet weak var nameTextField: UITextField!
     @IBOutlet weak var previewImageView: UIImageView!
     
     private let accessory = WWBluetoothManager.Accessory()
     
-    private let localName = "🤣🤣🤣🤣"
     private let serviceType: WWBluetoothManager.UUIDType = .service
     private let controlType: WWBluetoothManager.UUIDType = .control
     private let dataType: WWBluetoothManager.UUIDType = .data
     
+    private var localName : String { nameTextField.text ?? "" }
     private var isAdvertisingStarted = false
     private var currentSession: IncomingFileSession?
     
@@ -118,9 +118,7 @@ private extension AccessoryViewController {
         
         var responseResult: CBATTError.Code = .success
         
-        defer {
-            accessory.respond(to: firstRequest, withResult: responseResult)
-        }
+        defer { accessory.respond(to: firstRequest, withResult: responseResult) }
         
         for request in requests {
             
@@ -182,12 +180,9 @@ private extension AccessoryViewController {
         }
         
         switch record.type {
-        case .data:
-            handleDataRecord(record)
-        case .finish:
-            handleFinishRecord(record)
-        default:
-            logTextView.appendLog("Unexpected data characteristic record => \(record.type)")
+        case .data: handleDataRecord(record)
+        case .finish: handleFinishRecord(record)
+        default: logTextView.appendLog("Unexpected data characteristic record => \(record.type)")
         }
         
         return true
@@ -347,32 +342,19 @@ private extension AccessoryViewController {
     
     func updatePreviewIfPossible(with data: Data, filename: String) {
         
-        do {
-            let transferFile = try TransferFile.decode(from: data)
-
-            guard transferFile.isImage else {
-                logTextView.appendLog("Preview skipped => not an image")
-                return
-            }
-            
-            guard let image = UIImage(data: transferFile.data) else {
-                logTextView.appendLog("Image validation => failed")
-                print("image decode => failed")
-                return
-            }
-            
-            Task { @MainActor in
-                self.previewImageView.image = image
-                self.logTextView.appendLog("Image validation => success")
-                self.logTextView.appendLog("Preview updated => \(transferFile.normalizedFileName)")
-            }
-            
-            print("image decode => success")
-            
-        } catch {
-            logTextView.appendLog("TransferFile decode => failed")
-            print("TransferFile decode failed => \(error)")
+        guard let image = UIImage(data: data) else {
+            logTextView.appendLog("Image validation => failed")
+            print("image decode => failed")
+            return
         }
+        
+        Task { @MainActor in
+            self.previewImageView.image = image
+            self.logTextView.appendLog("Image validation => success")
+            self.logTextView.appendLog("Preview updated => \(filename)")
+        }
+        
+        print("image decode => success")
     }
 }
 
@@ -467,7 +449,6 @@ private extension AccessoryViewController {
             guard fileSize > 0 else { return nil }
             guard chunkSize > 0 else { return nil }
             
-            wwPrint("\(fileName) => \(typeIdentifier), \(fileSize), \(chunkSize)")
             return (fileName, typeIdentifier, fileSize, chunkSize)
             
         } catch {

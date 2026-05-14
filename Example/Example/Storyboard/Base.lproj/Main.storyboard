@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="24506" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="F1x-wK-WAc">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="23727" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="F1x-wK-WAc">
     <device id="retina5_9" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24504"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23721"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -18,7 +18,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="uP9-DY-bhP" customClass="LogTextView" customModule="Example" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="154" width="375" height="658"/>
+                                <rect key="frame" x="0.0" y="144" width="375" height="668"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <color key="textColor" systemColor="labelColor"/>
                                 <fontDescription key="fontDescription" type="boldSystem" pointSize="16"/>
@@ -97,7 +97,7 @@
                     <tabBarItem key="tabBarItem" title="Client" image="book.closed.circle.fill" catalog="system" id="Wjr-CZ-vV4"/>
                     <toolbarItems/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="FQ7-q4-gel">
-                        <rect key="frame" x="0.0" y="100" width="375" height="54"/>
+                        <rect key="frame" x="0.0" y="100" width="375" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
                     <nil name="viewControllers"/>
@@ -129,96 +129,6 @@
             </objects>
             <point key="canvasLocation" x="-1386" y="-273"/>
         </scene>
-        <!--Send-->
-        <scene sceneID="Csm-IP-y8V">
-            <objects>
-                <viewController id="xVo-2B-Vl2" customClass="FileTransferViewController" customModule="Example" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" contentMode="scaleToFill" id="8Ia-w7-kaL">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <subviews>
-                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="Iaf-Hq-zPl" customClass="LogTextView" customModule="Example" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="154" width="375" height="658"/>
-                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                                <color key="textColor" systemColor="labelColor"/>
-                                <fontDescription key="fontDescription" type="boldSystem" pointSize="16"/>
-                                <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
-                            </textView>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="dvp-wF-A7q">
-                                <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
-                            </imageView>
-                        </subviews>
-                        <viewLayoutGuide key="safeArea" id="k0D-2Z-Pw6"/>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                        <constraints>
-                            <constraint firstItem="dvp-wF-A7q" firstAttribute="leading" secondItem="k0D-2Z-Pw6" secondAttribute="leading" id="7Er-5s-JOT"/>
-                            <constraint firstItem="Iaf-Hq-zPl" firstAttribute="leading" secondItem="k0D-2Z-Pw6" secondAttribute="leading" id="GVE-Ug-eCW"/>
-                            <constraint firstAttribute="bottom" secondItem="dvp-wF-A7q" secondAttribute="bottom" id="OTw-IJ-7YC"/>
-                            <constraint firstAttribute="bottom" secondItem="Iaf-Hq-zPl" secondAttribute="bottom" id="Wk9-op-rLi"/>
-                            <constraint firstItem="Iaf-Hq-zPl" firstAttribute="trailing" secondItem="k0D-2Z-Pw6" secondAttribute="trailing" id="b69-Ti-wQz"/>
-                            <constraint firstItem="dvp-wF-A7q" firstAttribute="trailing" secondItem="k0D-2Z-Pw6" secondAttribute="trailing" id="bOe-4Z-Eta"/>
-                            <constraint firstItem="Iaf-Hq-zPl" firstAttribute="top" secondItem="k0D-2Z-Pw6" secondAttribute="top" id="czS-Qf-Sbg"/>
-                            <constraint firstItem="dvp-wF-A7q" firstAttribute="top" secondItem="8Ia-w7-kaL" secondAttribute="top" id="tec-Vs-z2j"/>
-                        </constraints>
-                    </view>
-                    <navigationItem key="navigationItem" title="Send" id="WS6-Ac-o3m">
-                        <leftBarButtonItems>
-                            <barButtonItem systemItem="compose" id="mGx-fA-HNa">
-                                <color key="tintColor" red="0.016804177310000001" green="0.19835099580000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                <connections>
-                                    <action selector="sendDemoFileAction:" destination="xVo-2B-Vl2" id="CvK-la-J6H"/>
-                                </connections>
-                            </barButtonItem>
-                            <barButtonItem systemItem="action" id="ukY-H7-UaP">
-                                <color key="tintColor" red="0.016804177310000001" green="0.19835099580000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                <connections>
-                                    <action selector="sendDemoImageAction:" destination="xVo-2B-Vl2" id="wGW-hd-Ogd"/>
-                                </connections>
-                            </barButtonItem>
-                        </leftBarButtonItems>
-                        <rightBarButtonItems>
-                            <barButtonItem image="hand.raised.fingers.spread.fill" catalog="system" id="7Xf-i5-5pj">
-                                <color key="tintColor" red="0.016804177310000001" green="0.19835099580000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                <connections>
-                                    <action selector="prepareReceiveAction:" destination="xVo-2B-Vl2" id="K2L-j2-vGQ"/>
-                                </connections>
-                            </barButtonItem>
-                            <barButtonItem systemItem="trash" id="TKk-Hc-Lgf">
-                                <color key="tintColor" red="0.016804177310000001" green="0.19835099580000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                <connections>
-                                    <action selector="cleanLogText:" destination="xVo-2B-Vl2" id="1yg-0b-SQz"/>
-                                </connections>
-                            </barButtonItem>
-                        </rightBarButtonItems>
-                    </navigationItem>
-                    <connections>
-                        <outlet property="logTextView" destination="Iaf-Hq-zPl" id="WUI-LG-jhz"/>
-                        <outlet property="previewImageView" destination="dvp-wF-A7q" id="5AJ-D0-bkp"/>
-                    </connections>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="1hm-yG-f58" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="268" y="1373.6453201970444"/>
-        </scene>
-        <!--Send-->
-        <scene sceneID="mnD-jo-KHK">
-            <objects>
-                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="4Zl-bd-3kl" sceneMemberID="viewController">
-                    <tabBarItem key="tabBarItem" title="Send" image="sensor.fill" catalog="system" id="3i5-43-XCJ"/>
-                    <toolbarItems/>
-                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="J2X-5k-crh">
-                        <rect key="frame" x="0.0" y="100" width="375" height="54"/>
-                        <autoresizingMask key="autoresizingMask"/>
-                    </navigationBar>
-                    <nil name="viewControllers"/>
-                    <connections>
-                        <segue destination="xVo-2B-Vl2" kind="relationship" relationship="rootViewController" id="H8f-iV-XTr"/>
-                    </connections>
-                </navigationController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="vMv-rg-ZO8" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="268" y="601"/>
-        </scene>
         <!--Peripheral-->
         <scene sceneID="oKC-ef-O4e">
             <objects>
@@ -230,25 +140,39 @@
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="FvN-Xn-t9S">
                                 <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
                             </imageView>
-                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="vUK-zy-TPo" customClass="LogTextView" customModule="Example" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="154" width="375" height="658"/>
-                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                <color key="textColor" systemColor="labelColor"/>
-                                <fontDescription key="fontDescription" type="boldSystem" pointSize="16"/>
-                                <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
-                            </textView>
+                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="Qe5-th-uLk">
+                                <rect key="frame" x="0.0" y="144" width="375" height="668"/>
+                                <subviews>
+                                    <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="🐰Chiikawa🐰" borderStyle="roundedRect" textAlignment="center" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="mJu-mO-LSN">
+                                        <rect key="frame" x="0.0" y="0.0" width="375" height="64"/>
+                                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="64" id="Yr6-vT-SR9"/>
+                                        </constraints>
+                                        <fontDescription key="fontDescription" name="HelveticaNeue" family="Helvetica Neue" pointSize="24"/>
+                                        <textInputTraits key="textInputTraits"/>
+                                    </textField>
+                                    <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="0ae-ua-vaN" customClass="LogTextView" customModule="Example" customModuleProvider="target">
+                                        <rect key="frame" x="0.0" y="72" width="375" height="596"/>
+                                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <color key="textColor" white="0.66666666666666663" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                        <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                                    </textView>
+                                </subviews>
+                            </stackView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="YuK-qx-lk9"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
-                            <constraint firstAttribute="bottom" secondItem="vUK-zy-TPo" secondAttribute="bottom" id="4CZ-b5-Ef1"/>
-                            <constraint firstAttribute="bottom" secondItem="FvN-Xn-t9S" secondAttribute="bottom" id="4ns-1J-ed1"/>
-                            <constraint firstItem="vUK-zy-TPo" firstAttribute="trailing" secondItem="YuK-qx-lk9" secondAttribute="trailing" id="53i-14-lUp"/>
-                            <constraint firstItem="FvN-Xn-t9S" firstAttribute="leading" secondItem="YuK-qx-lk9" secondAttribute="leading" id="VnP-rB-Bxd"/>
-                            <constraint firstItem="FvN-Xn-t9S" firstAttribute="top" secondItem="GHD-Dd-ku3" secondAttribute="top" id="XYf-It-fI8"/>
-                            <constraint firstItem="FvN-Xn-t9S" firstAttribute="trailing" secondItem="YuK-qx-lk9" secondAttribute="trailing" id="ilj-nJ-phz"/>
-                            <constraint firstItem="vUK-zy-TPo" firstAttribute="leading" secondItem="YuK-qx-lk9" secondAttribute="leading" id="rNI-b0-PDM"/>
-                            <constraint firstItem="vUK-zy-TPo" firstAttribute="top" secondItem="YuK-qx-lk9" secondAttribute="top" id="ulP-7Q-IzL"/>
+                            <constraint firstItem="FvN-Xn-t9S" firstAttribute="leading" secondItem="YuK-qx-lk9" secondAttribute="leading" id="1Im-rY-tdR"/>
+                            <constraint firstAttribute="bottom" secondItem="Qe5-th-uLk" secondAttribute="bottom" id="HqP-NP-s0a"/>
+                            <constraint firstItem="FvN-Xn-t9S" firstAttribute="top" secondItem="GHD-Dd-ku3" secondAttribute="top" id="NLb-77-kuA"/>
+                            <constraint firstAttribute="bottom" secondItem="FvN-Xn-t9S" secondAttribute="bottom" id="Oei-XY-Xod"/>
+                            <constraint firstItem="FvN-Xn-t9S" firstAttribute="trailing" secondItem="YuK-qx-lk9" secondAttribute="trailing" id="Owj-aI-KmF"/>
+                            <constraint firstItem="Qe5-th-uLk" firstAttribute="trailing" secondItem="YuK-qx-lk9" secondAttribute="trailing" id="YcA-H6-exm"/>
+                            <constraint firstItem="Qe5-th-uLk" firstAttribute="top" secondItem="YuK-qx-lk9" secondAttribute="top" id="bBD-5x-TS1"/>
+                            <constraint firstItem="Qe5-th-uLk" firstAttribute="leading" secondItem="YuK-qx-lk9" secondAttribute="leading" id="haY-rZ-UIz"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="Peripheral" id="sKr-Cf-Njb">
@@ -282,7 +206,8 @@
                         </rightBarButtonItems>
                     </navigationItem>
                     <connections>
-                        <outlet property="logTextView" destination="vUK-zy-TPo" id="fDQ-IH-jZp"/>
+                        <outlet property="logTextView" destination="0ae-ua-vaN" id="g4n-Dj-edz"/>
+                        <outlet property="nameTextField" destination="mJu-mO-LSN" id="bgX-zI-myJ"/>
                         <outlet property="previewImageView" destination="FvN-Xn-t9S" id="StE-DW-wRt"/>
                     </connections>
                 </viewController>
@@ -302,7 +227,7 @@
                         <color key="selectedImageTintColor" red="0.016804177310000001" green="0.19835099580000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                     </tabBar>
                     <connections>
-                        <segue destination="vL0-Fv-1fc" kind="relationship" relationship="viewControllers" id="ol1-LB-sWm"/>
+                        <segue destination="h4U-AR-w86" kind="relationship" relationship="viewControllers" id="CvF-in-xFM"/>
                     </connections>
                 </tabBarController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dJx-SO-7bR" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
@@ -316,7 +241,7 @@
                     <tabBarItem key="tabBarItem" title="Peripheral" image="books.vertical.fill" catalog="system" id="uV7-Mj-iQg"/>
                     <toolbarItems/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="Qiu-SB-qP1">
-                        <rect key="frame" x="0.0" y="100" width="375" height="54"/>
+                        <rect key="frame" x="0.0" y="100" width="375" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
                     <nil name="viewControllers"/>
@@ -328,13 +253,102 @@
             </objects>
             <point key="canvasLocation" x="1175" y="600"/>
         </scene>
+        <!--Send-->
+        <scene sceneID="Osq-bN-HB9">
+            <objects>
+                <viewController id="YE5-hb-OG0" customClass="ClientTransferViewController" customModule="Example" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="Qan-Ka-1MO">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Chiikawa" translatesAutoresizingMaskIntoConstraints="NO" id="wG6-8s-j9X">
+                                <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
+                            </imageView>
+                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="Hyh-6X-N7J">
+                                <rect key="frame" x="0.0" y="144" width="375" height="668"/>
+                                <subviews>
+                                    <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="🐰Chiikawa🐰" borderStyle="roundedRect" textAlignment="center" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="NL3-2M-YCQ">
+                                        <rect key="frame" x="0.0" y="0.0" width="375" height="64"/>
+                                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="64" id="J4t-gx-58F"/>
+                                        </constraints>
+                                        <fontDescription key="fontDescription" name="HelveticaNeue" family="Helvetica Neue" pointSize="24"/>
+                                        <textInputTraits key="textInputTraits"/>
+                                    </textField>
+                                    <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="sYb-rm-TdO" customClass="LogTextView" customModule="Example" customModuleProvider="target">
+                                        <rect key="frame" x="0.0" y="72" width="375" height="596"/>
+                                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <color key="textColor" white="0.66666666669999997" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                        <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                                    </textView>
+                                </subviews>
+                            </stackView>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="zB7-4o-AJw"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="wG6-8s-j9X" firstAttribute="leading" secondItem="zB7-4o-AJw" secondAttribute="leading" id="2JC-rr-ltf"/>
+                            <constraint firstAttribute="bottom" secondItem="Hyh-6X-N7J" secondAttribute="bottom" id="6IF-cn-hvW"/>
+                            <constraint firstItem="wG6-8s-j9X" firstAttribute="top" secondItem="Qan-Ka-1MO" secondAttribute="top" id="Ex6-Zy-eH2"/>
+                            <constraint firstAttribute="bottom" secondItem="wG6-8s-j9X" secondAttribute="bottom" id="J7x-uw-Frv"/>
+                            <constraint firstItem="Hyh-6X-N7J" firstAttribute="trailing" secondItem="zB7-4o-AJw" secondAttribute="trailing" id="OlY-dP-3hH"/>
+                            <constraint firstItem="Hyh-6X-N7J" firstAttribute="leading" secondItem="zB7-4o-AJw" secondAttribute="leading" id="fql-pr-3Md"/>
+                            <constraint firstItem="wG6-8s-j9X" firstAttribute="trailing" secondItem="zB7-4o-AJw" secondAttribute="trailing" id="igb-Xh-cjQ"/>
+                            <constraint firstItem="Hyh-6X-N7J" firstAttribute="top" secondItem="zB7-4o-AJw" secondAttribute="top" id="vdM-LF-XQk"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" title="Send" id="Giq-bf-LTx">
+                        <barButtonItem key="leftBarButtonItem" systemItem="action" id="yep-We-ZJj">
+                            <color key="tintColor" red="0.016804177310000001" green="0.19835099580000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                            <connections>
+                                <action selector="sendDemoImageAction:" destination="YE5-hb-OG0" id="1rX-2F-ou2"/>
+                            </connections>
+                        </barButtonItem>
+                        <barButtonItem key="rightBarButtonItem" systemItem="compose" id="zPj-ba-a5h">
+                            <color key="tintColor" red="0.016804177310000001" green="0.19835099580000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                            <connections>
+                                <action selector="sendDemoFileAction:" destination="YE5-hb-OG0" id="OEL-I5-xxK"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
+                    <connections>
+                        <outlet property="logTextView" destination="sYb-rm-TdO" id="ipF-1s-jGB"/>
+                        <outlet property="nameTextField" destination="NL3-2M-YCQ" id="8Eg-uR-IU1"/>
+                        <outlet property="sourceImageView" destination="wG6-8s-j9X" id="YQd-EC-buv"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="9lD-Zy-cdX" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="304.80000000000001" y="1373.6453201970444"/>
+        </scene>
+        <!--Send-->
+        <scene sceneID="Ecj-HB-RmW">
+            <objects>
+                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="h4U-AR-w86" sceneMemberID="viewController">
+                    <tabBarItem key="tabBarItem" title="Send" image="paperplane.fill" catalog="system" id="geU-mX-jbF"/>
+                    <toolbarItems/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="eKW-r9-TgM">
+                        <rect key="frame" x="0.0" y="100" width="375" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <nil name="viewControllers"/>
+                    <connections>
+                        <segue destination="YE5-hb-OG0" kind="relationship" relationship="rootViewController" id="KXy-zN-B5O"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="K69-wj-aJ3" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="305" y="601"/>
+        </scene>
     </scenes>
     <resources>
+        <image name="Chiikawa" width="37" height="80"/>
         <image name="book.closed.circle.fill" catalog="system" width="128" height="123"/>
         <image name="books.vertical.fill" catalog="system" width="128" height="110"/>
         <image name="folder.fill.badge.plus" catalog="system" width="128" height="93"/>
-        <image name="hand.raised.fingers.spread.fill" catalog="system" width="128" height="125"/>
-        <image name="sensor.fill" catalog="system" width="128" height="87"/>
+        <image name="paperplane.fill" catalog="system" width="128" height="119"/>
         <systemColor name="labelColor">
             <color white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
