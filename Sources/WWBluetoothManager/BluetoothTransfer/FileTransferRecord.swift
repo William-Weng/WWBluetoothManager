@@ -41,96 +41,6 @@ public extension WWBluetoothManager {
     }
 }
 
-// MARK: - FileTransferRecord
-extension WWBluetoothManager.FileTransferRecord {
-        
-    /// 根據既有 record 建立一筆錯誤封包
-    ///
-    /// 此封包會沿用原 record 的 `transferId` 與 `total`，並以 `index = 0` 表示這是一筆控制用途的錯誤通知，而非資料片段回應。
-    ///
-    /// - Parameter record: 作為本次錯誤回應基礎的既有封包
-    /// - Returns: 可用於通知對端傳輸失敗的 error record
-    static func makeError(from record: Self) -> Self {
-        .init(type: .error, transferId: record.transferId, index: 0, total: record.total)
-    }
-    
-    /// 根據既有 record 建立一筆 `ready` 封包
-    ///
-    /// 此封包通常用於握手階段，表示接收端或對端已準備好進入資料傳輸流程。它會沿用原 record 的 `transferId` 與 `total`，並固定使用 `index = 0`。
-    ///
-    /// - Parameter record: 作為本次 ready 回應基礎的既有封包
-    /// - Returns: 可用於通知對端開始進入資料傳輸階段的 ready record
-    static func makeReady(from record: Self) -> Self {
-        .init(type: .ready, transferId: record.transferId, index: 0, total: record.total)
-    }
-    
-    /// 根據既有 record 建立一筆 `serverHello` 封包
-    ///
-    /// 此封包通常用於回應 `clientHello`，表示接收端已接受本次傳輸請求，並準備進行後續握手流程。它會沿用原 record 的 `transferId` 與 `total`，並固定使用 `index = 0`
-    ///
-    /// - Parameter record: 作為本次 `serverHello` 回應基礎的既有封包。
-    /// - Returns: 可用於握手流程中的 `serverHello` record。
-    static func makeServerHello(from record: Self) -> Self {
-        .init(type: .serverHello, transferId: record.transferId, index: 0, total: record.total)
-    }
-    
-    /// 根據目前的 SenderSession 與 hello payload，建立 client hello 封包
-    ///
-    /// - Parameters:
-    ///   - session: 目前的傳送 Session
-    ///   - helloPayload: client hello 要附帶的 payload
-    /// - Returns: 一個 type 為 `.clientHello` 的 FileTransferRecord
-    static func makeClientHello(from session: WWBluetoothManager.SenderSession, payload: Data) -> Self {
-        .init(type: .clientHello, transferId: session.transferId, index: 0, total: session.totalChunks, payload: payload)
-    }
-    
-    /// 根據既有 record 建立一筆 ACK 封包
-    ///
-    /// 此封包會沿用原 record 的 `transferId`、`index` 與 `total`，用來表示某個特定資料片段已成功被接收端接受。
-    ///
-    /// - Parameter record: 要回應的既有資料封包
-    /// - Returns: 對應該資料片段的 ACK record
-    static func makeAck(from record: Self) -> Self {
-        .init(type: .ack, transferId: record.transferId, index: record.index, total: record.total)
-    }
-    
-    /// 根據既有 record 建立一筆 `finishAck` 封包
-    ///
-    /// 此封包表示接收端已完成整筆檔案資料的接收與重組。它會沿用原 record 的 `transferId` 與 `total`，並使用 `index = total` 表示本次傳輸的所有資料片段都已完成確認。
-    ///
-    /// - Parameter record: 作為本次完成回應基礎的既有封包。
-    /// - Returns: 可用於通知對端整筆傳輸已完成的 `finishAck` record。
-    static func makeFinishAck(from record: Self) -> Self {
-        .init(type: .finishAck, transferId: record.transferId, index: record.total, total: record.total)
-    }
-}
-
-// MARK: - Sender record factories
-extension WWBluetoothManager.FileTransferRecord {
-    
-    /// 根據目前 sender session 建立一筆資料封包
-    ///
-    /// 此封包會使用 session 中的 `transferId`、`sendingIndex` 與 `totalChunks`，並將傳入的 `payload` 作為本次實際要傳送的資料片段內容。
-    ///
-    /// - Parameters:
-    ///   - senderSession: 目前傳送流程使用中的 sender session
-    ///   - payload: 本次要送出的資料片段內容
-    /// - Returns: 可用於送出單一資料切片的 data record
-    static func makeData(from senderSession: WWBluetoothManager.SenderSession, payload: Data) -> Self {
-        .init(type: .data, transferId: senderSession.transferId, index: senderSession.sendingIndex, total: senderSession.totalChunks, payload: payload)
-    }
-    
-    /// 根據目前 sender session 建立一筆完成封包
-    ///
-    /// 此封包表示 sender 已完成所有資料片段的送出。它會使用 session 中的 `transferId` 與 `totalChunks`，並以 `index = totalChunks` 表示整筆資料傳輸已到達結尾。
-    ///
-    /// - Parameter senderSession: 目前傳送流程使用中的 sender session
-    /// - Returns: 可用於通知對端資料已全部送完的 finish record
-    static func makeFinish(from senderSession: WWBluetoothManager.SenderSession) -> Self {
-        .init(type: .finish, transferId: senderSession.transferId, index: senderSession.totalChunks, total: senderSession.totalChunks)
-    }
-}
-
 // MARK: - 公開 API
 public extension WWBluetoothManager.FileTransferRecord {
     
@@ -172,5 +82,95 @@ public extension WWBluetoothManager.FileTransferRecord {
         writer.writeData(payload)
         
         return writer.data
+    }
+}
+
+// MARK: - FileTransferRecord
+extension WWBluetoothManager.FileTransferRecord {
+        
+    /// 根據既有 record 建立一筆錯誤封包
+    ///
+    /// 此封包會沿用原 record 的 `transferId` 與 `total`，並以 `index = 0` 表示這是一筆控制用途的錯誤通知，而非資料片段回應。
+    ///
+    /// - Parameter record: 作為本次錯誤回應基礎的既有封包
+    /// - Returns: 可用於通知對端傳輸失敗的 error record
+    static func makeError(from record: Self) -> Self {
+        .init(type: .error, transferId: record.transferId, index: 0, total: record.total)
+    }
+    
+    /// 根據既有 record 建立一筆 `ready` 封包
+    ///
+    /// 此封包通常用於握手階段，表示接收端或對端已準備好進入資料傳輸流程。它會沿用原 record 的 `transferId` 與 `total`，並固定使用 `index = 0`。
+    ///
+    /// - Parameter record: 作為本次 ready 回應基礎的既有封包
+    /// - Returns: 可用於通知對端開始進入資料傳輸階段的 ready record
+    static func makeReady(from record: Self) -> Self {
+        .init(type: .ready, transferId: record.transferId, index: 0, total: record.total)
+    }
+    
+    /// 根據既有 record 建立一筆 `serverHello` 封包
+    ///
+    /// 此封包通常用於回應 `clientHello`，表示接收端已接受本次傳輸請求，並準備進行後續握手流程。它會沿用原 record 的 `transferId` 與 `total`，並固定使用 `index = 0`
+    ///
+    /// - Parameter record: 作為本次 `serverHello` 回應基礎的既有封包。
+    /// - Returns: 可用於握手流程中的 `serverHello` record。
+    static func makeServerHello(from record: Self) -> Self {
+        .init(type: .serverHello, transferId: record.transferId, index: 0, total: record.total)
+    }
+        
+    /// 根據既有 record 建立一筆 ACK 封包
+    ///
+    /// 此封包會沿用原 record 的 `transferId`、`index` 與 `total`，用來表示某個特定資料片段已成功被接收端接受。
+    ///
+    /// - Parameter record: 要回應的既有資料封包
+    /// - Returns: 對應該資料片段的 ACK record
+    static func makeAck(from record: Self) -> Self {
+        .init(type: .ack, transferId: record.transferId, index: record.index, total: record.total)
+    }
+    
+    /// 根據既有 record 建立一筆 `finishAck` 封包
+    ///
+    /// 此封包表示接收端已完成整筆檔案資料的接收與重組。它會沿用原 record 的 `transferId` 與 `total`，並使用 `index = total` 表示本次傳輸的所有資料片段都已完成確認。
+    ///
+    /// - Parameter record: 作為本次完成回應基礎的既有封包。
+    /// - Returns: 可用於通知對端整筆傳輸已完成的 `finishAck` record。
+    static func makeFinishAck(from record: Self) -> Self {
+        .init(type: .finishAck, transferId: record.transferId, index: record.total, total: record.total)
+    }
+}
+
+// MARK: - Sender record factories
+extension WWBluetoothManager.FileTransferRecord {
+    
+    /// 根據目前 sender session 建立一筆資料封包
+    ///
+    /// 此封包會使用 session 中的 `transferId`、`sendingIndex` 與 `totalChunks`，並將傳入的 `payload` 作為本次實際要傳送的資料片段內容。
+    ///
+    /// - Parameters:
+    ///   - senderSession: 目前傳送流程使用中的 sender session
+    ///   - payload: 本次要送出的資料片段內容
+    /// - Returns: 可用於送出單一資料切片的 data record
+    static func makeData(from senderSession: WWBluetoothManager.SenderSession, payload: Data) -> Self {
+        .init(type: .data, transferId: senderSession.transferId, index: senderSession.sendingIndex, total: senderSession.totalChunks, payload: payload)
+    }
+    
+    /// 根據目前的 SenderSession 與 hello payload，建立 client hello 封包
+    ///
+    /// - Parameters:
+    ///   - session: 目前的傳送 Session
+    ///   - helloPayload: client hello 要附帶的 payload
+    /// - Returns: 一個 type 為 `.clientHello` 的 FileTransferRecord
+    static func makeClientHello(from session: WWBluetoothManager.SenderSession, payload: Data) -> Self {
+        .init(type: .clientHello, transferId: session.transferId, index: 0, total: session.totalChunks, payload: payload)
+    }
+    
+    /// 根據目前 sender session 建立一筆完成封包
+    ///
+    /// 此封包表示 sender 已完成所有資料片段的送出。它會使用 session 中的 `transferId` 與 `totalChunks`，並以 `index = totalChunks` 表示整筆資料傳輸已到達結尾。
+    ///
+    /// - Parameter senderSession: 目前傳送流程使用中的 sender session
+    /// - Returns: 可用於通知對端資料已全部送完的 finish record
+    static func makeFinish(from senderSession: WWBluetoothManager.SenderSession) -> Self {
+        .init(type: .finish, transferId: senderSession.transferId, index: senderSession.totalChunks, total: senderSession.totalChunks)
     }
 }

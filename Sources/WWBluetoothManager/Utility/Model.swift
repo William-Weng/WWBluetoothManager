@@ -6,6 +6,7 @@
 //
 
 import CoreBluetooth
+import UniformTypeIdentifiers
 
 // MARK: - Public
 public extension WWBluetoothManager {
@@ -34,15 +35,8 @@ public extension WWBluetoothManager {
             try container.encode(isConnectable, forKey: .isConnectable)
         }
         
-        public var jsonString: String? {
-            
-            let encoder = JSONEncoder()
-            encoder.outputFormatting = .prettyPrinted
-            
-            guard let data = try? encoder.encode(self) else { return nil }
-            return data.string()
-        }
-        
+        public var jsonString: String? { makeJsonString() }
+                
         /// 初始化器：將底層的 CBPeripheral 轉換為易於 UI 使用的 Device 物件
         /// - Parameters:
         ///   - peripheral: 底層的 CoreBluetooth 周邊物件
@@ -63,6 +57,45 @@ public extension WWBluetoothManager {
             lhs.id == rhs.id
         }
     }
+    
+    /// 要傳輸的檔案資訊
+    struct FileInformation {
+        
+        public let name: String
+        public let contentType: UTType
+        public let data: Data
+        
+        /// 初始化
+        /// - Parameters:
+        ///   - name: 檔案名稱
+        ///   - contentType: 檔案類型
+        ///   - data: 檔案資料
+        public init(name: String, contentType: UTType, data: Data) {
+            
+            self.name = name
+            self.contentType = contentType
+            self.data = data
+        }
+    }
+    
+    /// 一組用於檔案傳輸流程的 characteristic
+    ///
+    /// 其中 `control` 用來傳送握手、狀態切換與完成通知等控制記錄，`data` 則用來傳送實際的檔案資料切片。`CBCharacteristic` 代表遠端 peripheral 上的 characteristic，因此把這兩個通道包成同一個型別有助於集中管理傳輸設定
+    struct TransferCharacteristics {
+        
+        public let control: CBCharacteristic
+        public let data: CBCharacteristic
+        
+        /// 建立一組檔案傳輸使用的 characteristic
+        ///
+        /// - Parameters:
+        ///   - control: 用來傳送控制記錄的 characteristic
+        ///   - data: 用來傳送資料切片的 characteristic
+        public init(control: CBCharacteristic, data: CBCharacteristic) {
+            self.control = control
+            self.data = data
+        }
+    }
 }
 
 // MARK: - Private
@@ -71,9 +104,9 @@ extension WWBluetoothManager {
     /// CBCharacteristicProperties 的**描述定義**（支援 `CaseIterable`）
     struct Property: CaseIterable {
         
-        let rawValue: CBCharacteristicProperties
-        let englishName: String
-        let localizedName: String
+        let rawValue: CBCharacteristicProperties        // 對應的 `CBCharacteristicProperties` 原始值
+        let englishName: String                         // 屬性的英文名稱
+        let localizedName: String                       // 屬性的本地化顯示名稱
         
         static let allCases: [Self] = [
             .init(rawValue: .broadcast, englishName: "Broadcast", localizedName: "廣播"),
@@ -100,7 +133,6 @@ extension WWBluetoothManager {
         var dataCharacteristic: CBCharacteristic?       // 傳送資料切片使用的 characteristic => 實際的 data / finish record 會透過這個 characteristic 傳送
         var sendingData = Data()                        // 本次要傳送的完整原始資料 => 這通常是已經包裝完成的檔案容器資料，例如 `TransferFile.encoded()` 的結果，後續會依 chunkSize 切成多片逐一送出
         var sendingIndex: UInt32 = 0                    // 下一片準備送出的切片索引，從 0 開始 => 每收到一筆對應的 ACK 後，通常會將它往後遞增
-
     }
     
     /// 接收端在單次檔案傳輸流程中所需維護的狀態資料 => 這個 session 專門保存 receiver 角色使用的資訊，例如目前的接收階段、預期總片數，以及已收到的資料切片
@@ -156,5 +188,24 @@ extension WWBluetoothManager.ReceiverSession {
     /// - Returns: 一個 phase 為 `.idle` 的新 ReceiverSession
     static func makeIdle(controlCharacteristic: CBCharacteristic, dataCharacteristic: CBCharacteristic) -> Self {
         .init(phase: .idle, transferId: 0, expectedTotalChunks: 0, controlCharacteristic: controlCharacteristic, dataCharacteristic: dataCharacteristic, receivedChunks: [:])
+    }
+}
+
+// MARK: - WWBluetoothManager.Device
+private extension WWBluetoothManager.Device {
+    
+    /// 將目前的 `Device` 物件編碼成 JSON 字串。
+    ///
+    /// 內部使用 `JSONEncoder` 進行編碼，並可透過 `outputFormatting` 指定輸出的格式；預設使用 `.prettyPrinted`，讓輸出的 JSON具有縮排與換行，較容易閱讀
+    ///
+    /// - Parameter outputFormatting: JSON 編碼輸出的格式設定
+    /// - Returns: 成功時回傳 JSON 字串，失敗時回傳 `nil`
+    func makeJsonString(outputFormatting: JSONEncoder.OutputFormatting = .prettyPrinted) -> String? {
+        
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = outputFormatting
+        
+        guard let data = try? encoder.encode(self) else { return nil }
+        return data.string()
     }
 }

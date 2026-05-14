@@ -10,7 +10,8 @@ import CoreBluetooth
 // MARK: - Central事件狀態常數化
 public extension WWBluetoothManager {
     
-    /// CentralManager 相關的事件狀態，用於 `centralManager(_:status:)` 委派方法。
+    /// CentralManager 相關的事件狀態，用於 `centralManager(_:status:)` 委派方法
+    ///
     /// 這些事件來自 `CBCentralManagerDelegate`，代表 Bluetooth 中央設備管理器的核心操作：
     /// - 狀態更新（開關、權限等）
     /// - 設備掃描發現
@@ -76,15 +77,15 @@ public extension WWBluetoothManager {
     
     enum AccessoryEvent {
         
-        case stateUpdated(state: CBManagerState)
-        case serviceAdded(service: CBService, error: Error?)
-        case advertisingStarted(error: Error?)
-        case advertisingStopped
-        case subscribed(central: CBCentral, characteristic: CBCharacteristic)
-        case unsubscribed(central: CBCentral, characteristic: CBCharacteristic)
-        case didReceiveReadRequest(request: CBATTRequest)
-        case didReceiveWriteRequests(requests: [CBATTRequest])
-        case readyToUpdateSubscribers
+        case stateUpdated(state: CBManagerState)                                                        // 藍牙管理器狀態已更新
+        case serviceAdded(service: CBService, error: Error?)                                            // 服務已加入至 peripheral manager
+        case advertisingStarted(error: Error?)                                                          // 廣播已開始
+        case advertisingStopped                                                                         // 廣播已停止
+        case subscribed(central: CBCentral, characteristic: CBCharacteristic)                           // 遠端 central 已訂閱指定 characteristic
+        case unsubscribed(central: CBCentral, characteristic: CBCharacteristic)                         // 遠端 central 已取消訂閱指定 characteristic
+        case didReceiveReadRequest(request: CBATTRequest)                                               // 收到來自遠端 central 的讀取請求
+        case didReceiveWriteRequests(requests: [CBATTRequest])                                          // 收到來自遠端 central 的寫入請求陣列
+        case readyToUpdateSubscribers                                                                   // peripheral manager 已可再次更新訂閱者資料
     }
 }
 
@@ -115,6 +116,16 @@ public extension WWBluetoothManager {
         case receivingData                  // 正在接收資料片段 => 這個狀態通常出現在接收端，表示目前正在累積多個 `data` chunk，等待重組完整檔案
         case completed                      // 傳輸已成功完成 => 傳送端或接收端在整個流程結束後都可以進入此狀態
         case failed(FileTransferError)      // 傳輸失敗 => 會附帶錯誤描述，用來表示此次傳輸失敗的原因
+    }
+    
+    /// 提供給 `ClientTransfer` 使用的內部傳輸事件。
+    enum ClientTransferEvent {
+        
+        case didStart(transferId: UInt32)                   // 已開始一筆新的傳輸流程
+        case didSendHello(transferId: UInt32)               // 已送出 client hello
+        case didSendChunk(index: UInt32, total: UInt32)     // 已送出一個資料切片
+        case didFinish(transferId: UInt32)                  // 傳輸流程已完成
+        case didFail(error: Error)                          // 傳輸流程發生錯誤
     }
     
     /// 檔案傳輸錯誤
@@ -174,32 +185,7 @@ extension WWBluetoothManager.FileTransferError: LocalizedError {
     }
 }
 
-// MARK: - AdvertisementDataKey
-extension WWBluetoothManager {
-    
-    /// 廣告資料鍵值常數（CoreBluetooth 標準）
-    enum AdvertisementDataKey {
-        
-        case localName              // 設備本地名稱（廣告包中最優先的名稱來源）
-        case manufacturerData       // 設備本地名稱（廣告包中最優先的名稱來源）
-        case serviceUUIDs           // 廣告中宣告的服務 UUID 列表（設備支援的 GATT 服務）
-        case isConnectable          // 可連線標記（iOS 11+，指示設備是否接受連線）
-        
-        /// 取得原始值
-        /// - Returns: String
-        func value() -> String {
-            
-            switch self {
-            case .localName: return CBAdvertisementDataLocalNameKey
-            case .manufacturerData: return CBAdvertisementDataManufacturerDataKey
-            case .serviceUUIDs: return CBAdvertisementDataServiceUUIDsKey
-            case .isConnectable: return CBAdvertisementDataIsConnectable
-            }
-        }
-    }
-}
-
-// MARK: - Event 轉換成文字
+// MARK: - ClientEvent
 extension WWBluetoothManager.ClientEvent: @retroactive CustomStringConvertible {
     
     public var description: String {
@@ -215,6 +201,46 @@ extension WWBluetoothManager.ClientEvent: @retroactive CustomStringConvertible {
         case .valueUpdated(let uuid, let data): return "Notify \(uuid.uuidString): \(data.map { String(format: "%02x", $0) }.joined())"
         case .writeCompleted(let uuid, let error): return "Write \(uuid.uuidString): \(error.map { "\($0)" } ?? "OK")"
         case .failed(let error): return "Failed: \(error)"
+        }
+    }
+}
+
+// MARK: - enum
+extension WWBluetoothManager {
+    
+    /// 廣告資料鍵值常數（CoreBluetooth 標準）
+    enum AdvertisementDataKey {
+        
+        case localName              // 設備本地名稱（廣告包中最優先的名稱來源）
+        case manufacturerData       // 設備本地名稱（廣告包中最優先的名稱來源）
+        case serviceUUIDs           // 廣告中宣告的服務 UUID 列表（設備支援的 GATT 服務）
+        case isConnectable          // 可連線標記（iOS 11+，指示設備是否接受連線）
+    }
+    
+    /// 提供給 `ClientTransfer` 使用的內部傳輸事件結果
+    ///
+    /// 這個列舉用來作為 `FileTransferController` 與 `ClientTransfer` 之間的橋接型別，將檔案傳輸流程中的重要結果整理成統一事件，方便上層轉換成對外的 `TransferEvent`。使用帶 associated values 的 enum 可以同時保留事件種類與必要資料，例如 chunk 索引、總片數、傳輸識別碼或錯誤資訊
+    enum ClientTransferResult {
+
+        case didSendChunk(index: UInt32, total: UInt32)         // 已確認送出一個資料切片
+        case didFinish(transferId: UInt32)                      // 已完成整筆檔案傳輸流程
+        case didFail(error: Error)                              // 傳輸流程發生錯誤
+        case none                                               // 沒有需要回報給上層的事件
+    }
+}
+
+// MARK: - AdvertisementDataKey
+extension WWBluetoothManager.AdvertisementDataKey {
+    
+    /// 取得原始值
+    /// - Returns: String
+    func value() -> String {
+        
+        switch self {
+        case .localName: return CBAdvertisementDataLocalNameKey
+        case .manufacturerData: return CBAdvertisementDataManufacturerDataKey
+        case .serviceUUIDs: return CBAdvertisementDataServiceUUIDsKey
+        case .isConnectable: return CBAdvertisementDataIsConnectable
         }
     }
 }

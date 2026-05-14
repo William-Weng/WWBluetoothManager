@@ -35,7 +35,7 @@ private extension ClientViewController {
             
             guard let this = self else { return }
             
-            DispatchQueue.main.async {
+            Task { @MainActor in
                 
                 this.logTextView.appendLog("\(event)")
                 
@@ -46,8 +46,9 @@ private extension ClientViewController {
             }
         }
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            self.client.startScan()
+        Task { @MainActor in
+            try await Task.sleep(for: .seconds(1.0))
+            client.startScan()
         }
     }
 }
@@ -60,12 +61,12 @@ private extension ClientViewController {
         
         logTextView.appendLog(device.jsonString ?? "")
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+        Task { @MainActor in
             
-            guard let this = self else { return }
+            try await Task.sleep(for: .seconds(1.0))
             
-            this.client.connect(device)
-            this.client.stopScan()
+            client.connect(device)
+            client.stopScan()
         }
     }
 }

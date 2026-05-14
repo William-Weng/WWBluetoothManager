@@ -9,6 +9,7 @@
 import Foundation
 import CoreBluetooth
 import WWByteReader
+import UniformTypeIdentifiers
 
 // MARK: - FileTransferController
 public extension WWBluetoothManager {
@@ -20,9 +21,11 @@ public extension WWBluetoothManager {
         
         public var onReceive: ((Data) -> Void)?                                                     // 當接收端成功重組完整檔案資料後要呼叫的回呼 => 回傳的 `Data` 為依照接收切片順序合併完成的完整資料內容
         
+        var onClientTransferEvent: ((ClientTransferEvent) -> Void)?
+        
         private var senderSession: SenderSession?                                                   // 傳送端目前使用中的 session
         private var receiverSession: ReceiverSession?                                               // 接收端目前使用中的 session
-
+        
         public init() {}
     }
 }
@@ -57,22 +60,35 @@ public extension WWBluetoothManager.FileTransferController {
         startSendingHello(with: data, chunkSize: chunkSize, helloPayload: helloPayload, to: peripheral, controlCharacteristic: controlCharacteristic, dataCharacteristic: dataCharacteristic)
     }
     
+    /// 傳送檔案給指定的藍牙周邊裝置
+    ///
+    /// 這個版本將檔案資訊與傳輸使用的 characteristics 分別包裝成型別，讓呼叫端不必個別傳入檔名、型別字串、資料內容與 control / data characteristics，可降低漏填或傳錯參數的機率。`UTType` 可透過 `identifier` 轉成對應的 type identifier 字串
+    ///
+    /// - Parameters:
+    ///   - peripheral: 目前要寫入資料的遠端裝置
+    ///   - fileInfo: 本次傳輸的檔案資訊，包含檔名、內容型別與原始資料
+    ///   - characteristics: 本次檔案傳輸使用的 control / data characteristics
+    /// - Throws: 當檔名或型別資訊無法正確寫入握手 payload 時拋出錯誤
+    func sendFile(using peripheral: CBPeripheral, fileInfo: WWBluetoothManager.FileInformation, characteristics: WWBluetoothManager.TransferCharacteristics) throws {
+        
+        try sendFile(using: peripheral, fileName: fileInfo.name, typeIdentifier: fileInfo.contentType.identifier, data: fileInfo.data, controlCharacteristic: characteristics.control, dataCharacteristic: characteristics.data)
+    }
+    
     /// 準備接收一筆檔案傳輸流程
     ///
     /// 此方法會建立新的 receiver session、保存接收完成後的回呼，並對 control / data characteristics 開啟 notify，讓後續收到的 `clientHello`、`data`、`finish` 等記錄可被處理
     ///
     /// - Parameters:
     ///   - peripheral: 目前要接收資料的遠端裝置
-    ///   - controlCharacteristic: 用來接收控制記錄的 characteristic
-    ///   - dataCharacteristic: 用來接收資料切片的 characteristic
+    ///   - characteristics: 本次檔案傳輸使用的 control / data characteristics
     ///   - onReceive: 當完整檔案資料重組完成後要呼叫的回呼
-    func receiveFile(using peripheral: CBPeripheral, controlCharacteristic: CBCharacteristic, dataCharacteristic: CBCharacteristic, onReceive: @escaping (Data) -> Void) {
+    func receiveFile(using peripheral: CBPeripheral, characteristics: WWBluetoothManager.TransferCharacteristics, onReceive: @escaping (Data) -> Void) {
         
         self.onReceive = onReceive
-        receiverSession = .makeIdle(controlCharacteristic: controlCharacteristic, dataCharacteristic: dataCharacteristic)
+        receiverSession = .makeIdle(controlCharacteristic: characteristics.control, dataCharacteristic: characteristics.data)
         
-        peripheral.setNotifyValue(true, for: controlCharacteristic)
-        peripheral.setNotifyValue(true, for: dataCharacteristic)
+        peripheral.setNotifyValue(true, for: characteristics.control)
+        peripheral.setNotifyValue(true, for: characteristics.data)
     }
     
     /// 處理來自 `WWBluetoothManager.PeripheralStatus` 的事件，並分派到檔案傳輸流程
@@ -89,6 +105,33 @@ public extension WWBluetoothManager.FileTransferController {
         case .characteristicValueUpdated(let characteristic, let data, let error): handleUpdatedValue(peripheral: peripheral, characteristic: characteristic, data: data, error: error)
         default: break
         }
+    }
+}
+
+// MARK: - Property
+extension WWBluetoothManager.FileTransferController {
+    
+    var currentSenderTransferId: UInt32? { senderSession?.transferId }                          // 目前 sender session 的 transferId。
+}
+
+extension WWBluetoothManager.FileTransferController {
+    
+    /// 處理 peripheral 狀態事件，並產生給 `ClientTransfer` 使用的事件結果。
+    ///
+    /// 目前先保留為最小橋接層，後續可再依 sender session 的 phase、
+    /// sendingIndex 或 ack 結果細化成 `didSendChunk` / `didFinish` 等事件。
+    ///
+    /// - Parameters:
+    ///   - peripheral: 目前互動中的遠端裝置。
+    ///   - status: 由藍牙層回傳的 peripheral 狀態事件。
+    /// - Returns: 對應的 `ClientTransferResult`。
+    func handleAndMakeClientTransferEvent(peripheral: CBPeripheral, status: WWBluetoothManager.PeripheralStatus) throws -> WWBluetoothManager.ClientTransferResult {
+        
+        handle(peripheral: peripheral, status: status)
+        
+        // 之後可以依你的 senderSession.phase / sendingIndex / ack
+        // 把 chunk 與 finish 事件接進來。
+        return .none
     }
 }
 
@@ -141,11 +184,13 @@ private extension WWBluetoothManager.FileTransferController {
     func startSendingHello(with data: Data, chunkSize: Int, helloPayload: Data, to peripheral: CBPeripheral, controlCharacteristic: CBCharacteristic, dataCharacteristic: CBCharacteristic) {
         
         let senderSession = WWBluetoothManager.SenderSession.makeWaitingServerHello(with: data, chunkSize: chunkSize, controlCharacteristic: controlCharacteristic, dataCharacteristic: dataCharacteristic)
-        
         self.senderSession = senderSession
-        
+                
         let hello = WWBluetoothManager.FileTransferRecord.makeClientHello(from: senderSession, payload: helloPayload)
-        peripheral.writeValue(hello.encode(), for: senderSession.controlCharacteristic!, type: .withResponse)
+        peripheral.writeValue(hello.encode(), for: controlCharacteristic, type: .withResponse)
+        
+        onClientTransferEvent?(.didStart(transferId: senderSession.transferId))
+        onClientTransferEvent?(.didSendHello(transferId: senderSession.transferId))
     }
 }
 
@@ -160,6 +205,8 @@ private extension WWBluetoothManager.FileTransferController {
     func handleWriteCompletion(error: Error?) {
         
         guard let error else { return }
+        
+        onClientTransferEvent?(.didFail(error: error))
         handleErrorAction(.writeFailed(error.localizedDescription))
     }
 
@@ -174,9 +221,12 @@ private extension WWBluetoothManager.FileTransferController {
     ///   - error: 值更新時回傳的錯誤資訊
     func handleUpdatedValue(peripheral: CBPeripheral, characteristic: CBCharacteristic, data: Data?, error: Error?) {
         
-        if let error { handleErrorAction(.updateFailed(error.localizedDescription)); return }
+        if let error {
+            onClientTransferEvent?(.didFail(error: error))
+            handleErrorAction(.updateFailed(error.localizedDescription))
+            return
+        }
         
-        // 只有在成功取得資料且能解碼成 record 時，才繼續後續流程。
         guard let data,
               let record = try? WWBluetoothManager.FileTransferRecord.decode(from: data)
         else {
@@ -393,10 +443,13 @@ private extension WWBluetoothManager.FileTransferController {
         guard var session = senderSession,
               characteristic.uuid == session.controlCharacteristic?.uuid,
               session.phase == .sendingData,
-              record.transferId == session.transferId
+              record.transferId == session.transferId,
+              record.index < session.totalChunks
         else {
             return
         }
+        
+        onClientTransferEvent?(.didSendChunk(index: record.index, total: session.totalChunks))
         
         session.sendingIndex = record.index + 1
         senderSession = session
@@ -412,11 +465,14 @@ private extension WWBluetoothManager.FileTransferController {
     func handleFinishAck(record: WWBluetoothManager.FileTransferRecord) {
         
         guard var session = senderSession,
+              session.phase == .waitingFinishAck,
               record.transferId == session.transferId
         else {
             return
         }
                 
+        onClientTransferEvent?(.didFinish(transferId: session.transferId))
+        
         session.phase = .completed
         senderSession = session
     }
@@ -506,7 +562,7 @@ private extension WWBluetoothManager.FileTransferController {
         
         guard let session = senderSession else { return .emptyData }
         
-        let payload = currentChunkPayload(session: session)
+        let payload = currentChunkPayload(from: session)
         return .makeData(from: session, payload: payload)
     }
 
@@ -516,7 +572,7 @@ private extension WWBluetoothManager.FileTransferController {
     ///
     /// - Parameter session: 本次傳輸使用中的 sender session
     /// - Returns: 本次應送出的 payload 內容
-    func currentChunkPayload(session: WWBluetoothManager.SenderSession) -> Data {
+    func currentChunkPayload(from session: WWBluetoothManager.SenderSession) -> Data {
         
         let startIndex = Int(session.sendingIndex) * session.chunkSize
         let endIndex = min(startIndex + session.chunkSize, session.sendingData.count)

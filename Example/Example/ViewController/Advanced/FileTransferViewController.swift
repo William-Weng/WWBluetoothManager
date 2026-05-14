@@ -264,7 +264,7 @@ private extension FileTransferViewController {
         
         isReceivePrepared = false
         
-        fileTransfer.receiveFile(using: peripheral, controlCharacteristic: controlCharacteristic, dataCharacteristic: dataCharacteristic) { [weak self] container in
+        fileTransfer.receiveFile(using: peripheral, characteristics: .init(control: controlCharacteristic, data: dataCharacteristic)) { [weak self] container in
             
             guard let self else { return }
             

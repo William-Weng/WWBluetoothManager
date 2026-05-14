@@ -309,11 +309,11 @@ import WWBluetoothManager
 
 final class ClientViewController: UIViewController {
     
+    @IBOutlet weak var logTextView: LogTextView!
+    
     private let client = WWBluetoothManager.Client()
     private let targetLocalName = "Control for SB1830"
-    
-    @IBOutlet weak var logTextView: UITextView!
-    
+        
     override func viewDidLoad() {
         super.viewDidLoad()
         setupBluetooth()
@@ -321,7 +321,7 @@ final class ClientViewController: UIViewController {
     
     @IBAction func writeData(_ sender: UIBarButtonItem) {
         let result = client.write(Data([0x01]), uuidType: .write, type: .withResponse)
-        appendLog("\(result)")
+        logTextView.appendLog("\(result)")
     }
 }
 
@@ -333,9 +333,9 @@ private extension ClientViewController {
             
             guard let this = self else { return }
             
-            DispatchQueue.main.async {
+            Task { @MainActor in
                 
-                this.appendLog("\(event)")
+                this.logTextView.appendLog("\(event)")
                 
                 switch event {
                 case .discovered(let device): this.connectDevice(device)
@@ -344,8 +344,9 @@ private extension ClientViewController {
             }
         }
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            self.client.startScan()
+        Task { @MainActor in
+            try await Task.sleep(for: .seconds(1.0))
+            client.startScan()
         }
     }
 }
@@ -356,24 +357,15 @@ private extension ClientViewController {
         
         guard device.name == targetLocalName else { return }
         
-        appendLog(device.jsonString ?? "")
+        logTextView.appendLog(device.jsonString ?? "")
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+        Task { @MainActor in
             
-            guard let this = self else { return }
+            try await Task.sleep(for: .seconds(1.0))
             
-            this.client.connect(device)
-            this.client.stopScan()
+            client.connect(device)
+            client.stopScan()
         }
-    }
-    
-    func appendLog(_ text: String) {
-        
-        let timestamp = DateFormatter.localizedString(from: Date(), dateStyle: .none, timeStyle: .medium)
-        let bottom = NSMakeRange(logTextView.text.count - 1, 1)
-        
-        logTextView.text += "[\(timestamp)] \(text)\n\n"
-        logTextView.scrollRangeToVisible(bottom)
     }
 }
 ```

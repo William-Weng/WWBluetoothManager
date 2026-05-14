@@ -75,7 +75,7 @@ final class AccessoryViewController: UIViewController {
 
 // MARK: - Bluetooth
 private extension AccessoryViewController {
-    
+        
     func bindAccessory() {
         
         logTextView.configure()
@@ -83,44 +83,31 @@ private extension AccessoryViewController {
         
         accessory.onEvent = { [weak self] event in
             
-            guard let self else { return }
+            guard let this = self else { return }
             
             switch event {
-            case .stateUpdated(let state):
-                self.logTextView.appendLog("Peripheral state => \(state.rawValue)")
-                
-            case .advertisingStarted(let error):
-                self.logTextView.appendLog("Advertising started, error => \(String(describing: error))")
-                
-            case .advertisingStopped:
-                self.logTextView.appendLog("Advertising stopped.")
-                
-            case .subscribed(let central, let characteristic):
-                self.logTextView.appendLog("Central subscribed => \(central.identifier.uuidString), characteristic => \(characteristic.uuid.uuidString)")
-                
-            case .unsubscribed(let central, let characteristic):
-                self.logTextView.appendLog("Central unsubscribed => \(central.identifier.uuidString), characteristic => \(characteristic.uuid.uuidString)")
-                
-            case .didReceiveWriteRequests(let requests):
-                self.receiveWriteRequests(requests)
-                
-            case .readyToUpdateSubscribers:
-                self.logTextView.appendLog("Ready to update subscribers again.")
-                
-            case .serviceAdded(let service, let error):
-                
-                self.logTextView.appendLog("Service added => \(service.uuid.uuidString), error => \(String(describing: error))")
-                
-                guard error == nil else { return }
-                guard !self.isAdvertisingStarted else { return }
-                
-                self.isAdvertisingStarted = true
-                self.accessory.startAdvertising(localName: self.localName, serviceTypes: [self.serviceType])
-                
-            case .didReceiveReadRequest:
-                break
+            case .stateUpdated(let state): this.logTextView.appendLog("Peripheral state => \(state.rawValue)")
+            case .advertisingStarted(let error): this.logTextView.appendLog("Advertising started, error => \(String(describing: error))")
+            case .advertisingStopped: this.logTextView.appendLog("Advertising stopped.")
+            case .subscribed(let central, let characteristic): this.logTextView.appendLog("Central subscribed => \(central.identifier.uuidString), characteristic => \(characteristic.uuid.uuidString)")
+            case .unsubscribed(let central, let characteristic): this.logTextView.appendLog("Central unsubscribed => \(central.identifier.uuidString), characteristic => \(characteristic.uuid.uuidString)")
+            case .didReceiveWriteRequests(let requests): this.receiveWriteRequests(requests)
+            case .readyToUpdateSubscribers: this.logTextView.appendLog("Ready to update subscribers again.")
+            case .serviceAdded(let service, let error): this.serviceAddedAction(service: service, error: error)
+            case .didReceiveReadRequest: break
             }
         }
+    }
+    
+    func serviceAddedAction(service: CBService, error: Error?) {
+        
+        logTextView.appendLog("Service added => \(service.uuid.uuidString), error => \(String(describing: error))")
+        
+        guard error == nil else { return }
+        guard !isAdvertisingStarted else { return }
+        
+        isAdvertisingStarted = true
+        accessory.startAdvertising(localName: localName, serviceTypes: [serviceType])
     }
     
     func receiveWriteRequests(_ requests: [CBATTRequest]) {
@@ -144,7 +131,7 @@ private extension AccessoryViewController {
             
             let uuidString = request.characteristic.uuid.uuidString
             logTextView.appendLog("Write => \(uuidString), \(data.count) bytes")
-            logTextView.appendLog("Hex => \(data.hexString)")
+            logTextView.appendLog("Hex => \(data.hexString())")
             
             guard let uuidType = WWBluetoothManager.UUIDType.find(uuid: request.characteristic.uuid) else {
                 responseResult = .requestNotSupported
@@ -152,12 +139,9 @@ private extension AccessoryViewController {
             }
             
             switch uuidType {
-            case .control:
-                if !handleControlRequest(data: data) { responseResult = .invalidPdu }
-            case .data:
-                if !handleDataRequest(data: data) { responseResult = .invalidPdu }
-            default:
-                responseResult = .requestNotSupported
+            case .control: if !handleControlRequest(data: data) { responseResult = .invalidPdu }
+            case .data: if !handleDataRequest(data: data) { responseResult = .invalidPdu }
+            default: responseResult = .requestNotSupported
             }
         }
     }
@@ -176,22 +160,13 @@ private extension AccessoryViewController {
         logTextView.appendLog("Index => \(record.index), total => \(record.total)")
         
         switch record.type {
-        case .clientHello:
-            handleClientHello(record)
-        case .ready:
-            handleReady(record)
-        case .ack:
-            logTextView.appendLog("Receive ACK => \(record.index)")
-        case .finishAck:
-            logTextView.appendLog("Receive finishAck.")
-            resetTransferState()
-        case .error:
-            logTextView.appendLog("Receive error record.")
-            resetTransferState()
-        case .serverHello:
-            logTextView.appendLog("Unexpected serverHello from central.")
-        case .data, .finish:
-            logTextView.appendLog("Unexpected control record => \(record.type)")
+        case .clientHello: handleClientHello(record)
+        case .ready: handleReady(record)
+        case .ack: logTextView.appendLog("Receive ACK => \(record.index)")
+        case .finishAck: logTextView.appendLog("Receive finishAck."); resetTransferState()
+        case .error: logTextView.appendLog("Receive error record."); resetTransferState()
+        case .serverHello: logTextView.appendLog("Unexpected serverHello from central.")
+        case .data, .finish: logTextView.appendLog("Unexpected control record => \(record.type)")
         }
         
         return true
@@ -244,14 +219,6 @@ private extension AccessoryViewController {
         
         currentSession = session
         
-        logTextView.appendLog(
-            "Start receiving => \(session.fileName), " +
-            "type => \(session.typeIdentifier), " +
-            "size => \(session.fileSize), " +
-            "chunk => \(session.chunkSize), " +
-            "total => \(session.expectedTotalChunks)"
-        )
-        
         let serverHello = WWBluetoothManager.FileTransferRecord(
             type: .serverHello,
             transferId: record.transferId,
@@ -290,16 +257,6 @@ private extension AccessoryViewController {
             logTextView.appendLog("Chunk payload too large => index \(record.index), size \(record.payload.count)")
             sendErrorRecord(transferId: record.transferId, total: record.total)
             return
-        }
-        
-        if record.index == 0 {
-            logTextView.appendLog("RECV payload.count => \(record.payload.count)")
-            logTextView.appendLog("RECV payload.head => \(record.payload.prefix(16).hexString())")
-            logTextView.appendLog("RECV payload.tail => \(record.payload.suffix(16).hexString())")
-        }
-        
-        if session.chunks[record.index] != nil {
-            logTextView.appendLog("Duplicate chunk => \(record.index), overwrite")
         }
         
         session.chunks[record.index] = record.payload
@@ -373,10 +330,6 @@ private extension AccessoryViewController {
             total: record.total
         )
         
-        logTextView.appendLog("Merged bytes => \(fileData.count)")
-        logTextView.appendLog("Merged head => \(fileData.prefix(16).hexString)")
-        logTextView.appendLog("Merged tail => \(fileData.suffix(16).hexString)")
-        
         sendControlRecord(finishAck, log: "Send finishAck")
         resetTransferState()
     }
@@ -396,12 +349,7 @@ private extension AccessoryViewController {
         
         do {
             let transferFile = try TransferFile.decode(from: data)
-            
-            print("decoded fileName => \(transferFile.fileName)")
-            print("decoded typeIdentifier => \(transferFile.typeIdentifier)")
-            print("decoded data.count => \(transferFile.data.count)")
-            print("decoded data.head => \(transferFile.data.prefix(16).hexString())")
-            
+
             guard transferFile.isImage else {
                 logTextView.appendLog("Preview skipped => not an image")
                 return
@@ -413,7 +361,7 @@ private extension AccessoryViewController {
                 return
             }
             
-            DispatchQueue.main.async {
+            Task { @MainActor in
                 self.previewImageView.image = image
                 self.logTextView.appendLog("Image validation => success")
                 self.logTextView.appendLog("Preview updated => \(transferFile.normalizedFileName)")
@@ -442,7 +390,7 @@ private extension AccessoryViewController {
         let isSuccess = accessory.notifyValue(data, for: controlCharacteristic)
         
         logTextView.appendLog("\(log) => \(isSuccess ? "success" : "buffer full")")
-        logTextView.appendLog("Send hex => \(data.hexString)")
+        logTextView.appendLog("Send hex => \(data.hexString())")
     }
     
     func sendErrorRecord(transferId: UInt32, total: UInt32) {

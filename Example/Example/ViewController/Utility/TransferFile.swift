@@ -21,10 +21,7 @@ struct TransferFile {
     
     func encoded() throws -> Data {
         
-        let header = TransferFileHeader(
-            fileName: fileName,
-            typeIdentifier: typeIdentifier
-        )
+        let header = TransferFileHeader(fileName: fileName, typeIdentifier: typeIdentifier)
         
         let headerData = try JSONEncoder().encode(header)
         var headerLength = UInt32(headerData.count).bigEndian
