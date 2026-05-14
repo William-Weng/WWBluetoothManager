@@ -37,6 +37,12 @@ dependencies: [
 ]
 ```
 
+## [Central & Peripheral](https://www.youtube.com/watch?v=lkB5iLOm-GE)
+
+![](https://github.com/user-attachments/assets/b74c4e7e-1f91-46dc-a2ca-3eb60980e5c9)
+
+![](https://github.com/user-attachments/assets/f121e231-29b4-4080-90a0-e6e835754ddf)
+
 ## 🧭 [架構圖](https://chiikawa-wallpaper.com/zh-Hant/mobile)
 
 ```mermaid
