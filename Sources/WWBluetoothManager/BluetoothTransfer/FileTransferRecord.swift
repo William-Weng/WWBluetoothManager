@@ -43,7 +43,7 @@ public extension WWBluetoothManager {
 
 // MARK: - FileTransferRecord
 extension WWBluetoothManager.FileTransferRecord {
-    
+        
     /// 根據既有 record 建立一筆錯誤封包
     ///
     /// 此封包會沿用原 record 的 `transferId` 與 `total`，並以 `index = 0` 表示這是一筆控制用途的錯誤通知，而非資料片段回應。
@@ -72,6 +72,16 @@ extension WWBluetoothManager.FileTransferRecord {
     /// - Returns: 可用於握手流程中的 `serverHello` record。
     static func makeServerHello(from record: Self) -> Self {
         .init(type: .serverHello, transferId: record.transferId, index: 0, total: record.total)
+    }
+    
+    /// 根據目前的 SenderSession 與 hello payload，建立 client hello 封包
+    ///
+    /// - Parameters:
+    ///   - session: 目前的傳送 Session
+    ///   - helloPayload: client hello 要附帶的 payload
+    /// - Returns: 一個 type 為 `.clientHello` 的 FileTransferRecord
+    static func makeClientHello(from session: WWBluetoothManager.SenderSession, payload: Data) -> Self {
+        .init(type: .clientHello, transferId: session.transferId, index: 0, total: session.totalChunks, payload: payload)
     }
     
     /// 根據既有 record 建立一筆 ACK 封包

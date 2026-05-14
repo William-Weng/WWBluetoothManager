@@ -114,3 +114,47 @@ extension WWBluetoothManager {
         var receivedChunks: [UInt32: Data] = [:]        // 已接收的資料切片集合，key 為切片索引 => 接收端會先依 index 暫存各片資料，待全部收齊後再依序合併成完整 Data
     }
 }
+
+// MARK: - WWBluetoothManager.SenderSession
+extension WWBluetoothManager.SenderSession {
+    
+    /// 建立一個處於等待 server hello 狀態的 SenderSession => 隨機產生一組 transferId，用來識別這次檔案傳輸流程，初始從第 0 個 chunk 開始傳送
+    ///
+    /// - Parameters:
+    ///   - data: 準備傳送的完整資料內容
+    ///   - chunkSize: 每個資料分段的大小
+    ///   - controlCharacteristic: 用來傳送控制訊息的 characteristic
+    ///   - dataCharacteristic: 用來傳送資料內容的 characteristic
+    /// - Returns: 一個 phase 為 `.waitingServerHello` 的新 SenderSession
+    static func makeWaitingServerHello(with data: Data, chunkSize: Int, controlCharacteristic: CBCharacteristic, dataCharacteristic: CBCharacteristic) -> Self {
+        
+        let totalChunks = UInt32((data.count + chunkSize - 1) / chunkSize)
+        let transferId = UInt32.random(in: .min ... .max)
+        
+        return .init(phase: .waitingServerHello, transferId: transferId, totalChunks: totalChunks, chunkSize: chunkSize, controlCharacteristic: controlCharacteristic, dataCharacteristic: dataCharacteristic, sendingData: data, sendingIndex: 0)
+    }
+}
+
+// MARK: - WWBluetoothManager.ReceiverSession
+extension WWBluetoothManager.ReceiverSession {
+    
+    /// 根據既有的 session 與檔案傳輸紀錄，建立一個處於等待 ready 狀態的 ReceiverSession
+    ///
+    /// - Parameters:
+    ///   - session: 目前已存在的接收 Session，沿用其中的 characteristic 設定
+    ///   - record: 檔案傳輸紀錄，提供 transferId 與預期的 chunk 總數
+    /// - Returns: 一個 phase 為 `.waitingReady` 的新 ReceiverSession
+    static func makeWaitingReady(from session: WWBluetoothManager.ReceiverSession, record: WWBluetoothManager.FileTransferRecord) -> Self {
+        .init(phase: .waitingReady, transferId: record.transferId, expectedTotalChunks: record.total, controlCharacteristic: session.controlCharacteristic, dataCharacteristic: session.dataCharacteristic, receivedChunks: [:])
+    }
+    
+    /// 建立一個處於 idle 狀態的 ReceiverSession
+    ///
+    /// - Parameters:
+    ///   - controlCharacteristic: 控制訊息使用的 characteristic
+    ///   - dataCharacteristic: 資料傳輸使用的 characteristic
+    /// - Returns: 一個 phase 為 `.idle` 的新 ReceiverSession
+    static func makeIdle(controlCharacteristic: CBCharacteristic, dataCharacteristic: CBCharacteristic) -> Self {
+        .init(phase: .idle, transferId: 0, expectedTotalChunks: 0, controlCharacteristic: controlCharacteristic, dataCharacteristic: dataCharacteristic, receivedChunks: [:])
+    }
+}
