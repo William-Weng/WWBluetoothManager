@@ -70,7 +70,7 @@ graph TD
     CoreBLE -- "觸發 Delegate 回調" --> Central
 ```
 
-## 🤝 委派協定
+## 🤝 [委派協定](https://www.youtube.com/watch?v=rlJ1lwZqo9k)
 
 | Delegate 名稱 | 說明 |
 |-----------|------|
